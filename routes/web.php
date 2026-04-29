@@ -77,3 +77,7 @@ Route::middleware(['auth', 'role.admin'])
         Route::resource('matkul',    MatkulController::class);
         Route::resource('kelas',     AdminKelasController::class);
     });
+
+// Download template Excel
+Route::get('/import/template/{type}', [ImportController::class, 'downloadTemplate'])
+    ->name('import.template');
