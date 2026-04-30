@@ -3,6 +3,19 @@
 @section('page-title','Tambah Mahasiswa')
 @section('page-sub','Buat akun dan data mahasiswa baru')
 @section('content')
+
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #14532D 0%, #16A34A 55%, #22C55E 100%)',
+    'icon'         => 'bi-person-plus-fill',
+    'title'        => 'Tambah Mahasiswa Baru',
+    'sub'          => 'Buat akun dan data mahasiswa baru di sistem SIAKAD',
+    'chips'        => [
+        ['icon' => 'bi-key-fill',         'label' => 'Akun otomatis dibuat'],
+        ['icon' => 'bi-shield-check-fill','label' => 'Role Student'],
+        ['icon' => 'bi-envelope-fill',    'label' => 'Email wajib unik'],
+    ],
+])
+
 <div class="mb-3">
     <a href="{{ route('admin.mahasiswa.index') }}" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);font-weight:600;text-decoration:none;">
         <i class="bi bi-arrow-left"></i> Kembali ke Data Mahasiswa

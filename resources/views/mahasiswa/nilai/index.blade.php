@@ -6,6 +6,33 @@
  
 @section('content')
  
+{{-- ══ BANNER ══ --}}
+@php
+    $ipSemVal = $nilais->isNotEmpty()
+        ? collect($nilais)->reduce(function($carry, $n) {
+            return $carry + ($n->nilai_akhir * $n->mataKuliah->sks);
+        }, 0) / max($nilais->sum('mataKuliah.sks'), 1)
+        : 0;
+    $totalSks = $nilais->sum(fn($n) => $n->mataKuliah->sks);
+    $nilaiDE  = $nilais->whereIn('grade', ['D','E'])->count();
+@endphp
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #14532D 0%, #16A34A 55%, #22C55E 100%)',
+    'icon'         => 'bi-journal-bookmark-fill',
+    'title'        => 'Nilai Akademik',
+    'sub'          => 'Riwayat nilai mata kuliah · Semester ' . $semester,
+    'chips'        => [
+        ['icon' => 'bi-collection-fill',      'label' => $nilais->count() . ' Mata Kuliah'],
+        ['icon' => 'bi-layers-fill',          'label' => $totalSks . ' SKS Total'],
+        ['icon' => 'bi-trophy-fill',          'label' => $nilais->where('grade','A')->count() . ' Nilai A'],
+        ['icon' => 'bi-exclamation-triangle', 'label' => $nilaiDE . ' Nilai D/E'],
+    ],
+    'badge_num'    => $nilais->where('grade','A')->count() + $nilais->where('grade','B')->count(),
+    'badge_label'  => "Nilai\nBaik",
+    'badge2_num'   => $nilaiDE,
+    'badge2_label' => "Perlu\nPerhatian",
+])
+
 {{-- Filter --}}
 <form method="GET" action="{{ route('mahasiswa.nilai') }}" class="semester-bar">
     <select name="semester" class="select-semester">

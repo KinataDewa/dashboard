@@ -3,6 +3,18 @@
 @section('page-title','Tambah Dosen')
 @section('page-sub','Buat akun dan data dosen baru')
 @section('content')
+
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #14532D 0%, #16A34A 55%, #22C55E 100%)',
+    'icon'         => 'bi-person-plus-fill',
+    'title'        => 'Tambah Dosen Baru',
+    'sub'          => 'Buat akun dan data dosen baru di sistem SIAKAD',
+    'chips'        => [
+        ['icon' => 'bi-key-fill',         'label' => 'Akun otomatis dibuat'],
+        ['icon' => 'bi-shield-check-fill','label' => 'Role Dosen'],
+    ],
+])
+
 <div class="mb-3"><a href="{{ route('admin.dosen.index') }}" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);font-weight:600;text-decoration:none;"><i class="bi bi-arrow-left"></i> Kembali</a></div>
 <div class="row justify-content-center"><div class="col-lg-7">
 <div class="section-label">Data Dosen Baru</div>

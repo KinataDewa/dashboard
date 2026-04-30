@@ -220,6 +220,23 @@
 
 @section('content')
 
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 55%, #3B82F6 100%)',
+    'icon'         => 'bi-grid-1x2-fill',
+    'title'        => 'Selamat datang, ' . $mahasiswa->nama . '! 👋',
+    'sub'          => 'Semester ' . $semesterAktif . ' · ' . ($mahasiswa->kelas->tahun_akademik ?? '2024/2025') . ' · ' . ($mahasiswa->kelas->nama ?? ''),
+    'chips'        => [
+        ['icon' => 'bi-mortarboard-fill',  'label' => 'Semester ' . $semesterAktif],
+        ['icon' => 'bi-book-fill',         'label' => $nilais->count() . ' Mata Kuliah'],
+        ['icon' => 'bi-calendar2-check',   'label' => $absensis->count() . ' Kelas Aktif'],
+        ['icon' => 'bi-graph-up-arrow',    'label' => 'IPK ' . number_format($ipk, 2)],
+    ],
+    'badge_num'    => number_format($ipk, 2),
+    'badge_label'  => "IPK\nKumulatif",
+    'badge2_num'   => $nilais->count(),
+    'badge2_label' => "Mata\nKuliah",
+])
+
 {{-- ══ STAT CARDS ══ --}}
 <div class="section-label">Ringkasan Akademik</div>
 <div class="row g-3 mb-4">

@@ -10,6 +10,21 @@
 @endsection
  
 @section('content')
+
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 55%, #60A5FA 100%)',
+    'icon'         => 'bi-people-fill',
+    'title'        => 'Data Mahasiswa',
+    'sub'          => 'Kelola seluruh data mahasiswa aktif Jurusan Teknologi Informasi',
+    'chips'        => [
+        ['icon' => 'bi-people-fill',       'label' => $mahasiswas->total() . ' Mahasiswa Terdaftar'],
+        ['icon' => 'bi-grid-3x3-gap-fill', 'label' => $kelasList->count() . ' Kelas'],
+        ['icon' => 'bi-person-check-fill', 'label' => 'Status Aktif'],
+    ],
+    'badge_num'    => $mahasiswas->total(),
+    'badge_label'  => "Total\nMahasiswa",
+])
+
 <div class="section-label">Daftar Mahasiswa</div>
 <div class="card-white tbl-card-v2">
     <div class="tbl-head-v2">

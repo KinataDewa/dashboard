@@ -17,6 +17,21 @@
 
 @section('content')
 
+{{-- ══ BANNER ══ --}}
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 55%, #3B82F6 100%)',
+    'icon'         => 'bi-people-fill',
+    'title'        => 'Data Mahasiswa Bimbingan',
+    'sub'          => ($dosen->nama ?? auth()->user()->name) . ' · Klik Detail untuk melihat rekap lengkap',
+    'chips'        => [
+        ['icon' => 'bi-people-fill',              'label' => $mahasiswas->count() . ' Mahasiswa'],
+        ['icon' => 'bi-exclamation-triangle-fill','label' => $mahasiswas->filter(fn($m) => $m->is_berisiko ?? $m->isBerisiko())->count() . ' Berisiko'],
+        ['icon' => 'bi-check-circle-fill',        'label' => $mahasiswas->filter(fn($m) => !($m->is_berisiko ?? $m->isBerisiko()))->count() . ' Aman'],
+    ],
+    'badge_num'    => $mahasiswas->count(),
+    'badge_label'  => "Total\nMahasiswa",
+])
+
 {{-- Summary --}}
 @php
     $jmlBerisiko = $mahasiswas->filter(fn($m) => $m->is_berisiko ?? $m->isBerisiko())->count();

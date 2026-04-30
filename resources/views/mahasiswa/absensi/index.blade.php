@@ -40,6 +40,35 @@
  
 @section('content')
  
+{{-- Hitung dulu sebelum banner --}}
+@php
+    $sumHadir = $absensis->sum('jam_hadir');
+    $sumIzin  = $absensis->sum('jam_izin');
+    $sumSakit = $absensis->sum('jam_sakit');
+    $sumAlpha = $absensis->sum('jam_alpha');
+    $sumAll   = $sumHadir + $sumIzin + $sumSakit + $sumAlpha;
+    $pctHadir = $sumAll > 0 ? round($sumHadir / $sumAll * 100) : 0;
+@endphp
+ 
+{{-- ══ BANNER ══ --}}
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #1E3A5F 0%, #0891B2 55%, #22D3EE 100%)',
+    'icon'         => 'bi-calendar2-check-fill',
+    'title'        => 'Riwayat Absensi',
+    'sub'          => 'Data kehadiran per mata kuliah · Semester ' . $semesterAktif,
+    'chips'        => [
+        ['icon' => 'bi-person-check-fill', 'label' => $sumHadir . ' Jam Hadir'],
+        ['icon' => 'bi-x-circle-fill',     'label' => $sumAlpha . ' Jam Alpha'],
+        ['icon' => 'bi-percent',           'label' => $pctHadir . '% Kehadiran'],
+        ['icon' => $sumAlpha >= 14 ? 'bi-exclamation-triangle-fill' : 'bi-shield-check-fill',
+                                           'label' => $sumAlpha >= 18 ? 'Status: Kritis!' : ($sumAlpha >= 14 ? 'Status: Waspada' : 'Status: Aman')],
+    ],
+    'badge_num'    => $pctHadir . '%',
+    'badge_label'  => "Total\nKehadiran",
+    'badge2_num'   => $sumAlpha . 'j',
+    'badge2_label' => "Total\nAlpha",
+])
+ 
 {{-- Filter --}}
 <div class="semester-bar mb-4">
     <form method="GET" action="{{ route('mahasiswa.absensi') }}" style="display:flex;gap:10px;align-items:center;">
@@ -55,15 +84,6 @@
 </div>
  
 {{-- Summary cards --}}
-@php
-    $sumHadir = $absensis->sum('jam_hadir');
-    $sumIzin  = $absensis->sum('jam_izin');
-    $sumSakit = $absensis->sum('jam_sakit');
-    $sumAlpha = $absensis->sum('jam_alpha');
-    $sumAll   = $sumHadir + $sumIzin + $sumSakit + $sumAlpha;
-    $pctHadir = $sumAll > 0 ? round($sumHadir / $sumAll * 100) : 0;
-@endphp
- 
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
         <div class="absen-mini">
@@ -159,11 +179,11 @@
             <tbody id="absenBody">
                 @forelse($absensis as $i => $absen)
                 @php
-                    $total   = $absen->jam_hadir + $absen->jam_izin + $absen->jam_sakit + $absen->jam_alpha;
-                    $pct     = $total > 0 ? round($absen->jam_hadir / $total * 100) : 0;
-                    $alpha   = $absen->jam_alpha;
+                    $total     = $absen->jam_hadir + $absen->jam_izin + $absen->jam_sakit + $absen->jam_alpha;
+                    $pct       = $total > 0 ? round($absen->jam_hadir / $total * 100) : 0;
+                    $alpha     = $absen->jam_alpha;
                     $statusVal = $alpha >= 18 ? 'kritis' : ($alpha >= 14 ? 'waspada' : 'aman');
-                    $rowBg   = $alpha >= 18 ? 'rgba(239,68,68,.03)' : ($alpha >= 14 ? 'rgba(245,158,11,.03)' : 'transparent');
+                    $rowBg     = $alpha >= 18 ? 'rgba(239,68,68,.03)' : ($alpha >= 14 ? 'rgba(245,158,11,.03)' : 'transparent');
                 @endphp
                 <tr data-matkul="{{ strtolower($absen->mataKuliah->nama) }}"
                     data-status="{{ $statusVal }}"

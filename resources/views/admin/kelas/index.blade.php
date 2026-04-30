@@ -8,6 +8,21 @@
 @endsection
  
 @section('content')
+
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #0C4A6E 0%, #0891B2 55%, #22D3EE 100%)',
+    'icon'         => 'bi-grid-3x3-gap-fill',
+    'title'        => 'Kelola Kelas',
+    'sub'          => 'Daftar kelas aktif seluruh angkatan · Tahun Akademik 2024/2025',
+    'chips'        => [
+        ['icon' => 'bi-grid-3x3-gap-fill', 'label' => $kelas->total() . ' Kelas Aktif'],
+        ['icon' => 'bi-people-fill',       'label' => 'Multi Angkatan'],
+        ['icon' => 'bi-person-badge-fill', 'label' => 'Terhubung DPA'],
+    ],
+    'badge_num'    => $kelas->total(),
+    'badge_label'  => "Total\nKelas",
+])
+
 <div class="section-label">Daftar Kelas</div>
 <div class="card-white tbl-card-v2">
     <div class="tbl-head-v2">

@@ -2,7 +2,7 @@
 @section('title','Data Dosen')
 @section('page-title','Data Dosen')
 @section('page-sub','Kelola data dosen Jurusan TI')
- 
+
 @section('topbar-actions')
 <a href="{{ route('admin.dosen.create') }}" class="btn-primary">
     <i class="bi bi-plus-lg"></i> Tambah Dosen
@@ -10,6 +10,20 @@
 @endsection
  
 @section('content')
+
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #14532D 0%, #15803D 55%, #22C55E 100%)',
+    'icon'         => 'bi-person-badge-fill',
+    'title'        => 'Data Dosen',
+    'sub'          => 'Kelola data dosen pengampu dan Dosen Pembimbing Akademik',
+    'chips'        => [
+        ['icon' => 'bi-person-badge-fill', 'label' => $dosens->total() . ' Dosen Aktif'],
+        ['icon' => 'bi-mortarboard-fill',  'label' => 'Pengampu & DPA'],
+    ],
+    'badge_num'    => $dosens->total(),
+    'badge_label'  => "Total\nDosen",
+])
+
 <div class="section-label">Daftar Dosen</div>
 <div class="card-white tbl-card-v2">
     <div class="tbl-head-v2">

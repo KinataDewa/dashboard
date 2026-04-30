@@ -3,6 +3,21 @@
 @section('page-title','Edit Mahasiswa')
 @section('page-sub', $mahasiswa->nama . ' · ' . $mahasiswa->nim)
 @section('content')
+
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #1E3A8A 0%, #4338CA 55%, #6366F1 100%)',
+    'icon'         => 'bi-pencil-square',
+    'title'        => 'Edit Mahasiswa — ' . $mahasiswa->nama,
+    'sub'          => 'NIM: ' . $mahasiswa->nim . ' · ' . ($mahasiswa->kelas->nama ?? '') . ' · ' . ucfirst($mahasiswa->status),
+    'chips'        => [
+        ['icon' => 'bi-person-fill',          'label' => $mahasiswa->nama],
+        ['icon' => 'bi-hash',                 'label' => $mahasiswa->nim],
+        ['icon' => 'bi-grid-3x3-gap-fill',    'label' => $mahasiswa->kelas->nama ?? '-'],
+    ],
+    'badge_num'    => $mahasiswa->angkatan,
+    'badge_label'  => "Angkatan",
+])
+
 <div class="mb-3">
     <a href="{{ route('admin.mahasiswa.index') }}" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);font-weight:600;text-decoration:none;">
         <i class="bi bi-arrow-left"></i> Kembali

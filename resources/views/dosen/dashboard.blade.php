@@ -37,6 +37,24 @@
 
 @section('content')
 
+{{-- ══ BANNER ══ --}}
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #1E3A8A 0%, #4338CA 55%, #6366F1 100%)',
+    'icon'         => 'bi-person-badge-fill',
+    'title'        => 'Dashboard DPA — ' . ($dosen->nama ?? auth()->user()->name),
+    'sub'          => 'Panel Dosen Pembimbing Akademik · Tahun Akademik 2024/2025',
+    'chips'        => [
+        ['icon' => 'bi-people-fill',              'label' => $totalMahasiswa . ' Mahasiswa Bimbingan'],
+        ['icon' => 'bi-exclamation-triangle-fill','label' => $totalBerisiko . ' Berisiko'],
+        ['icon' => 'bi-award-fill',               'label' => 'IPK Rata-rata ' . number_format($rataRataIpk, 2)],
+        ['icon' => 'bi-graph-down-arrow',         'label' => $totalNilaiDE . ' Nilai D/E'],
+    ],
+    'badge_num'    => $totalMahasiswa,
+    'badge_label'  => "Total\nMahasiswa",
+    'badge2_num'   => $totalBerisiko,
+    'badge2_label' => "Perlu\nBimbingan",
+])
+
 {{-- STAT CARDS --}}
 <div class="section-label">Ringkasan Kelas</div>
 <div class="row g-3 mb-4">

@@ -8,6 +8,21 @@
 @endsection
  
 @section('content')
+
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #3B0764 0%, #7C3AED 55%, #A78BFA 100%)',
+    'icon'         => 'bi-book-fill',
+    'title'        => 'Mata Kuliah',
+    'sub'          => 'Kelola mata kuliah seluruh kelas Jurusan Teknologi Informasi',
+    'chips'        => [
+        ['icon' => 'bi-book-fill',         'label' => $matkuls->total() . ' Mata Kuliah'],
+        ['icon' => 'bi-layers-fill',       'label' => 'Multi Semester'],
+        ['icon' => 'bi-person-badge-fill', 'label' => 'Terhubung Dosen'],
+    ],
+    'badge_num'    => $matkuls->total(),
+    'badge_label'  => "Total\nMata Kuliah",
+])
+
 <div class="section-label">Daftar Mata Kuliah</div>
 <div class="card-white tbl-card-v2">
     <div class="tbl-head-v2">

@@ -564,10 +564,26 @@
             {{-- Notifikasi --}}
             <div class="notif-wrap">
                 @php
-                    $notifCount = 0;
-                    if(isset($nilaiDE))       $notifCount += $nilaiDE->count();
-                    if(isset($absensiKritis)) $notifCount += $absensiKritis->count();
-                @endphp
+                $notifCount = 0;
+ 
+                // Cek $nilaiDE — bisa Collection atau int atau null
+                if (isset($nilaiDE)) {
+                    if (is_object($nilaiDE) && method_exists($nilaiDE, 'count')) {
+                        $notifCount += $nilaiDE->count();
+                    } elseif (is_int($nilaiDE) || is_numeric($nilaiDE)) {
+                        $notifCount += (int) $nilaiDE;
+                    }
+                }
+ 
+                // Cek $absensiKritis — bisa Collection atau int atau null
+                if (isset($absensiKritis)) {
+                    if (is_object($absensiKritis) && method_exists($absensiKritis, 'count')) {
+                        $notifCount += $absensiKritis->count();
+                    } elseif (is_int($absensiKritis) || is_numeric($absensiKritis)) {
+                        $notifCount += (int) $absensiKritis;
+                    }
+                }
+            @endphp
                 <button class="notif-btn" id="notifToggle" aria-label="Notifikasi">
                     <i class="bi bi-bell-fill"></i>
                     @if($notifCount > 0)
@@ -583,7 +599,7 @@
                         @endif
                     </div>
                     <div class="notif-panel-body">
-                        @if(isset($nilaiDE) && $nilaiDE->count() > 0)
+                        @if(isset($nilaiDE) && is_object($nilaiDE) && $nilaiDE->count() > 0)
                             @foreach($nilaiDE as $n)
                             <div class="notif-entry">
                                 <div class="notif-icon-wrap"><i class="bi bi-exclamation-circle-fill"></i></div>
@@ -594,6 +610,26 @@
                                 </div>
                             </div>
                             @endforeach
+                        @endif
+ 
+                        @if(isset($absensiKritis) && is_object($absensiKritis) && $absensiKritis->count() > 0)
+                            @foreach($absensiKritis as $a)
+                            <div class="notif-entry">
+                                <div class="notif-icon-wrap"><i class="bi bi-clock-fill"></i></div>
+                                <div class="notif-entry-text">
+                                    Alpha <strong>{{ $a->jam_alpha }} jam</strong> pada
+                                    <strong>{{ $a->mataKuliah->nama }}</strong>.
+                                    Mendekati batas 18 jam!
+                                </div>
+                            </div>
+                            @endforeach
+                        @endif
+ 
+                        @if($notifCount === 0)
+                        <div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px;">
+                            <i class="bi bi-check-circle d-block mb-1" style="font-size:22px;color:var(--blue-mid);"></i>
+                            Tidak ada notifikasi baru
+                        </div>
                         @endif
                         @if(isset($absensiKritis) && $absensiKritis->count() > 0)
                             @foreach($absensiKritis as $a)

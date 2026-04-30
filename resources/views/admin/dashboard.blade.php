@@ -11,6 +11,23 @@
 
 @section('content')
 
+@include('components.page-banner', [
+    'gradient'     => 'linear-gradient(135deg, #0C1445 0%, #1E3A8A 40%, #2563EB 100%)',
+    'icon'         => 'bi-speedometer2',
+    'title'        => 'Overview Sistem — Jurusan TI',
+    'sub'          => 'Politeknik Negeri Malang · Tahun Akademik 2024/2025',
+    'chips'        => [
+        ['icon' => 'bi-mortarboard-fill',         'label' => $totalMahasiswa . ' Mahasiswa'],
+        ['icon' => 'bi-person-badge-fill',        'label' => $totalDosen . ' Dosen'],
+        ['icon' => 'bi-book-fill',                'label' => $totalMatkul . ' Mata Kuliah'],
+        ['icon' => 'bi-exclamation-triangle-fill','label' => $mahasiswaBerisiko . ' Berisiko'],
+    ],
+    'badge_num'    => $totalMahasiswa,
+    'badge_label'  => "Total\nMahasiswa",
+    'badge2_num'   => $mahasiswaBerisiko,
+    'badge2_label' => "Perlu\nPerhatian",
+])
+
 {{-- ══ STAT CARDS ══ --}}
 <div class="section-label">Statistik Sistem</div>
 <div class="row g-3 mb-4">

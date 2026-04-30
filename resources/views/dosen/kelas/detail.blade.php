@@ -25,6 +25,32 @@
  
 @section('content')
  
+{{-- ══ BANNER ══ --}}
+@php
+    $isRiskyMhs = $mahasiswa->isBerisiko();
+    $alphaTotal = $absensis->sum('jam_alpha');
+    $nilaiDECount = $nilais->whereIn('grade',['D','E'])->count();
+@endphp
+@include('components.page-banner', [
+    'gradient'     => $isRiskyMhs
+        ? 'linear-gradient(135deg, #7F1D1D 0%, #DC2626 55%, #EF4444 100%)'
+        : 'linear-gradient(135deg, #14532D 0%, #15803D 55%, #22C55E 100%)',
+    'icon'         => $isRiskyMhs ? 'bi-exclamation-triangle-fill' : 'bi-person-check-fill',
+    'title'        => $mahasiswa->nama,
+    'sub'          => $mahasiswa->nim . ' · ' . ($mahasiswa->kelas->nama ?? '') . ' · Semester ' . $semesterAktif,
+    'chips'        => [
+        ['icon' => 'bi-mortarboard-fill',          'label' => 'IPK ' . number_format($ipk, 2)],
+        ['icon' => 'bi-calendar2-check',           'label' => 'IP Sem ' . number_format($ip, 2)],
+        ['icon' => 'bi-x-circle-fill',             'label' => $alphaTotal . ' Jam Alpha'],
+        ['icon' => $isRiskyMhs ? 'bi-exclamation-circle-fill' : 'bi-shield-check-fill',
+                                                   'label' => $isRiskyMhs ? 'Status: Berisiko' : 'Status: Aman'],
+    ],
+    'badge_num'    => number_format($ipk, 2),
+    'badge_label'  => "IPK\nKumulatif",
+    'badge2_num'   => $nilaiDECount,
+    'badge2_label' => "Nilai\nD/E",
+])
+
 <div class="mb-3">
     <a href="{{ route('dosen.dashboard') }}"
        style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);font-weight:600;text-decoration:none;">
