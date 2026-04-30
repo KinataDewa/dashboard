@@ -1,132 +1,166 @@
-{{-- resources/views/mahasiswa/absensi/index.blade.php --}}
 @extends('layouts.mahasiswa')
-
+ 
 @section('title', 'Riwayat Absensi')
 @section('page-title', 'Riwayat Absensi')
-@section('page-sub', 'Semester ' . $semesterAktif . ' — ' . $mahasiswa->kelas->nama ?? '')
-
+@section('page-sub', 'Data kehadiran Anda per mata kuliah')
+ 
 @section('content')
-
-{{-- PERINGATAN ALPHA KRITIS --}}
-@if($absensiKritis->count() > 0)
-<div style="background:linear-gradient(135deg,#e8334a,#c0192d);border-radius:13px;padding:14px 18px;color:#fff;display:flex;align-items:center;gap:14px;margin-bottom:20px;">
-    <div style="width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">⛔</div>
-    <div>
-        <div style="font-weight:700;font-size:13.5px;margin-bottom:2px;">
-            {{ $absensiKritis->count() }} Mata Kuliah Melewati Batas Alpha 18 Jam!
+ 
+{{-- Filter --}}
+<form method="GET" action="{{ route('mahasiswa.absensi') }}" class="semester-bar">
+    <select name="semester" class="select-semester">
+        <option value="{{ $semesterAktif }}">
+            {{ $mahasiswa->kelas->tahun_akademik ?? '2024/2025' }} Genap — Semester {{ $semesterAktif }}
+        </option>
+    </select>
+    <button type="submit" class="btn-primary">Filter</button>
+</form>
+ 
+{{-- Summary mini cards --}}
+<div class="row g-2 mb-4">
+    @php
+        $sumHadir = $absensis->sum('jam_hadir');
+        $sumIzin  = $absensis->sum('jam_izin');
+        $sumSakit = $absensis->sum('jam_sakit');
+        $sumAlpha = $absensis->sum('jam_alpha');
+        $sumAll   = $sumHadir + $sumIzin + $sumSakit + $sumAlpha;
+        $pctHadir = $sumAll > 0 ? round($sumHadir / $sumAll * 100) : 0;
+    @endphp
+    <div class="col-6 col-md-3">
+        <div class="card-white" style="padding:14px 16px;">
+            <div style="font-size:11px;font-weight:600;color:#22C55E;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;">Hadir</div>
+            <div style="font-size:24px;font-weight:800;color:var(--text-1);line-height:1;">{{ $sumHadir }}<span style="font-size:13px;color:var(--text-2);font-weight:500;"> jam</span></div>
         </div>
-        <div style="font-size:11.5px;opacity:.88;">
-            {{ $absensiKritis->map(fn($a) => $a->mataKuliah->nama . ' (' . $a->jam_alpha . ' jam)')->implode(', ') }}
-            — Tidak diperkenankan mengikuti UAS.
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card-white" style="padding:14px 16px;">
+            <div style="font-size:11px;font-weight:600;color:#FBBF24;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;">Izin</div>
+            <div style="font-size:24px;font-weight:800;color:var(--text-1);line-height:1;">{{ $sumIzin }}<span style="font-size:13px;color:var(--text-2);font-weight:500;"> jam</span></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card-white" style="padding:14px 16px;">
+            <div style="font-size:11px;font-weight:600;color:#3B82F6;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;">Sakit</div>
+            <div style="font-size:24px;font-weight:800;color:var(--text-1);line-height:1;">{{ $sumSakit }}<span style="font-size:13px;color:var(--text-2);font-weight:500;"> jam</span></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card-white" style="padding:14px 16px;">
+            <div style="font-size:11px;font-weight:600;color:#EF4444;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;">Alpha</div>
+            <div style="font-size:24px;font-weight:800;color:{{ $sumAlpha >= 14 ? '#EF4444' : 'var(--text-1)' }};line-height:1;">
+                {{ $sumAlpha }}<span style="font-size:13px;color:var(--text-2);font-weight:500;"> jam</span>
+            </div>
         </div>
     </div>
 </div>
-@endif
-
-{{-- REKAP TOTAL --}}
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div style="background:rgba(40,199,111,0.08);border:1px solid rgba(40,199,111,0.2);border-radius:14px;padding:18px;text-align:center;">
-            <div style="font-size:36px;font-weight:800;color:var(--success-green);font-family:'Space Mono',monospace;">{{ $totalHadir }}</div>
-            <div style="font-size:11px;color:#8da3c0;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Total Hadir (jam)</div>
+ 
+<div class="card-white tbl-card">
+    <div class="tbl-head">
+        <div class="tbl-title">Riwayat Absensi</div>
+        <div class="tbl-actions">
+            <div class="search-wrap">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search" id="searchAbsensi">
+            </div>
+            <div class="filter-wrap">
+                <button class="btn-filter" id="filterAbsenBtn">
+                    <i class="bi bi-sliders2" style="font-size:12px;"></i> Filter
+                </button>
+                <div class="filter-menu" id="filterAbsenMenu">
+                    <div class="filter-menu-label">Select Filter</div>
+                    <div class="filter-opt active" data-val="">Semua</div>
+                    <div class="filter-opt" data-val="hadir">Hadir</div>
+                    <div class="filter-opt" data-val="izin">Izin</div>
+                    <div class="filter-opt" data-val="sakit">Sakit</div>
+                    <div class="filter-opt" data-val="alpha">Alpha</div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div style="background:rgba(0,180,200,0.08);border:1px solid rgba(0,180,200,0.2);border-radius:14px;padding:18px;text-align:center;">
-            <div style="font-size:36px;font-weight:800;color:var(--teal);font-family:'Space Mono',monospace;">{{ $totalIzin }}</div>
-            <div style="font-size:11px;color:#8da3c0;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Total Izin (jam)</div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div style="background:rgba(255,159,67,0.08);border:1px solid rgba(255,159,67,0.2);border-radius:14px;padding:18px;text-align:center;">
-            <div style="font-size:36px;font-weight:800;color:var(--warning-orange);font-family:'Space Mono',monospace;">{{ $totalSakit }}</div>
-            <div style="font-size:11px;color:#8da3c0;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Total Sakit (jam)</div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div style="background:rgba(232,51,74,0.08);border:1px solid rgba(232,51,74,0.2);border-radius:14px;padding:18px;text-align:center;">
-            <div style="font-size:36px;font-weight:800;color:var(--danger-red);font-family:'Space Mono',monospace;">{{ $totalAlpha }}</div>
-            <div style="font-size:11px;color:#8da3c0;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Total Alpha (jam)</div>
-        </div>
+ 
+    <div style="overflow-x:auto;">
+        <table class="ac-table">
+            <thead>
+                <tr>
+                    <th style="width:48px;">No</th>
+                    <th>Mata Kuliah</th>
+                    <th style="text-align:center;">Hadir</th>
+                    <th style="text-align:center;">Izin</th>
+                    <th style="text-align:center;">Sakit</th>
+                    <th style="text-align:center;">Alpha</th>
+                    <th style="text-align:center;">% Hadir</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="absenBody">
+                @forelse($absensis as $i => $absen)
+                @php
+                    $total  = $absen->jam_hadir + $absen->jam_izin + $absen->jam_sakit + $absen->jam_alpha;
+                    $pct    = $total > 0 ? round($absen->jam_hadir / $total * 100) : 0;
+                    $status = 'hadir';
+                    if ($absen->jam_alpha > 0)     $status = 'alpha';
+                    elseif ($absen->jam_izin > 0)  $status = 'izin';
+                    elseif ($absen->jam_sakit > 0) $status = 'sakit';
+                @endphp
+                <tr data-matkul="{{ strtolower($absen->mataKuliah->nama) }}"
+                    data-status="{{ $status }}">
+                    <td class="muted">{{ $i + 1 }}</td>
+                    <td style="font-weight:500;">{{ $absen->mataKuliah->nama }}</td>
+                    <td class="muted" style="text-align:center;">{{ $absen->jam_hadir }}</td>
+                    <td class="muted" style="text-align:center;">{{ $absen->jam_izin }}</td>
+                    <td class="muted" style="text-align:center;">{{ $absen->jam_sakit }}</td>
+                    <td style="text-align:center;font-weight:700;color:{{ $absen->jam_alpha >= 18 ? '#EF4444' : ($absen->jam_alpha >= 14 ? '#F97316' : 'var(--text-1)') }};">
+                        {{ $absen->jam_alpha }}
+                        @if($absen->jam_alpha >= 18) <i class="bi bi-exclamation-triangle-fill" style="color:#EF4444;font-size:11px;"></i> @endif
+                    </td>
+                    <td style="text-align:center;">
+                        <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
+                            <div style="width:50px;height:5px;background:#E2E8F0;border-radius:3px;overflow:hidden;">
+                                <div style="height:100%;width:{{ $pct }}%;background:{{ $pct>=75 ? '#22C55E' : '#EF4444' }};border-radius:3px;"></div>
+                            </div>
+                            <span style="font-size:12px;font-weight:600;color:{{ $pct>=75 ? '#22C55E' : '#EF4444' }};">{{ $pct }}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        @if($absen->jam_alpha >= 18)
+                            <span class="badge badge-red">⛔ Melewati Batas</span>
+                        @elseif($absen->jam_alpha >= 14)
+                            <span class="badge" style="background:#FEF3C7;color:#92400E;">⚠ Waspada</span>
+                        @else
+                            <span class="badge badge-green">Aman</span>
+                        @endif
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="8" style="text-align:center;padding:36px;color:var(--text-3);">
+                        <i class="bi bi-calendar-x" style="font-size:28px;display:block;margin-bottom:8px;"></i>
+                        Belum ada data absensi untuk semester ini.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
-
-{{-- TABEL DETAIL PER MATKUL --}}
-<div class="section-card">
-    <div class="section-header">
-        <div>
-            <div class="section-title">Detail Absensi per Mata Kuliah</div>
-            <div class="section-subtitle">Batas maksimal alpha: 18 jam per mata kuliah</div>
-        </div>
-    </div>
-
-    <table class="nilai-table">
-        <thead>
-            <tr>
-                <th>Mata Kuliah</th>
-                <th class="text-center">Total Jam</th>
-                <th class="text-center">Hadir</th>
-                <th class="text-center">Izin</th>
-                <th class="text-center">Sakit</th>
-                <th class="text-center">Alpha</th>
-                <th class="text-center">% Hadir</th>
-                <th class="text-center">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($absensis as $absen)
-            @php
-                $totalJam  = $absen->jam_hadir + $absen->jam_izin + $absen->jam_sakit + $absen->jam_alpha;
-                $pct       = $totalJam > 0 ? round($absen->jam_hadir / $totalJam * 100) : 0;
-                $kritis    = $absen->jam_alpha >= 18;
-                $waspada   = $absen->jam_alpha >= 14 && $absen->jam_alpha < 18;
-            @endphp
-            <tr class="{{ $kritis ? 'warn-row' : '' }}">
-                <td>
-                    <div class="matkul-name">{{ $absen->mataKuliah->nama }}</div>
-                    <div class="matkul-sub">{{ $absen->mataKuliah->kode }}</div>
-                </td>
-                <td class="text-center"><span class="score-pill">{{ $totalJam }}</span></td>
-                <td class="text-center" style="color:var(--success-green);font-weight:700;">{{ $absen->jam_hadir }}</td>
-                <td class="text-center" style="color:var(--teal);font-weight:600;">{{ $absen->jam_izin }}</td>
-                <td class="text-center" style="color:var(--warning-orange);font-weight:600;">{{ $absen->jam_sakit }}</td>
-                <td class="text-center" style="color:{{ $kritis ? 'var(--danger-red)' : ($waspada ? 'var(--warning-orange)' : '#5a6e8c') }};font-weight:{{ $kritis || $waspada ? '800' : '600' }};">
-                    {{ $absen->jam_alpha }}
-                    @if($kritis) ⛔ @elseif($waspada) ⚠️ @endif
-                </td>
-                <td class="text-center" style="min-width:120px;">
-                    <div class="progress progress-thin mb-1">
-                        <div class="progress-bar {{ $pct >= 75 ? 'bg-success' : ($pct >= 60 ? 'bg-warning' : 'bg-danger') }}"
-                             style="width:{{ $pct }}%"></div>
-                    </div>
-                    <small style="font-family:'Space Mono';font-size:11px;font-weight:700;color:{{ $pct >= 75 ? 'var(--success-green)' : 'var(--danger-red)' }};">{{ $pct }}%</small>
-                </td>
-                <td class="text-center">
-                    @if($kritis)
-                        <span style="background:rgba(232,51,74,0.1);color:var(--danger-red);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;">⛔ Melewati Batas</span>
-                    @elseif($waspada)
-                        <span style="background:rgba(255,159,67,0.1);color:var(--warning-orange);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;">⚠ Waspada</span>
-                    @else
-                        <span style="background:rgba(40,199,111,0.1);color:var(--success-green);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;">✓ Aman</span>
-                    @endif
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="8" class="text-center py-4" style="color:#8da3c0;">
-                    <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
-                    Belum ada data absensi untuk semester ini.
-                </td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    {{-- KETERANGAN --}}
-    <div class="mt-3 d-flex gap-3 flex-wrap" style="font-size:11px;color:#8da3c0;">
-        <span><span style="color:var(--success-green);font-weight:700;">✓ Aman</span> = Alpha &lt; 14 jam</span>
-        <span><span style="color:var(--warning-orange);font-weight:700;">⚠ Waspada</span> = Alpha 14–17 jam</span>
-        <span><span style="color:var(--danger-red);font-weight:700;">⛔ Melewati Batas</span> = Alpha ≥ 18 jam (tidak boleh UAS)</span>
-    </div>
-</div>
+ 
 @endsection
+ 
+@push('scripts')
+<script>
+document.getElementById('searchAbsensi').addEventListener('input', function() {
+    var q = this.value.toLowerCase();
+    document.querySelectorAll('#absenBody tr').forEach(function(row) {
+        row.style.display = (row.dataset.matkul||'').includes(q) ? '' : 'none';
+    });
+});
+ 
+document.getElementById('filterAbsenBtn').addEventListener('filterChange', function(e) {
+    var val = e.detail.value;
+    document.querySelectorAll('#absenBody tr').forEach(function(row) {
+        if (!val) { row.style.display = ''; return; }
+        row.style.display = row.dataset.status === val ? '' : 'none';
+    });
+});
+</script>
+@endpush
