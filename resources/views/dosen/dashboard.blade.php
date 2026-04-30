@@ -132,13 +132,34 @@
 
 {{-- ALERT --}}
 @if($totalBerisiko > 0)
-<div style="background:#FEF2F2;border:1px solid #FECACA;border-left:4px solid #EF4444;border-radius:var(--radius-sm);padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:12px;">
-    <i class="bi bi-exclamation-triangle-fill" style="color:#EF4444;font-size:18px;flex-shrink:0;"></i>
-    <div style="flex:1;">
-        <div style="font-size:13.5px;font-weight:700;color:#991B1B;">{{ $totalBerisiko }} mahasiswa terdeteksi berisiko akademik</div>
-        <div style="font-size:12px;color:#B91C1C;margin-top:2px;">Terdapat nilai D/E atau absensi ≥18 jam. Segera lakukan bimbingan.</div>
+<div class="risk-alert-wrap" id="riskAlertDosen">
+    <div class="risk-pulse-ring"></div>
+ 
+    <div class="risk-alert-left">
+        <div class="risk-alert-icon">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <div class="risk-alert-content">
+            <div class="risk-alert-tag">⚡ Tindakan Diperlukan</div>
+            <div class="risk-alert-title">
+                {{ $totalBerisiko }} Mahasiswa Bimbingan Anda Berisiko!
+            </div>
+            <div class="risk-alert-desc">
+                Terdapat mahasiswa dengan <strong>nilai D/E</strong> atau <strong>absensi ≥18 jam</strong>.
+                Segera lakukan bimbingan akademik sebelum batas waktu perbaikan nilai.
+            </div>
+        </div>
     </div>
-    <a href="{{ route('dosen.kelas') }}" class="btn-danger ms-auto" style="flex-shrink:0;"><i class="bi bi-arrow-right"></i> Lihat Detail</a>
+ 
+    <div class="risk-alert-right">
+        <a href="{{ route('dosen.kelas') }}" class="risk-alert-btn">
+            <i class="bi bi-arrow-right-circle-fill"></i>
+            Lihat & Tangani Sekarang
+        </a>
+        <button class="risk-alert-close" id="riskCloseDosen" title="Tutup">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
 </div>
 @endif
 
@@ -450,5 +471,22 @@ document.getElementById('filterMhsBtn').addEventListener('filterChange', functio
         r.style.display = r.dataset.status===val ? '' : 'none';
     });
 });
+</script>
+
+<script>
+@push('scripts')
+<script>
+(function() {
+    var el   = document.getElementById('riskAlertDosen');
+    var btnX = document.getElementById('riskCloseDosen');
+    if (!el || !btnX) return;
+ 
+    btnX.addEventListener('click', function() {
+        el.style.animation = 'alertSlideOut .35s cubic-bezier(.4,0,1,1) forwards';
+        setTimeout(function() {
+            el.style.display = 'none';
+        }, 340);
+    });
+})();
 </script>
 @endpush

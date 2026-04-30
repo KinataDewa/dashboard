@@ -215,6 +215,152 @@
     .donut-canvas-box canvas { width: 120px !important; height: 120px !important; }
     .donut-center-num { font-size: 16px; }
 }
+
+.mhs-alert-wrap {
+    position: relative;
+    background: linear-gradient(135deg, #1A0A0A 0%, #7F1D1D 40%, #991B1B 100%);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(239,68,68,.25), 0 2px 8px rgba(239,68,68,.15);
+    animation: mhsAlertIn .4s cubic-bezier(.16,1,.3,1) both;
+    flex-wrap: wrap;
+}
+@keyframes mhsAlertIn {
+    from { opacity:0; transform: translateY(-12px) scale(.98); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+}
+@keyframes mhsAlertOut {
+    from { opacity:1; transform:translateY(0) scale(1); max-height:300px; margin-bottom:24px; padding:20px 24px; }
+    to   { opacity:0; transform:translateY(-8px) scale(.97); max-height:0; margin-bottom:0; padding:0 24px; }
+}
+.mhs-alert-wrap::before {
+    content:''; position:absolute; inset:0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 24px 24px; pointer-events:none;
+}
+.mhs-alert-wrap::after {
+    content:''; position:absolute; top:0; left:-100%;
+    width:60%; height:100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent);
+    animation: mhsGlowSweep 4s ease infinite; pointer-events:none;
+}
+@keyframes mhsGlowSweep {
+    0%   { left:-60%; }
+    100% { left:140%; }
+}
+.mhs-pulse-ring {
+    position:absolute; left:28px; top:50%;
+    transform: translateY(-50%);
+    width:52px; height:52px; border-radius:50%;
+    background: rgba(239,68,68,.2);
+    animation: mhsRingPulse 2s ease-out infinite; pointer-events:none;
+}
+@keyframes mhsRingPulse {
+    0%   { transform:translateY(-50%) scale(1);   opacity:.8; }
+    70%  { transform:translateY(-50%) scale(1.8); opacity:0; }
+    100% { transform:translateY(-50%) scale(1);   opacity:0; }
+}
+.mhs-alert-left {
+    display:flex; align-items:flex-start;
+    gap:16px; flex:1; min-width:0;
+    position:relative; z-index:1;
+}
+.mhs-alert-icon {
+    width:44px; height:44px; border-radius:12px;
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.2);
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; color:#FCA5A5; flex-shrink:0;
+    animation: mhsIconShake 3s ease infinite;
+}
+@keyframes mhsIconShake {
+    0%,90%,100% { transform:rotate(0deg); }
+    92%  { transform:rotate(-8deg); }
+    94%  { transform:rotate(8deg); }
+    96%  { transform:rotate(-4deg); }
+    98%  { transform:rotate(4deg); }
+}
+.mhs-alert-content { min-width:0; }
+.mhs-alert-tag {
+    display:inline-flex; align-items:center;
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:20px; padding:2px 10px;
+    font-size:11px; font-weight:700;
+    color:#FCA5A5; letter-spacing:.5px; margin-bottom:6px;
+}
+.mhs-alert-title {
+    font-size:15px; font-weight:800; color:#fff;
+    line-height:1.3; margin-bottom:5px; letter-spacing:-.2px;
+}
+.mhs-alert-desc {
+    font-size:12.5px; color:rgba(255,255,255,.7); line-height:1.5;
+}
+.mhs-alert-desc strong { color:#FCA5A5; font-weight:700; }
+ 
+/* Pills */
+.mhs-alert-pills { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+.mhs-alert-pill {
+    display:inline-flex; align-items:center; gap:5px;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:20px; padding:3px 11px;
+    font-size:11.5px; font-weight:600; color:#fff;
+}
+.mhs-alert-pill.pill-danger {
+    background:rgba(239,68,68,.25);
+    border-color:rgba(239,68,68,.4);
+    color:#FCA5A5;
+}
+ 
+/* Right */
+.mhs-alert-right {
+    display:flex; align-items:center; gap:10px;
+    flex-shrink:0; position:relative; z-index:1;
+}
+.mhs-alert-btn {
+    background:#fff; color:#991B1B;
+    border:none; border-radius:9px;
+    padding:10px 18px; font-size:13px; font-weight:700;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    cursor:pointer; text-decoration:none;
+    display:inline-flex; align-items:center; gap:7px;
+    transition:all .2s; white-space:nowrap;
+    box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+.mhs-alert-btn:hover {
+    background:#FEF2F2; color:#7F1D1D;
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(0,0,0,.25);
+}
+.mhs-alert-close {
+    width:34px; height:34px; border-radius:8px;
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.15);
+    color:rgba(255,255,255,.7); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; transition:all .2s; flex-shrink:0;
+}
+.mhs-alert-close:hover {
+    background:rgba(255,255,255,.2); color:#fff;
+    border-color:rgba(255,255,255,.3); transform:scale(1.05);
+}
+ 
+@media (max-width:768px) {
+    .mhs-alert-wrap   { padding:16px 18px; gap:14px; }
+    .mhs-alert-right  { width:100%; justify-content:space-between; }
+    .mhs-alert-btn    { flex:1; justify-content:center; }
+    .mhs-pulse-ring   { display:none; }
+    .mhs-alert-title  { font-size:14px; }
+    .mhs-alert-desc   { font-size:12px; }
+}
+
 </style>
 @endpush
 
@@ -236,6 +382,85 @@
     'badge2_num'   => $nilais->count(),
     'badge2_label' => "Mata\nKuliah",
 ])
+
+{{-- ══ ALERT MAHASISWA ══ --}}
+@php
+    $totalAlpha    = $absensis->sum('jam_alpha');   // hitung di sini dulu
+    $alertNilaiDE  = $nilaiDE->count() > 0;
+    $alertAlpha    = $totalAlpha >= 14;
+    $showAlert     = $alertNilaiDE || $alertAlpha;
+@endphp
+ 
+@if($showAlert)
+<div class="mhs-alert-wrap" id="mhsAlert">
+    <div class="mhs-pulse-ring"></div>
+ 
+    <div class="mhs-alert-left">
+        <div class="mhs-alert-icon">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+ 
+        <div class="mhs-alert-content">
+            <div class="mhs-alert-tag">⚡ Perhatian Diperlukan</div>
+ 
+            @if($alertNilaiDE && $alertAlpha)
+                <div class="mhs-alert-title">
+                    Nilai D/E & Absensi Anda Memerlukan Perhatian!
+                </div>
+                <div class="mhs-alert-desc">
+                    Anda memiliki <strong>{{ $nilaiDE->count() }} nilai D/E</strong>
+                    dan <strong>{{ $totalAlpha }} jam alpha</strong>
+                    ({{ 18 - $totalAlpha <= 0 ? 'telah melewati' : (18 - $totalAlpha) . ' jam lagi mencapai' }} batas 18 jam).
+                    Segera hubungi Dosen PA Anda!
+                </div>
+            @elseif($alertNilaiDE)
+                <div class="mhs-alert-title">
+                    {{ $nilaiDE->count() }} Nilai Anda Masuk Kategori D/E!
+                </div>
+                <div class="mhs-alert-desc">
+                    Nilai rendah dapat mempengaruhi IPK dan kelulusan Anda.
+                    Segera konsultasikan dengan <strong>Dosen Pembimbing Akademik</strong> untuk tindakan perbaikan.
+                </div>
+            @else
+                <div class="mhs-alert-title">
+                    Absensi Anda {{ $totalAlpha >= 18 ? 'Melewati Batas!' : 'Mendekati Batas!' }}
+                </div>
+                <div class="mhs-alert-desc">
+                    Total alpha Anda sudah <strong>{{ $totalAlpha }} jam</strong>
+                    dari batas maksimal <strong>18 jam</strong>.
+                    {{ $totalAlpha >= 18 ? 'Anda berisiko tidak dapat mengikuti UAS!' : (18 - $totalAlpha) . ' jam lagi Anda tidak dapat mengikuti UAS.' }}
+                </div>
+            @endif
+ 
+            {{-- Detail pills --}}
+            <div class="mhs-alert-pills">
+                @if($alertNilaiDE)
+                <span class="mhs-alert-pill">
+                    <i class="bi bi-journal-x"></i>
+                    {{ $nilaiDE->count() }} Nilai D/E
+                </span>
+                @endif
+                @if($alertAlpha)
+                <span class="mhs-alert-pill {{ $totalAlpha >= 18 ? 'pill-danger' : '' }}">
+                    <i class="bi bi-clock-history"></i>
+                    {{ $totalAlpha }}j Alpha {{ $totalAlpha >= 18 ? '⛔' : '⚠️' }}
+                </span>
+                @endif
+            </div>
+        </div>
+    </div>
+ 
+    <div class="mhs-alert-right">
+        <a href="{{ route('mahasiswa.nilai') }}" class="mhs-alert-btn">
+            <i class="bi bi-eye-fill"></i>
+            Lihat Detail
+        </a>
+        <button class="mhs-alert-close" id="mhsAlertClose" title="Tutup">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+</div>
+@endif
 
 {{-- ══ STAT CARDS ══ --}}
 <div class="section-label">Ringkasan Akademik</div>
@@ -843,5 +1068,20 @@ document.getElementById('searchAbsensi').addEventListener('input', function() {
         r.style.display = (r.dataset.matkul||'').includes(q) ? '' : 'none';
     });
 });
+
+</script>
+<script>
+(function() {
+    var el   = document.getElementById('mhsAlert');
+    var btnX = document.getElementById('mhsAlertClose');
+    if (!el || !btnX) return;
+ 
+    btnX.addEventListener('click', function() {
+        el.style.animation = 'mhsAlertOut .35s cubic-bezier(.4,0,1,1) forwards';
+        setTimeout(function() {
+            el.style.display = 'none';
+        }, 340);
+    });
+})();
 </script>
 @endpush
