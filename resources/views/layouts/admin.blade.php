@@ -129,6 +129,115 @@
         .status-active{background:#DCFCE7;color:#166534;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:600;}
         .status-inactive{background:#FEE2E2;color:#991B1B;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:600;}
         @keyframes scaleIn{from{opacity:0;transform:scale(.96) translateY(-4px);}to{opacity:1;transform:scale(1) translateY(0);}}
+        .pagination { display:flex; gap:4px; align-items:center; flex-wrap:wrap; }
+.pagination .page-item .page-link {
+    border:1.5px solid var(--border); border-radius:var(--radius-sm);
+    padding:6px 12px; font-size:13px; font-weight:500;
+    color:var(--text-2); background:var(--white);
+    text-decoration:none; transition:all .15s;
+    font-family:'Plus Jakarta Sans',sans-serif;
+}
+.pagination .page-item .page-link:hover { background:var(--blue-light); color:var(--blue); border-color:var(--blue); }
+.pagination .page-item.active .page-link { background:var(--blue); color:#fff; border-color:var(--blue); font-weight:700; }
+.pagination .page-item.disabled .page-link { opacity:.4; cursor:not-allowed; }
+ 
+/* ══ FORM ELEMENTS ══════════════════════════════════ */
+.form-group { margin-bottom:0; }
+.form-label-ac {
+    display:block; font-size:11.5px; font-weight:700;
+    color:var(--text-2); margin-bottom:7px;
+    text-transform:uppercase; letter-spacing:.6px;
+}
+.form-input-ac {
+    width:100%; border:1.5px solid var(--border);
+    border-radius:var(--radius-sm); padding:10px 13px;
+    font-size:13.5px; outline:none;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    color:var(--text-1); background:var(--white);
+    transition:border-color .15s, box-shadow .15s;
+    -webkit-appearance:none;
+}
+.form-input-ac:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.08); }
+.form-input-ac::placeholder { color:var(--text-3); }
+.form-select-ac {
+    width:100%; border:1.5px solid var(--border);
+    border-radius:var(--radius-sm); padding:10px 36px 10px 13px;
+    font-size:13.5px; outline:none;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    color:var(--text-1); background:var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;
+    -webkit-appearance:none; cursor:pointer;
+    transition:border-color .15s, box-shadow .15s;
+}
+.form-select-ac:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.08); }
+ 
+/* File input */
+.file-input-wrap {
+    border:2px dashed var(--border); border-radius:var(--radius-sm);
+    padding:14px 16px; background:var(--bg);
+    display:flex; align-items:center; gap:12px;
+    cursor:pointer; transition:all .2s; position:relative;
+}
+.file-input-wrap:hover { border-color:var(--blue); background:var(--blue-light); }
+.file-input-wrap input[type="file"] {
+    position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+}
+.file-input-icon { font-size:20px; flex-shrink:0; }
+.file-input-text { font-size:13px; color:var(--text-2); }
+.file-input-text strong { color:var(--blue); font-weight:600; }
+ 
+/* Upload card */
+.upload-card {
+    border:1.5px solid var(--border); border-radius:var(--radius);
+    overflow:hidden; transition:all .2s; background:var(--white);
+}
+.upload-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); transform:translateY(-1px); }
+.upload-card-accent { height:3px; }
+.upload-card-body { padding:18px; }
+.upload-card-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.upload-icon-box { width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.upload-card-title { font-size:14px; font-weight:700; color:var(--text-1); }
+.upload-card-desc  { font-size:11.5px; color:var(--text-2); margin-top:2px; line-height:1.4; }
+ 
+/* ══ EMPTY STATE ════════════════════════════════════ */
+.empty-state { text-align:center; padding:48px 20px; color:var(--text-3); }
+.empty-state i { font-size:36px; display:block; margin-bottom:10px; }
+.empty-state p { font-size:14px; margin:0; }
+ 
+/* ══ TABLE UPGRADE ══════════════════════════════════ */
+.tbl-number {
+    font-size:11.5px; font-weight:700; color:var(--text-3);
+    background:var(--bg); border-radius:20px;
+    padding:2px 8px; font-family:monospace;
+}
+ 
+/* ══ IMPORT STATUS BADGE ════════════════════════════ */
+.import-status { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; margin-top:8px; }
+.dot-green { width:7px; height:7px; border-radius:50%; background:#22C55E; flex-shrink:0; }
+.dot-gray  { width:7px; height:7px; border-radius:50%; background:var(--text-3); flex-shrink:0; }
+ 
+/* ══ ADMIN DASHBOARD CARDS ══════════════════════════ */
+.quick-card {
+    background:var(--white); border:1.5px solid var(--border);
+    border-radius:var(--radius); padding:20px;
+    text-align:center; text-decoration:none;
+    transition:all .2s; display:block;
+    box-shadow:var(--shadow);
+}
+.quick-card:hover {
+    border-color:var(--blue); transform:translateY(-3px);
+    box-shadow:0 8px 24px rgba(37,99,235,.12); color:inherit;
+}
+.quick-card-icon {
+    width:52px; height:52px; border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; margin:0 auto 12px;
+}
+.quick-card-title { font-size:14px; font-weight:700; color:var(--text-1); margin-bottom:4px; }
+.quick-card-desc  { font-size:12px; color:var(--text-2); }
+.quick-card-count {
+    font-size:22px; font-weight:800; margin-bottom:2px;
+    font-family:monospace;
+}
         @media(max-width:768px){.sidebar{transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.sidebar-overlay.open{display:block;}.main-wrap{margin-left:0;}.hamburger{display:flex;}.page-content{padding:16px;}.topbar{padding:0 16px;height:60px;}.topbar-title h2{font-size:14px;}.topbar-title p{font-size:11px;}.user-info-wrap{display:none;}}
         @media(max-width:400px){.topbar-title p{display:none;}}
     </style>
