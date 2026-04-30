@@ -1,5 +1,3 @@
-{{-- resources/views/mahasiswa/dashboard.blade.php --}}
-{{-- GANTI SELURUH ISI FILE INI --}}
 @extends('layouts.mahasiswa')
 
 @section('title', 'Dashboard')
