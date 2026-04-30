@@ -12,9 +12,16 @@
             <div class="section-title">Import Data — Semester Aktif</div>
             <div class="section-subtitle">Format file: .xlsx — Gunakan template yang disediakan</div>
         </div>
-        <a href="#" style="font-size:12px;color:var(--accent);font-weight:600;text-decoration:none;">
-            <i class="bi bi-download me-1"></i> Download Semua Template
-        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            @foreach(['nilai','absensi','mahasiswa','dosen','matkul','kelas'] as $t)
+            <a href="{{ route('admin.import.template', $t) }}"
+               style="font-size:12px;color:var(--blue);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--white);transition:all .15s;"
+               onmouseover="this.style.background='var(--blue-light)'"
+               onmouseout="this.style.background='var(--white)'">
+                <i class="bi bi-download"></i> {{ ucfirst($t) }}
+            </a>
+            @endforeach
+        </div>
     </div>
  
     <div class="row g-3">

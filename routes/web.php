@@ -1,6 +1,4 @@
 <?php
-// routes/web.php
-// Ganti SELURUH isi file ini
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -69,6 +67,8 @@ Route::middleware(['auth', 'role.admin'])
             Route::post('/dosen',     [ImportController::class, 'dosen'])->name('dosen');
             Route::post('/matkul',    [ImportController::class, 'matkul'])->name('matkul');
             Route::post('/kelas',     [ImportController::class, 'kelas'])->name('kelas');
+
+            Route::get('/template/{type}', [ImportController::class, 'downloadTemplate'])->name('template');
         });
 
         // CRUD resources
@@ -78,6 +78,3 @@ Route::middleware(['auth', 'role.admin'])
         Route::resource('kelas',     AdminKelasController::class);
     });
 
-// Download template Excel
-Route::get('/import/template/{type}', [ImportController::class, 'downloadTemplate'])
-    ->name('import.template');

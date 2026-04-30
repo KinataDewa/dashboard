@@ -1,81 +1,33 @@
 @extends('layouts.admin')
-@section('title', 'Tambah Mahasiswa')
-@section('page-title', 'Tambah Mahasiswa')
-@section('page-sub', 'Buat akun dan data mahasiswa baru')
+@section('title', 'Edit Mahasiswa')
+@section('page-title', 'Edit Mahasiswa')
+@section('page-sub', $mahasiswa->nama . ' — ' . $mahasiswa->nim)
  
 @section('content')
+<div class="mb-3">
+    <a href="{{ route('admin.mahasiswa.index') }}" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);font-weight:600;text-decoration:none;">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
+ 
 <div class="row justify-content-center">
     <div class="col-lg-7">
-        <div class="section-card">
-            <div class="section-title mb-4">Form Tambah Mahasiswa</div>
- 
+        <div class="section-label">Form Edit Mahasiswa</div>
+        <div class="card-white tbl-card-v2">
             @if($errors->any())
-            <div class="alert alert-danger" style="border-radius:10px;">
-                <ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+            <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:18px;">
+                <ul style="margin:0;padding-left:16px;color:#991B1B;font-size:13px;">
+                    @foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach
+                </ul>
             </div>
             @endif
  
-            <form action="{{ route('admin.mahasiswa.store') }}" method="POST">
-                @csrf
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label style="font-size:12px;font-weight:700;color:#5a6e8c;margin-bottom:6px;display:block;">NIM *</label>
-                        <input type="text" name="nim" value="{{ old('nim') }}" required
-                               style="width:100%;border:1.5px solid #e4eaf5;border-radius:10px;padding:9px 14px;font-size:13px;outline:none;font-family:'Plus Jakarta Sans',sans-serif;">
-                    </div>
-                    <div class="col-md-6">
-                        <label style="font-size:12px;font-weight:700;color:#5a6e8c;margin-bottom:6px;display:block;">Nama Lengkap *</label>
-                        <input type="text" name="nama" value="{{ old('nama') }}" required
-                               style="width:100%;border:1.5px solid #e4eaf5;border-radius:10px;padding:9px 14px;font-size:13px;outline:none;font-family:'Plus Jakarta Sans',sans-serif;">
-                    </div>
-                    <div class="col-md-6">
-                        <label style="font-size:12px;font-weight:700;color:#5a6e8c;margin-bottom:6px;display:block;">Email *</label>
-                        <input type="email" name="email" value="{{ old('email') }}" required
-                               style="width:100%;border:1.5px solid #e4eaf5;border-radius:10px;padding:9px 14px;font-size:13px;outline:none;font-family:'Plus Jakarta Sans',sans-serif;">
-                    </div>
-                    <div class="col-md-6">
-                        <label style="font-size:12px;font-weight:700;color:#5a6e8c;margin-bottom:6px;display:block;">Password *</label>
-                        <input type="password" name="password" required
-                               style="width:100%;border:1.5px solid #e4eaf5;border-radius:10px;padding:9px 14px;font-size:13px;outline:none;font-family:'Plus Jakarta Sans',sans-serif;">
-                    </div>
-                    <div class="col-md-6">
-                        <label style="font-size:12px;font-weight:700;color:#5a6e8c;margin-bottom:6px;display:block;">Kelas *</label>
-                        <select name="kelas_id" required style="width:100%;border:1.5px solid #e4eaf5;border-radius:10px;padding:9px 14px;font-size:13px;outline:none;font-family:'Plus Jakarta Sans',sans-serif;">
-                            <option value="">-- Pilih Kelas --</option>
-                            @foreach($kelasList as $kelas)
-                            <option value="{{ $kelas->id }}" {{ old('kelas_id')==$kelas->id ? 'selected':'' }}>{{ $kelas->nama }} (Sem {{ $kelas->semester }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label style="font-size:12px;font-weight:700;color:#5a6e8c;margin-bottom:6px;display:block;">Dosen PA *</label>
-                        <select name="dosen_pa_id" required style="width:100%;border:1.5px solid #e4eaf5;border-radius:10px;padding:9px 14px;font-size:13px;outline:none;font-family:'Plus Jakarta Sans',sans-serif;">
-                            <option value="">-- Pilih Dosen PA --</option>
-                            @foreach($dosenList as $dosen)
-                            <option value="{{ $dosen->id }}" {{ old('dosen_pa_id')==$dosen->id ? 'selected':'' }}>{{ $dosen->nama }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label style="font-size:12px;font-weight:700;color:#5a6e8c;margin-bottom:6px;display:block;">Angkatan *</label>
-                        <input type="number" name="angkatan" value="{{ old('angkatan', date('Y')) }}" required min="2000" max="{{ date('Y') }}"
-                               style="width:100%;border:1.5px solid #e4eaf5;border-radius:10px;padding:9px 14px;font-size:13px;outline:none;font-family:'Plus Jakarta Sans',sans-serif;">
-                    </div>
-                    <div class="col-md-6">
-                        <label style="font-size:12px;font-weight:700;color:#5a6e8c;margin-bottom:6px;display:block;">Status</label>
-                        <select name="status" style="width:100%;border:1.5px solid #e4eaf5;border-radius:10px;padding:9px 14px;font-size:13px;outline:none;font-family:'Plus Jakarta Sans',sans-serif;">
-                            <option value="aktif">Aktif</option>
-                            <option value="cuti">Cuti</option>
-                            <option value="lulus">Lulus</option>
-                            <option value="keluar">Keluar</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="mt-4 d-flex gap-2">
-                    <button type="submit" class="primary-btn"><i class="bi bi-check-lg"></i> Simpan</button>
-                    <a href="{{ route('admin.mahasiswa.index') }}" style="background:#f0f4fc;color:var(--navy);border:none;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:600;text-decoration:none;">
-                        Batal
-                    </a>
+            <form action="{{ route('admin.mahasiswa.update', $mahasiswa->id) }}" method="POST">
+                @csrf @method('PUT')
+                @include('admin.mahasiswa._form', ['mahasiswa' => $mahasiswa])
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn-primary"><i class="bi bi-check-lg"></i> Update</button>
+                    <a href="{{ route('admin.mahasiswa.index') }}" style="background:#F1F5F9;color:var(--text-1);border:none;border-radius:var(--radius-sm);padding:7px 18px;font-size:13.5px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;">Batal</a>
                 </div>
             </form>
         </div>

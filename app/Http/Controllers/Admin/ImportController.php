@@ -165,23 +165,62 @@ class ImportController extends Controller
     // ── DOWNLOAD TEMPLATE ────────────────────────────
     public function downloadTemplate(string $type)
     {
+        // Generate template langsung tanpa file fisik
+        // menggunakan array of arrays → CSV download
         $templates = [
-            'nilai'     => 'templates/template_nilai.xlsx',
-            'absensi'   => 'templates/template_absensi.xlsx',
-            'mahasiswa' => 'templates/template_mahasiswa.xlsx',
-            'dosen'     => 'templates/template_dosen.xlsx',
-            'matkul'    => 'templates/template_matkul.xlsx',
+            'nilai' => [
+                'filename' => 'template_nilai.xlsx',
+                'headers'  => ['nim','kode_matkul','semester','tahun_akademik','nilai_tugas','nilai_uts','nilai_uas'],
+                'sample'   => ['2341720099','TI601','6','2024/2025','85','78','82'],
+            ],
+            'absensi' => [
+                'filename' => 'template_absensi.xlsx',
+                'headers'  => ['nim','kode_matkul','semester','tahun_akademik','tanggal','pertemuan_ke','jam_hadir','jam_izin','jam_sakit','jam_alpha'],
+                'sample'   => ['2341720099','TI601','6','2024/2025','2025-05-20','14','38','2','2','0'],
+            ],
+            'mahasiswa' => [
+                'filename' => 'template_mahasiswa.xlsx',
+                'headers'  => ['nim','nama','email','kelas','angkatan','nip_dosen_pa'],
+                'sample'   => ['2341720050','Nama Mahasiswa','email@student.polinema.ac.id','TI3C','2023','197501012005011001'],
+            ],
+            'dosen' => [
+                'filename' => 'template_dosen.xlsx',
+                'headers'  => ['nip','nama','email','no_hp'],
+                'sample'   => ['199001012020121001','Nama Dosen','dosen@polinema.ac.id','08123456789'],
+            ],
+            'matkul' => [
+                'filename' => 'template_matkul.xlsx',
+                'headers'  => ['kode','nama','sks','semester','kelas','nip_dosen'],
+                'sample'   => ['TI608','Internet of Things','3','6','TI3C','197803152006041002'],
+            ],
+            'jadwal' => [
+                'filename' => 'template_jadwal.xlsx',
+                'headers'  => ['kode_matkul','kelas','hari','jam_mulai','jam_selesai','ruangan'],
+                'sample'   => ['TI601','TI3C','Senin','08:00','10:30','GKB1-301'],
+            ],
+            'kelas' => [
+                'filename' => 'template_kelas.xlsx',
+                'headers'  => ['nama','semester','prodi','nip_dosen_pa','tahun_akademik'],
+                'sample'   => ['TI3D','6','Teknologi Informasi','197501012005011001','2024/2025'],
+            ],
         ];
-
+ 
         if (!isset($templates[$type])) {
             return back()->with('error', 'Template tidak ditemukan.');
         }
-
-        $path = storage_path('app/' . $templates[$type]);
-        if (!file_exists($path)) {
-            return back()->with('error', 'File template belum tersedia.');
-        }
-
-        return response()->download($path);
+ 
+        $tpl      = $templates[$type];
+        $filename = str_replace('.xlsx', '.csv', $tpl['filename']);
+ 
+        // Build CSV content
+        $rows = [];
+        $rows[] = implode(',', $tpl['headers']);
+        $rows[] = implode(',', $tpl['sample']);
+        $content = implode("\n", $rows);
+ 
+        return response($content, 200, [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 }

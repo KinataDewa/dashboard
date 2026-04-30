@@ -36,11 +36,13 @@ class AbsensiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnE
                 'tahun_akademik' => trim($row['tahun_akademik']),
             ],
             [
-                'semester'   => intval($row['semester']),
-                'jam_hadir'  => intval($row['jam_hadir']),
-                'jam_izin'   => intval($row['jam_izin']),
-                'jam_sakit'  => intval($row['jam_sakit']),
-                'jam_alpha'  => intval($row['jam_alpha']),
+                'semester'     => intval($row['semester']),
+                'tanggal'      => $row['tanggal'] ?? now()->format('Y-m-d'),
+                'pertemuan_ke' => intval($row['pertemuan_ke'] ?? 1),
+                'jam_hadir'    => intval($row['jam_hadir']),
+                'jam_izin'     => intval($row['jam_izin']),
+                'jam_sakit'    => intval($row['jam_sakit']),
+                'jam_alpha'    => intval($row['jam_alpha']),
             ]
         );
     }

@@ -463,10 +463,10 @@
                         <input type="text" placeholder="Search" id="searchNilai">
                     </div>
                     <div class="filter-wrap">
-                        <button class="btn-filter">
+                        <button class="btn-filter" id="filterNilaiTblBtn">
                             <i class="bi bi-sliders2" style="font-size:12px;"></i>
                         </button>
-                        <div class="filter-menu">
+                        <div class="filter-menu" id="filterNilaiTblMenu">
                             <div class="filter-menu-label">Filter Nilai</div>
                             <div class="filter-opt active" data-val="">Semua</div>
                             <div class="filter-opt" data-val="baik">Nilai Baik (A/B)</div>
@@ -799,6 +799,15 @@ document.getElementById('filterBarBtn').addEventListener('filterChange', functio
 document.getElementById('filterAbsenBtn').addEventListener('filterChange', function(e) {
     var val = e.detail.value;
     document.querySelectorAll('#absenTableBody tr').forEach(function(r) {
+        if (!val) { r.style.display=''; return; }
+        r.style.display = r.dataset.status===val ? '' : 'none';
+    });
+});
+
+// ── FILTER TABEL NILAI (dashboard) ──────────────────
+document.getElementById('filterNilaiTblBtn').addEventListener('filterChange', function(e) {
+    var val = e.detail.value;
+    document.querySelectorAll('#nilaiTableBody tr').forEach(function(r) {
         if (!val) { r.style.display=''; return; }
         r.style.display = r.dataset.status===val ? '' : 'none';
     });
