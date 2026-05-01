@@ -55,6 +55,38 @@
     'badge2_label' => "Perlu\nBimbingan",
 ])
 
+{{-- ALERT --}}
+@if($totalBerisiko > 0)
+<div class="risk-alert-wrap" id="riskAlertDosen">
+    <div class="risk-pulse-ring"></div>
+ 
+    <div class="risk-alert-left">
+        <div class="risk-alert-icon">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <div class="risk-alert-content">
+            <div class="risk-alert-tag">⚡ Tindakan Diperlukan</div>
+            <div class="risk-alert-title">
+                {{ $totalBerisiko }} Mahasiswa Bimbingan Anda Berisiko!
+            </div>
+            <div class="risk-alert-desc">
+                Terdapat mahasiswa dengan <strong>nilai D/E</strong> atau <strong>absensi ≥18 jam</strong>.
+                Segera lakukan bimbingan akademik sebelum batas waktu perbaikan nilai.
+            </div>
+        </div>
+    </div>
+ 
+    <div class="risk-alert-right">
+        <a href="{{ route('dosen.kelas') }}" class="risk-alert-btn">
+            <i class="bi bi-arrow-right-circle-fill"></i>
+            Lihat & Tangani Sekarang
+        </a>
+        <button class="risk-alert-close" id="riskCloseDosen" title="Tutup">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+</div>
+@endif
 {{-- STAT CARDS --}}
 <div class="section-label">Ringkasan Kelas</div>
 <div class="row g-3 mb-4">
@@ -129,39 +161,6 @@
         </div>
     </div>
 </div>
-
-{{-- ALERT --}}
-@if($totalBerisiko > 0)
-<div class="risk-alert-wrap" id="riskAlertDosen">
-    <div class="risk-pulse-ring"></div>
- 
-    <div class="risk-alert-left">
-        <div class="risk-alert-icon">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-        </div>
-        <div class="risk-alert-content">
-            <div class="risk-alert-tag">⚡ Tindakan Diperlukan</div>
-            <div class="risk-alert-title">
-                {{ $totalBerisiko }} Mahasiswa Bimbingan Anda Berisiko!
-            </div>
-            <div class="risk-alert-desc">
-                Terdapat mahasiswa dengan <strong>nilai D/E</strong> atau <strong>absensi ≥18 jam</strong>.
-                Segera lakukan bimbingan akademik sebelum batas waktu perbaikan nilai.
-            </div>
-        </div>
-    </div>
- 
-    <div class="risk-alert-right">
-        <a href="{{ route('dosen.kelas') }}" class="risk-alert-btn">
-            <i class="bi bi-arrow-right-circle-fill"></i>
-            Lihat & Tangani Sekarang
-        </a>
-        <button class="risk-alert-close" id="riskCloseDosen" title="Tutup">
-            <i class="bi bi-x-lg"></i>
-        </button>
-    </div>
-</div>
-@endif
 
 {{-- CHARTS --}}
 <div class="section-label">Laporan Visual Kelas</div>

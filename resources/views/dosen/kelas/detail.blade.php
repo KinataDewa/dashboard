@@ -51,23 +51,6 @@
     'badge2_label' => "Nilai\nD/E",
 ])
 
-<div class="mb-3">
-    <a href="{{ route('dosen.dashboard') }}"
-       style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);font-weight:600;text-decoration:none;">
-        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
-    </a>
-</div>
- 
-{{-- Alert berisiko --}}
-@if($mahasiswa->isBerisiko())
-<div style="background:#FEF2F2;border:1px solid #FECACA;border-left:4px solid #EF4444;border-radius:var(--radius-sm);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
-    <i class="bi bi-exclamation-triangle-fill" style="color:#EF4444;font-size:18px;flex-shrink:0;"></i>
-    <div>
-        <div style="font-size:13.5px;font-weight:700;color:#991B1B;">Mahasiswa ini terdeteksi BERISIKO</div>
-        <div style="font-size:12px;color:#B91C1C;margin-top:2px;">Terdapat nilai D/E atau absensi ≥18 jam. Segera lakukan bimbingan akademik.</div>
-    </div>
-</div>
-@endif
  
 <div class="row g-4">
     {{-- KIRI: Nilai & Absensi --}}
