@@ -194,6 +194,14 @@
             <i class="bi bi-arrow-right-circle-fill"></i>
             Lihat & Tangani Sekarang
         </a>
+        <form action="{{ route('admin.kirim.peringatan') }}" method="POST" style="display:inline;">
+            @csrf
+            <button type="submit" class="risk-alert-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);"
+                    onclick="return confirm('Kirim email peringatan ke semua mahasiswa berisiko?')">
+                <i class="bi bi-envelope-fill"></i>
+                Kirim Email
+            </button>
+        </form>
         <button class="risk-alert-close" id="riskCloseAdmin" title="Tutup">
             <i class="bi bi-x-lg"></i>
         </button>

@@ -56,6 +56,7 @@ Route::middleware(['auth', 'role.admin'])
     ->name('admin.')
     ->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+        Route::post('/kirim-peringatan', [AdminDashboard::class, 'kirimPeringatan'])->name('kirim.peringatan');
 
         // Import data
         Route::prefix('import')->name('import.')->group(function () {
