@@ -69,18 +69,46 @@
     'badge2_label' => "Total\nAlpha",
 ])
  
-{{-- Filter --}}
-<div class="semester-bar mb-4">
-    <form method="GET" action="{{ route('mahasiswa.absensi') }}" style="display:flex;gap:10px;align-items:center;">
-        <select name="semester" class="select-semester">
-            <option value="{{ $semesterAktif }}">
-                {{ $mahasiswa->kelas->tahun_akademik ?? '2024/2025' }}
-                {{ $semesterAktif % 2 == 0 ? 'Genap' : 'Ganjil' }}
-                — Semester {{ $semesterAktif }}
-            </option>
-        </select>
-        <button type="submit" class="btn-primary">Filter</button>
-    </form>
+{{-- ══ FILTER SEMESTER ══ --}}
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+ 
+    {{-- Kiri: info semester --}}
+    <div>
+        <div style="font-size:15px;font-weight:700;color:var(--text-1);">
+            Absensi Semester {{ $semester }}
+            @if($semester == $semesterAktif)
+                <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#DCFCE7;color:#15803D;margin-left:6px;">
+                    <i class="bi bi-circle-fill" style="font-size:7px;"></i> Aktif
+                </span>
+            @endif
+        </div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:2px;">
+            {{ $absensis->count() }} mata kuliah ·
+            Kehadiran: <strong style="color:{{ $pctHadir >= 75 ? '#22C55E' : '#EF4444' }};">{{ $pctHadir }}%</strong> ·
+            Alpha: <strong style="color:{{ $sumAlpha >= 18 ? '#EF4444' : ($sumAlpha >= 14 ? '#F59E0B' : 'var(--text-1)') }};">{{ $sumAlpha }} jam</strong>
+        </div>
+    </div>
+ 
+    {{-- Kanan: pills semester --}}
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:11.5px;color:var(--text-3);font-weight:600;margin-right:4px;">Semester:</span>
+        @foreach($semesterList as $sem)
+        <a href="{{ route('mahasiswa.absensi', ['semester' => $sem]) }}"
+           style="
+               display:inline-flex;align-items:center;justify-content:center;
+               min-width:36px;height:32px;padding:0 12px;
+               border-radius:20px;font-size:12.5px;font-weight:700;
+               text-decoration:none;transition:all .15s;
+               {{ $sem == $semester
+                   ? 'background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3);'
+                   : 'background:#F1F5F9;color:var(--text-2);border:1px solid var(--border);' }}
+           "
+           onmouseover="{{ $sem != $semester ? "this.style.background='#E2E8F0'" : '' }}"
+           onmouseout="{{ $sem != $semester ? "this.style.background='#F1F5F9'" : '' }}">
+            {{ $sem }}
+        </a>
+        @endforeach
+    </div>
 </div>
  
 {{-- Summary cards --}}

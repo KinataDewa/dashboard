@@ -634,14 +634,14 @@
                         <div class="demo-card-email">admin@polinema.ac.id</div>
                         <span class="demo-card-tag" style="background:#F5F3FF;color:#7C3AED;">Admin Jurusan</span>
                     </div>
-                    <div class="demo-card" onclick="fillDemo('budi.santoso@polinema.ac.id')">
+                    <div class="demo-card" onclick="fillDemo('elok.nur@polinema.ac.id')">
                         <div class="demo-card-role" style="color:#16A34A;">Dosen</div>
-                        <div class="demo-card-email">budi.santoso@...</div>
+                        <div class="demo-card-email">elok.nur@polinema.ac.id</div>
                         <span class="demo-card-tag" style="background:#F0FDF4;color:#16A34A;">Dosen PA</span>
                     </div>
-                    <div class="demo-card" onclick="fillDemo('kinata@student.polinema.ac.id')">
+                    <div class="demo-card" onclick="fillDemo('kinata.dewa@student.polinema.ac.id')">
                         <div class="demo-card-role" style="color:#2563EB;">Mahasiswa</div>
-                        <div class="demo-card-email">kinatadas@student...</div>
+                        <div class="demo-card-email">kinata.dewa@student</div>
                         <span class="demo-card-tag" style="background:#EFF6FF;color:#2563EB;">Student</span>
                     </div>
                 </div>

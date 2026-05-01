@@ -97,15 +97,11 @@ class Mahasiswa extends Model
     // ── Helper: cek mahasiswa berisiko ───────────────
     public function isBerisiko(): bool
     {
-        $adaNilaiDE = $this->nilais()
-            ->whereIn('grade', ['D', 'E'])
-            ->exists();
+        // Sistem otomatis cek dari data nilai dan absensi
+        $nilaiRendah = $this->nilais->whereIn('grade', ['C', 'D', 'E'])->count();
+        $totalAlpha  = $this->absensis->sum('jam_alpha');
 
-        $adaAlphaKritis = $this->absensis()
-            ->where('jam_alpha', '>=', 18)
-            ->exists();
-
-        return $adaNilaiDE || $adaAlphaKritis;
+        return $nilaiRendah > 0 || $totalAlpha >= 18;
     }
 
     // ── Helper: total jam alpha semua matkul ─────────

@@ -373,7 +373,6 @@
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-// ── Hitung distribusi grade dari semua mahasiswa ─────
 @php
     $gradeCount = ['A'=>0,'B'=>0,'C'=>0,'D'=>0,'E'=>0];
     foreach($mahasiswas as $mhs) {
@@ -389,7 +388,6 @@ var gradeLabels = ['A','B','C','D','E'];
 var gradeData   = [{{ $gradeCount['A'] }},{{ $gradeCount['B'] }},{{ $gradeCount['C'] }},{{ $gradeCount['D'] }},{{ $gradeCount['E'] }}];
 var gradeColors = ['#22C55E','#3B82F6','#FBBF24','#F97316','#EF4444'];
 
-// Bar Chart
 var barCtx = document.getElementById('nilaiChart').getContext('2d');
 new Chart(barCtx, {
     type: 'bar',
@@ -410,37 +408,23 @@ new Chart(barCtx, {
             legend: { display: false },
             tooltip: {
                 backgroundColor: '#0F172A', padding:10, cornerRadius:8,
-                callbacks: {
-                    label: function(c) { return ' ' + c.raw + ' mahasiswa'; }
-                }
+                callbacks: { label: function(c) { return ' ' + c.raw + ' mahasiswa'; } }
             }
         },
         scales: {
-            x: {
-                grid: { display: false },
-                ticks: { font: { family:'Plus Jakarta Sans', size:12 }, color:'#64748B' }
-            },
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1,
-                    font: { family:'Plus Jakarta Sans', size:12 }, color:'#64748B'
-                },
-                grid: { color:'#F8FAFC' },
-                border: { display: false }
-            }
+            x: { grid: { display: false }, ticks: { font: { family:'Plus Jakarta Sans', size:12 }, color:'#64748B' } },
+            y: { beginAtZero: true, ticks: { stepSize:1, font: { family:'Plus Jakarta Sans', size:12 }, color:'#64748B' }, grid: { color:'#F8FAFC' }, border: { display:false } }
         }
     }
 });
 
-// Donut Chart
 var donutCtx = document.getElementById('absensiChart').getContext('2d');
 new Chart(donutCtx, {
     type: 'doughnut',
     data: {
         labels: ['Hadir','Izin','Sakit','Alpha'],
         datasets: [{
-            data: [{{ $totalH }},{{ $totalI }},{{ $totalS }},{{ $totalA }}],
+            data: [{{ $totalH ?? 0 }},{{ $totalI ?? 0 }},{{ $totalS ?? 0 }},{{ $totalA ?? 0 }}],
             backgroundColor: ['#22C55E','#FBBF24','#3B82F6','#EF4444'],
             borderWidth: 3, borderColor: '#FFFFFF', hoverOffset: 5,
         }]
@@ -457,13 +441,13 @@ new Chart(donutCtx, {
     }
 });
 
-// Search & Filter
 document.getElementById('searchMhs').addEventListener('input', function() {
     var q = this.value.toLowerCase();
     document.querySelectorAll('#mhsBody tr').forEach(function(r) {
         r.style.display = (r.dataset.nama||'').includes(q) ? '' : 'none';
     });
 });
+
 document.getElementById('filterMhsBtn').addEventListener('filterChange', function(e) {
     var val = e.detail.value;
     document.querySelectorAll('#mhsBody tr').forEach(function(r) {
@@ -471,21 +455,14 @@ document.getElementById('filterMhsBtn').addEventListener('filterChange', functio
         r.style.display = r.dataset.status===val ? '' : 'none';
     });
 });
-</script>
 
-<script>
-@push('scripts')
-<script>
 (function() {
     var el   = document.getElementById('riskAlertDosen');
     var btnX = document.getElementById('riskCloseDosen');
     if (!el || !btnX) return;
- 
     btnX.addEventListener('click', function() {
         el.style.animation = 'alertSlideOut .35s cubic-bezier(.4,0,1,1) forwards';
-        setTimeout(function() {
-            el.style.display = 'none';
-        }, 340);
+        setTimeout(function() { el.style.display = 'none'; }, 340);
     });
 })();
 </script>

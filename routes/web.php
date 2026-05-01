@@ -27,17 +27,16 @@ Route::get('/', function () {
 });
 
 // ── Auth routes ──────────────────────────────────────────
-Auth::routes(['register' => false]); // nonaktifkan register publik
+Auth::routes(['register' => false]);
 
 // ── MAHASISWA ────────────────────────────────────────────
 Route::middleware(['auth', 'role.mahasiswa'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
     ->group(function () {
-        Route::get('/dashboard',         [MhsDashboard::class,  'index'])->name('dashboard');
-        Route::get('/nilai',             [NilaiController::class, 'index'])->name('nilai');
-        Route::get('/nilai/{semester}',  [NilaiController::class, 'bySemester'])->name('nilai.semester');
-        Route::get('/absensi',           [AbsensiController::class, 'index'])->name('absensi');
+        Route::get('/dashboard', [MhsDashboard::class,   'index'])->name('dashboard');
+        Route::get('/nilai',     [NilaiController::class, 'index'])->name('nilai');
+        Route::get('/absensi',   [AbsensiController::class, 'index'])->name('absensi');
     });
 
 // ── DOSEN DPA ────────────────────────────────────────────
@@ -45,9 +44,9 @@ Route::middleware(['auth', 'role.dosen'])
     ->prefix('dosen')
     ->name('dosen.')
     ->group(function () {
-        Route::get('/dashboard',          [DosenDashboard::class,      'index'])->name('dashboard');
-        Route::get('/kelas',              [DosenKelasController::class, 'index'])->name('kelas');
-        Route::get('/mahasiswa/{id}',     [DosenKelasController::class, 'detail'])->name('mahasiswa.detail');
+        Route::get('/dashboard',      [DosenDashboard::class,      'index'])->name('dashboard');
+        Route::get('/kelas',          [DosenKelasController::class, 'index'])->name('kelas');
+        Route::get('/mahasiswa/{id}', [DosenKelasController::class, 'detail'])->name('mahasiswa.detail');
     });
 
 // ── ADMIN ────────────────────────────────────────────────
@@ -55,21 +54,20 @@ Route::middleware(['auth', 'role.admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+        Route::get('/dashboard',         [AdminDashboard::class, 'index'])->name('dashboard');
         Route::post('/kirim-peringatan', [AdminDashboard::class, 'kirimPeringatan'])->name('kirim.peringatan');
 
         // Import data
         Route::prefix('import')->name('import.')->group(function () {
-            Route::get('/',           [ImportController::class, 'index'])->name('index');
-            Route::post('/nilai',     [ImportController::class, 'nilai'])->name('nilai');
-            Route::post('/absensi',   [ImportController::class, 'absensi'])->name('absensi');
-            Route::post('/jadwal',    [ImportController::class, 'jadwal'])->name('jadwal');
-            Route::post('/mahasiswa', [ImportController::class, 'mahasiswa'])->name('mahasiswa');
-            Route::post('/dosen',     [ImportController::class, 'dosen'])->name('dosen');
-            Route::post('/matkul',    [ImportController::class, 'matkul'])->name('matkul');
-            Route::post('/kelas',     [ImportController::class, 'kelas'])->name('kelas');
-
-            Route::get('/template/{type}', [ImportController::class, 'downloadTemplate'])->name('template');
+            Route::get('/',                    [ImportController::class, 'index'])->name('index');
+            Route::post('/nilai',              [ImportController::class, 'nilai'])->name('nilai');
+            Route::post('/absensi',            [ImportController::class, 'absensi'])->name('absensi');
+            Route::post('/jadwal',             [ImportController::class, 'jadwal'])->name('jadwal');
+            Route::post('/mahasiswa',          [ImportController::class, 'mahasiswa'])->name('mahasiswa');
+            Route::post('/dosen',              [ImportController::class, 'dosen'])->name('dosen');
+            Route::post('/matkul',             [ImportController::class, 'matkul'])->name('matkul');
+            Route::post('/kelas',              [ImportController::class, 'kelas'])->name('kelas');
+            Route::get('/template/{type}',     [ImportController::class, 'downloadTemplate'])->name('template');
         });
 
         // CRUD resources
@@ -78,4 +76,3 @@ Route::middleware(['auth', 'role.admin'])
         Route::resource('matkul',    MatkulController::class);
         Route::resource('kelas',     AdminKelasController::class);
     });
-

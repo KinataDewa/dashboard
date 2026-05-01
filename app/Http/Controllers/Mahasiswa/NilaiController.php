@@ -12,16 +12,16 @@ class NilaiController extends Controller
             ->with('kelas')
             ->firstOrFail();
  
+        // Ambil semua semester yang punya nilai (untuk dropdown)
+        $semesterList = $mahasiswa->nilais()
+            ->distinct('semester')
+            ->pluck('semester')
+            ->sort()
+            ->values();
+ 
+        // Default = semester terbaru, bisa di-override via ?semester=X
         $semesterAktif = $mahasiswa->kelas->semester ?? 6;
- 
-        return $this->bySemester($semesterAktif);
-    }
- 
-    public function bySemester(int $semester)
-    {
-        $mahasiswa = Mahasiswa::where('user_id', auth()->id())
-            ->with('kelas')
-            ->firstOrFail();
+        $semester = (int) request('semester', $semesterList->last() ?? $semesterAktif);
  
         $nilais = $mahasiswa->nilais()
             ->where('semester', $semester)
@@ -30,15 +30,12 @@ class NilaiController extends Controller
  
         $ip = $mahasiswa->getIpSemester($semester);
  
-        // Ambil semua semester yang punya nilai
-        $semesterList = $mahasiswa->nilais()
-            ->distinct('semester')
-            ->pluck('semester')
-            ->sort()
-            ->values();
+        // Hitung IPK kumulatif sampai semester ini
+        $ipk = $mahasiswa->ipk;
  
         return view('mahasiswa.nilai.index', compact(
-            'mahasiswa', 'nilais', 'ip', 'semester', 'semesterList'
+            'mahasiswa', 'nilais', 'ip', 'ipk',
+            'semester', 'semesterList', 'semesterAktif'
         ));
     }
 }

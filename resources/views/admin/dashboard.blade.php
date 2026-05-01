@@ -11,7 +11,6 @@
 
 @push('styles')
 <style>
-/* ── Risk Alert ─────────────────────────────────── */
 .risk-alert-wrap {
     position: relative;
     background: linear-gradient(135deg, #1A0A0A 0%, #7F1D1D 40%, #991B1B 100%);
@@ -277,10 +276,6 @@
     </div>
     @endforeach
 </div>
-
-@if($mahasiswaBerisiko > 0)
-<div class="section-label">Peringatan</div>
-@endif
 
 @endsection
 
