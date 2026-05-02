@@ -215,6 +215,12 @@
     .donut-canvas-box canvas { width: 120px !important; height: 120px !important; }
     .donut-center-num { font-size: 16px; }
 }
+@media(max-width:480px){
+    .donut-wrap-v2{flex-direction:column;align-items:center;}
+    .legend-v2{width:100%;}
+    .tbl-head-v2{flex-direction:column;align-items:stretch;}
+    .tbl-actions{justify-content:flex-start;flex-wrap:wrap;}
+}
 
 .mhs-alert-wrap {
     position: relative;

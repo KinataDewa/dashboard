@@ -44,7 +44,7 @@ class DashboardController extends Controller
         foreach ($mahasiswas as $mhs) {
             $nilaiDE    = $mhs->nilais->whereIn('grade', ['D', 'E']);
             $totalAlpha = $mhs->absensis->sum('jam_alpha');
-            $isBerisiko = $nilaiDE->count() > 0 || $totalAlpha >= 14;
+            $isBerisiko = $nilaiDE->count() > 0 || $totalAlpha >= 18;
 
             if (!$isBerisiko || !$mhs->user) continue;
 
@@ -52,9 +52,8 @@ class DashboardController extends Controller
             if (!$email) continue;
 
             try {
-                Mail::to($email)->send(new MahasiswaBerisiko($mhs));
+                Mail::to($email)->queue(new MahasiswaBerisiko($mhs));
                 $terkirim++;
-                sleep(1);
             } catch (\Exception $e) {
                 $gagal++;
                 \Log::error("Email gagal ke {$mhs->nama}: " . $e->getMessage());

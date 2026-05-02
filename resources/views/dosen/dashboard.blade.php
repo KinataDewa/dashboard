@@ -32,6 +32,15 @@
 .legend-v2-val{font-size:12.5px;font-weight:700;color:var(--text-1);}
 .legend-bar{width:100%;height:4px;background:#F1F5F9;border-radius:2px;margin-top:3px;overflow:hidden;}
 .legend-bar-fill{height:100%;border-radius:2px;}
+@media(max-width:576px){
+    .donut-canvas-box{width:120px;height:120px;}
+    .donut-canvas-box canvas{width:120px!important;height:120px!important;}
+    .donut-center-num{font-size:16px;}
+}
+@media(max-width:480px){
+    .donut-wrap-v2{flex-direction:column;align-items:center;}
+    .legend-v2{width:100%;}
+}
 </style>
 @endpush
 

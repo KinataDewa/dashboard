@@ -9,6 +9,8 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
  
 class DosenImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnError
 {
@@ -22,12 +24,13 @@ class DosenImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnErr
             ['email' => trim($row['email'])],
             [
                 'name'     => trim($row['nama']),
-                'password' => Hash::make(trim($row['nip'])),
+                'password' => Hash::make(Str::random(12)),
             ]
         );
- 
+
         if ($user->wasRecentlyCreated) {
             $user->assignRole('dosen');
+            Password::sendResetLink(['email' => $user->email]);
         }
  
         $this->imported++;

@@ -30,9 +30,6 @@ class MahasiswaController extends Controller
         $mahasiswas = $query->orderBy('nim')->paginate(15);
         $kelasList  = Kelas::orderBy('nama')->get();
 
-        // DEBUG — hapus setelah confirmed
-        // dd($mahasiswas->count(), $mahasiswas->first());
-
         return view('admin.mahasiswa.index', compact('mahasiswas', 'kelasList'));
     }
  
@@ -82,7 +79,35 @@ class MahasiswaController extends Controller
     public function show(Mahasiswa $mahasiswa)
     {
         $mahasiswa->load(['kelas', 'dosenPa', 'user', 'nilais.mataKuliah', 'absensis.mataKuliah']);
-        return view('admin.mahasiswa.show', compact('mahasiswa'));
+
+        $semesterAktif = request('semester')
+            ? (int) request('semester')
+            : ($mahasiswa->kelas->semester ?? 6);
+
+        $nilais   = $mahasiswa->nilais->where('semester', $semesterAktif)->values();
+        $absensis = $mahasiswa->absensis->where('semester', $semesterAktif)->values();
+
+        $ip  = $mahasiswa->getIpSemester($semesterAktif);
+        $ipk = $mahasiswa->ipk;
+
+        $sumHadir = $absensis->sum('jam_hadir');
+        $sumAlpha = $absensis->sum('jam_alpha');
+        $sumTotal = $absensis->sum(fn($a) => $a->jam_hadir + $a->jam_izin + $a->jam_sakit + $a->jam_alpha);
+        $pctHadir = $sumTotal > 0 ? round($sumHadir / $sumTotal * 100) : 0;
+
+        $semesterList = $mahasiswa->nilais->pluck('semester')->unique()->sort()->values();
+
+        $allSemesters = $semesterList;
+        $trendIp      = $allSemesters->map(fn($s) => $mahasiswa->getIpSemester($s));
+        $trendAlpha   = $allSemesters->map(
+            fn($s) => $mahasiswa->absensis->where('semester', $s)->sum('jam_alpha')
+        );
+
+        return view('admin.mahasiswa.show', compact(
+            'mahasiswa', 'nilais', 'absensis', 'ip', 'ipk',
+            'semesterAktif', 'sumHadir', 'sumAlpha', 'pctHadir',
+            'allSemesters', 'trendIp', 'trendAlpha', 'semesterList'
+        ));
     }
  
     public function edit(Mahasiswa $mahasiswa)
