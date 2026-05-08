@@ -212,12 +212,14 @@
 <div class="section-label">Statistik Sistem</div>
 <div class="row g-3 mb-4">
     @php
+    $totalKompenPending = \App\Models\Kompensasi::where('status','pending')->count();
     $stats = [
         ['label'=>'Mahasiswa Aktif',    'val'=>$totalMahasiswa,    'icon'=>'bi-mortarboard-fill',         'accent'=>'linear-gradient(90deg,#2563EB,#60A5FA)', 'ibg'=>'#EFF6FF', 'ic'=>'#2563EB', 'badge'=>'Terdaftar',      'bbg'=>'#DBEAFE', 'bc'=>'#1D4ED8'],
         ['label'=>'Total Dosen',        'val'=>$totalDosen,        'icon'=>'bi-person-badge-fill',        'accent'=>'linear-gradient(90deg,#16A34A,#86EFAC)', 'ibg'=>'#F0FDF4', 'ic'=>'#16A34A', 'badge'=>'Aktif mengajar', 'bbg'=>'#DCFCE7', 'bc'=>'#166534'],
         ['label'=>'Mata Kuliah',        'val'=>$totalMatkul,       'icon'=>'bi-book-fill',                'accent'=>'linear-gradient(90deg,#7C3AED,#A78BFA)', 'ibg'=>'#F5F3FF', 'ic'=>'#7C3AED', 'badge'=>'Semester aktif', 'bbg'=>'#EDE9FE', 'bc'=>'#5B21B6'],
         ['label'=>'Kelas Aktif',        'val'=>$totalKelas,        'icon'=>'bi-grid-3x3-gap-fill',        'accent'=>'linear-gradient(90deg,#0891B2,#67E8F9)', 'ibg'=>'#ECFEFF', 'ic'=>'#0891B2', 'badge'=>'Semua angkatan', 'bbg'=>'#CFFAFE', 'bc'=>'#0E7490'],
         ['label'=>'Mahasiswa Berisiko', 'val'=>$mahasiswaBerisiko, 'icon'=>'bi-exclamation-triangle-fill','accent'=>$mahasiswaBerisiko>0 ? 'linear-gradient(90deg,#EF4444,#FCA5A5)' : 'linear-gradient(90deg,#22C55E,#86EFAC)', 'ibg'=>$mahasiswaBerisiko>0 ? '#FEF2F2' : '#F0FDF4', 'ic'=>$mahasiswaBerisiko>0 ? '#EF4444' : '#22C55E', 'badge'=>$mahasiswaBerisiko>0 ? 'Perlu penanganan' : 'Semua aman', 'bbg'=>$mahasiswaBerisiko>0 ? '#FEE2E2' : '#DCFCE7', 'bc'=>$mahasiswaBerisiko>0 ? '#991B1B' : '#166534'],
+        ['label'=>'Kompen Pending', 'val'=>$totalKompenPending, 'icon'=>'bi-clipboard2-check-fill', 'accent'=>$totalKompenPending>0 ? 'linear-gradient(90deg,#F59E0B,#FCD34D)' : 'linear-gradient(90deg,#22C55E,#86EFAC)', 'ibg'=>$totalKompenPending>0 ? '#FEF3C7' : '#F0FDF4', 'ic'=>$totalKompenPending>0 ? '#F59E0B' : '#22C55E', 'badge'=>$totalKompenPending>0 ? 'Perlu ditangani' : 'Semua lunas', 'bbg'=>$totalKompenPending>0 ? '#FEF9C3' : '#DCFCE7', 'bc'=>$totalKompenPending>0 ? '#854D0E' : '#166534'],
     ];
     @endphp
 
@@ -259,7 +261,8 @@
         ['url'=>route('admin.kelas.index'),    'icon'=>'bi-grid-3x3-gap-fill',        'title'=>'Kelola Kelas', 'count'=>$totalKelas,    'unit'=>'kelas',      'bg'=>'#ECFEFF','c'=>'#0891B2'],
         ['url'=>route('admin.import.index'),   'icon'=>'bi-file-earmark-arrow-up-fill','title'=>'Import Data', 'count'=>null,           'unit'=>'Upload Excel','bg'=>'#FFF7ED','c'=>'#EA580C'],
     ];
-    @endphp
+    @endphp    
+
 
     @foreach($menus as $menu)
     <div class="col-md col-6">

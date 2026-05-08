@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\DosenController as AdminDosenController;
 use App\Http\Controllers\Admin\MatkulController;
 use App\Http\Controllers\Admin\KelasController as AdminKelasController;
 use App\Http\Controllers\Admin\ImportController;
+use App\Http\Controllers\Admin\KompensasiController;
 
 // ── Root redirect ────────────────────────────────────────
 Route::get('/', function () {
@@ -68,6 +69,16 @@ Route::middleware(['auth', 'role.admin'])
             Route::post('/matkul',             [ImportController::class, 'matkul'])->name('matkul');
             Route::post('/kelas',              [ImportController::class, 'kelas'])->name('kelas');
             Route::get('/template/{type}',     [ImportController::class, 'downloadTemplate'])->name('template');
+        });
+
+        Route::prefix('kompensasi')->name('kompensasi.')->group(function () {
+            Route::get('/',                                [KompensasiController::class, 'index'])->name('index');
+            Route::get('/create',                          [KompensasiController::class, 'create'])->name('create');
+            Route::post('/',                               [KompensasiController::class, 'store'])->name('store');
+            Route::get('/{kompensasi}',                    [KompensasiController::class, 'show'])->name('show');
+            Route::post('/{kompensasi}/ttd-admin',         [KompensasiController::class, 'ttdAdmin'])->name('ttd-admin');
+            Route::post('/{kompensasi}/ttd-kajur',         [KompensasiController::class, 'ttdKajur'])->name('ttd-kajur');
+            Route::delete('/{kompensasi}',                 [KompensasiController::class, 'destroy'])->name('destroy');
         });
 
         // CRUD resources

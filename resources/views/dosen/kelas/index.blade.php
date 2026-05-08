@@ -175,6 +175,13 @@
                                 <i class="bi bi-check-circle-fill"></i> Aman
                             </span>
                         @endif
+                        @php $kompenMhs = $mhs->kompensasis->where('status','pending')->first(); @endphp
+                        @if($kompenMhs)
+                        <span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;background:#FEF3C7;color:#92400E;margin-left:4px;">
+                            <i class="bi bi-clipboard2-check-fill" style="font-size:9px;"></i>
+                            Kompen {{ $kompenMhs->jam_kompen_wajib }}j
+                        </span>
+                        @endif
                     </td>
                     <td>
                         <a href="{{ route('dosen.mahasiswa.detail', $mhs->id) }}" class="btn-outline" style="font-size:12px;padding:5px 12px;">

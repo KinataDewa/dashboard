@@ -12,7 +12,7 @@ class KelasController extends Controller
         $dosen = Dosen::where('user_id', auth()->id())->firstOrFail();
  
         $mahasiswas = Mahasiswa::where('dosen_pa_id', $dosen->id)
-            ->with(['kelas', 'nilais.mataKuliah', 'absensis'])
+            ->with(['kelas', 'nilais.mataKuliah', 'absensis', 'kompensasis'])
             ->get()
             ->map(function ($m) {
                 $m->ipk_val      = $m->ipk;

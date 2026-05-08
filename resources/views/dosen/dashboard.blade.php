@@ -253,8 +253,34 @@
     </div>
 </div>
 
+{{-- Ringkasan Kompensasi --}}
+@php
+    $kompenPending = $mahasiswas->filter(function($m) {
+        return $m->kompensasis->where('status','pending')->isNotEmpty();
+    });
+@endphp
+@if($kompenPending->count() > 0)
+<div style="background:#FFFBEB;border:1px solid #FDE68A;border-left:4px solid #F59E0B;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:10px;">
+        <i class="bi bi-clipboard2-check-fill" style="font-size:20px;color:#F59E0B;"></i>
+        <div>
+            <div style="font-size:13.5px;font-weight:700;color:#92400E;">
+                {{ $kompenPending->count() }} Mahasiswa Belum Lunas Kompensasi
+            </div>
+            <div style="font-size:12px;color:#78350F;margin-top:2px;">
+                Ingatkan mahasiswa untuk menyelesaikan kompensasi alpha sesegera mungkin.
+            </div>
+        </div>
+    </div>
+    <span style="background:#FEF3C7;color:#92400E;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;">
+        {{ $kompenPending->count() }} Pending
+    </span>
+</div>
+@endif
+
 {{-- TABEL MAHASISWA --}}
 <div class="section-label">Data Mahasiswa Bimbingan</div>
+
 <div class="card-white tbl-card-v2">
     <div class="tbl-head-v2">
         <div>

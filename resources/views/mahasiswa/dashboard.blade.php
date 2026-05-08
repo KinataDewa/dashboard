@@ -567,6 +567,53 @@
         </div>
     </div>
 </div>
+@php
+    $kompenAktif = $mahasiswa->getKompensasiSemester($semesterAktif);
+@endphp
+@if($kompenAktif)
+<div class="col-sm-4 col-12">
+    <div class="stat-card-v2">
+        <div class="stat-card-accent" style="background:{{ $kompenAktif->isLunas() ? 'linear-gradient(90deg,#22C55E,#86EFAC)' : 'linear-gradient(90deg,#F59E0B,#FCD34D)' }};"></div>
+        <div class="stat-card-body">
+            <div class="stat-icon-box" style="background:{{ $kompenAktif->isLunas() ? '#F0FDF4' : '#FEF3C7' }};">
+                <i class="bi bi-clipboard2-check-fill" style="color:{{ $kompenAktif->isLunas() ? '#22C55E' : '#F59E0B' }};"></i>
+            </div>
+            <div class="stat-card-info">
+                <div class="stat-card-label">Kompensasi Sem {{ $semesterAktif }}</div>
+                <div class="stat-card-value" style="color:{{ $kompenAktif->isLunas() ? '#22C55E' : '#F59E0B' }};font-size:24px;">
+                    {{ $kompenAktif->jam_kompen_wajib }}<span style="font-size:14px;font-weight:500;color:var(--text-2);"> jam</span>
+                </div>
+                <div class="stat-card-note mt-1">
+                    @if($kompenAktif->isLunas())
+                        <span class="stat-card-badge badge-up"><i class="bi bi-check-circle-fill"></i> Lunas</span>
+                    @else
+                        <span class="stat-card-badge badge-warn"><i class="bi bi-hourglass-split"></i> Pending</span>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- @if(isset($kompenAktif) && $kompenAktif && !$kompenAktif->isLunas())
+<div class="card-white" style="border-left:4px solid #F59E0B;border-radius:12px;padding:16px 20px;margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">⏳</div>
+        <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text-1);">Kompensasi Semester {{ $semesterAktif }} Belum Lunas</div>
+            <div style="font-size:12.5px;color:var(--text-2);margin-top:2px;">
+                Anda wajib menyelesaikan <strong style="color:#92400E;">{{ $kompenAktif->jam_kompen_wajib }} jam</strong> kompensasi
+                ({{ $kompenAktif->sp_label }} — {{ $kompenAktif->jam_alpha }} jam alpha).
+                Hubungi admin untuk surat kompensasi.
+            </div>
+        </div>
+    </div>
+    <span style="background:#FEF3C7;color:#92400E;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;">
+        {{ $kompenAktif->sp_label }} · Pending
+    </span>
+</div>
+@endif --}}
 
 {{-- ══ CHARTS ══ --}}
 <div class="section-label">Laporan Visual</div>

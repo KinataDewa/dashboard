@@ -121,5 +121,30 @@ class Mahasiswa extends Model
             ->with('mataKuliah')
             ->get();
     }
+
+    public function kompensasis()
+    {
+        return $this->hasMany(Kompensasi::class);
+    }
+ 
+    // Ambil kompensasi semester tertentu
+    public function getKompensasiSemester(int $semester, string $tahunAkademik = '2024/2025')
+    {
+        return $this->kompensasis
+            ->where('semester', $semester)
+            ->where('tahun_akademik', $tahunAkademik)
+            ->first();
+    }
+ 
+    // Cek apakah punya kompen pending di semester tertentu
+    public function hasPendingKompen(int $semester, string $tahunAkademik = '2024/2025'): bool
+    {
+        return $this->kompensasis
+            ->where('semester', $semester)
+            ->where('tahun_akademik', $tahunAkademik)
+            ->where('status', 'pending')
+            ->isNotEmpty();
+    }
+    
 }
 

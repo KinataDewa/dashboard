@@ -491,6 +491,19 @@
         <a href="{{ route('admin.kelas.index') }}" class="nav-link-item {{ request()->routeIs('admin.kelas*') ? 'active' : '' }}">
             <i class="bi bi-grid-3x3-gap-fill"></i> <span>Kelas</span>
         </a>
+ 
+        <span class="nav-label">Akademik</span>
+        <a href="{{ route('admin.kompensasi.index') }}"
+           class="nav-link-item {{ request()->routeIs('admin.kompensasi*') ? 'active' : '' }}">
+            <i class="bi bi-clipboard2-check-fill"></i>
+            <span>Kompensasi</span>
+            @php $pendingKompen = \App\Models\Kompensasi::where('status','pending')->count(); @endphp
+            @if($pendingKompen > 0)
+            <span style="margin-left:auto;background:#EF4444;color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;line-height:1.6;">
+                {{ $pendingKompen }}
+            </span>
+            @endif
+        </a>
     </nav>
     <div class="sidebar-footer">
         <form method="POST" action="{{ route('logout') }}">

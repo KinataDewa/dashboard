@@ -27,6 +27,7 @@ class DashboardController extends Controller
                 'nilais.mataKuliah',
                 'absensis.mataKuliah',
                 'user',
+                'kompensasis',
             ])
             ->get();
 

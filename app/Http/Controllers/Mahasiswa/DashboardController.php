@@ -12,7 +12,7 @@ class DashboardController extends Controller
     {
         $user      = auth()->user();
         $mahasiswa = Mahasiswa::where('user_id', $user->id)
-            ->with(['kelas', 'dosenPa'])
+            ->with(['kelas', 'dosenPa', 'kompensasis'])
             ->firstOrFail();
  
         $semesterAktif  = $mahasiswa->kelas->semester ?? 6;
@@ -52,10 +52,13 @@ class DashboardController extends Controller
             $rataRataKelas[$mk->id] = $mk->getRataRataNilai();
         }
  
+        $kompenAktif = $mahasiswa->getKompensasiSemester($semesterAktif);
+
         return view('mahasiswa.dashboard', compact(
             'mahasiswa', 'nilais', 'absensis',
             'ipSemester', 'ipk', 'nilaiDE', 'absensiKritis',
-            'semesterAktif', 'tahunAkademik', 'rataRataKelas'
+            'semesterAktif', 'tahunAkademik', 'rataRataKelas',
+            'kompenAktif'
         ));
     }
 }
