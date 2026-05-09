@@ -32,7 +32,34 @@
 .legend-v2-val{font-size:12.5px;font-weight:700;color:var(--text-1);}
 .legend-bar{width:100%;height:4px;background:#F1F5F9;border-radius:2px;margin-top:3px;overflow:hidden;}
 .legend-bar-fill{height:100%;border-radius:2px;}
+
+/* ── Status Bar (NEW) ────────────────────────────── */
+.status-summary{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.status-bar-wrap{flex:1;min-width:180px;}
+.status-bar{width:100%;height:8px;background:#F1F5F9;border-radius:4px;overflow:hidden;display:flex;}
+.status-bar-safe{height:100%;background:#22C55E;transition:width .6s ease;}
+.status-bar-risk{height:100%;background:#EF4444;transition:width .6s ease;}
+.status-item{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.status-item-val{font-size:16px;font-weight:800;color:var(--text-1);line-height:1;}
+.status-item-lbl{font-size:11px;color:var(--text-2);margin-top:1px;}
+
+/* ── Tabel (NEW) ─────────────────────────────────── */
+.mhs-table{width:100%;border-collapse:collapse;}
+.mhs-table thead th{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;padding:8px 12px;border-bottom:1.5px solid var(--border);background:#FAFBFF;white-space:nowrap;}
+.mhs-table tbody tr{border-bottom:1px solid #F8FAFC;transition:background .12s;}
+.mhs-table tbody tr:last-child{border-bottom:none;}
+.mhs-table tbody tr:hover{background:#F8FAFF;}
+.mhs-table tbody td{padding:11px 12px;vertical-align:middle;font-size:13px;}
+.mhs-table tbody tr.row-risk{background:rgba(239,68,68,.025);}
+.mhs-table tbody tr.row-risk td:first-child{border-left:3px solid #EF4444;}
+
+@media(max-width:768px){
+    .hide-mobile{display:none!important;}
+    .status-bar-wrap{width:100%;}
+}
 @media(max-width:576px){
+    .hide-sm{display:none!important;}
     .donut-canvas-box{width:120px;height:120px;}
     .donut-canvas-box canvas{width:120px!important;height:120px!important;}
     .donut-center-num{font-size:16px;}
@@ -64,11 +91,10 @@
     'badge2_label' => "Perlu\nBimbingan",
 ])
 
-{{-- ALERT --}}
+{{-- ══ ALERT (LAMA) ══ --}}
 @if($totalBerisiko > 0)
 <div class="risk-alert-wrap" id="riskAlertDosen">
     <div class="risk-pulse-ring"></div>
- 
     <div class="risk-alert-left">
         <div class="risk-alert-icon">
             <i class="bi bi-exclamation-triangle-fill"></i>
@@ -84,7 +110,6 @@
             </div>
         </div>
     </div>
- 
     <div class="risk-alert-right">
         <a href="{{ route('dosen.kelas') }}" class="risk-alert-btn">
             <i class="bi bi-arrow-right-circle-fill"></i>
@@ -96,7 +121,8 @@
     </div>
 </div>
 @endif
-{{-- STAT CARDS --}}
+
+{{-- ══ STAT CARDS (LAMA) ══ --}}
 <div class="section-label">Ringkasan Kelas</div>
 <div class="row g-3 mb-4">
     <div class="col-sm-3 col-6">
@@ -171,11 +197,56 @@
     </div>
 </div>
 
-{{-- CHARTS --}}
+{{-- ══ STATUS BAR (NEW) ══ --}}
+@php
+    $totalAman     = $totalMahasiswa - $totalBerisiko;
+    $pctAman       = $totalMahasiswa > 0 ? round($totalAman / $totalMahasiswa * 100) : 0;
+    $pctRisiko     = $totalMahasiswa > 0 ? round($totalBerisiko / $totalMahasiswa * 100) : 0;
+    $kompenPending = $mahasiswas->filter(fn($m) => $m->kompensasis->where('status','pending')->isNotEmpty());
+@endphp
+<div class="status-summary mb-4">
+    <div style="flex-shrink:0;">
+        <div style="font-size:12px;font-weight:700;color:var(--text-2);">Status Keseluruhan</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:1px;">{{ $totalMahasiswa }} mahasiswa bimbingan</div>
+    </div>
+    <div class="status-bar-wrap">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+            <span style="font-size:11.5px;font-weight:700;color:#22C55E;">{{ $totalAman }} Aman ({{ $pctAman }}%)</span>
+            <span style="font-size:11.5px;font-weight:700;color:#EF4444;">{{ $totalBerisiko }} Berisiko ({{ $pctRisiko }}%)</span>
+        </div>
+        <div class="status-bar">
+            <div class="status-bar-safe" style="width:{{ $pctAman }}%;"></div>
+            <div class="status-bar-risk" style="width:{{ $pctRisiko }}%;"></div>
+        </div>
+    </div>
+    <div style="display:flex;gap:16px;flex-shrink:0;">
+        <div class="status-item">
+            <div class="status-dot" style="background:#22C55E;"></div>
+            <div>
+                <div class="status-item-val">{{ $totalAman }}</div>
+                <div class="status-item-lbl">Aman</div>
+            </div>
+        </div>
+        <div class="status-item">
+            <div class="status-dot" style="background:#EF4444;"></div>
+            <div>
+                <div class="status-item-val" style="color:#EF4444;">{{ $totalBerisiko }}</div>
+                <div class="status-item-lbl">Berisiko</div>
+            </div>
+        </div>
+        <div class="status-item">
+            <div class="status-dot" style="background:#F59E0B;"></div>
+            <div>
+                <div class="status-item-val" style="color:#F59E0B;">{{ $kompenPending->count() }}</div>
+                <div class="status-item-lbl">Kompen</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ══ CHARTS (LAMA) ══ --}}
 <div class="section-label">Laporan Visual Kelas</div>
 <div class="row g-3 mb-4">
-
-    {{-- Bar Chart Distribusi Nilai --}}
     <div class="col-lg-7">
         <div class="chart-card-v2">
             <div class="chart-head-v2">
@@ -187,7 +258,6 @@
             <div style="position:relative;height:220px;margin-top:14px;">
                 <canvas id="nilaiChart"></canvas>
             </div>
-            {{-- Grade legend --}}
             <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;">
                 @foreach(['A'=>['#22C55E','Sangat Baik'],'B'=>['#3B82F6','Baik'],'C'=>['#FBBF24','Cukup'],'D'=>['#F97316','Kurang'],'E'=>['#EF4444','Sangat Kurang']] as $g => $info)
                 <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-2);">
@@ -198,8 +268,6 @@
             </div>
         </div>
     </div>
-
-    {{-- Donut Absensi --}}
     <div class="col-lg-5">
         <div class="chart-card-v2">
             <div class="chart-head-v2">
@@ -208,19 +276,17 @@
                     <div class="chart-sub-v2">Total jam kehadiran seluruh mahasiswa</div>
                 </div>
             </div>
-
             @php
-                $totalH = $mahasiswas->sum(fn($m) => $m->absensis->sum('jam_hadir'));
-                $totalI = $mahasiswas->sum(fn($m) => $m->absensis->sum('jam_izin'));
-                $totalS = $mahasiswas->sum(fn($m) => $m->absensis->sum('jam_sakit'));
-                $totalA = $mahasiswas->sum(fn($m) => $m->absensis->sum('jam_alpha'));
+                $totalH   = $mahasiswas->sum(fn($m) => $m->absensis->sum('jam_hadir'));
+                $totalI   = $mahasiswas->sum(fn($m) => $m->absensis->sum('jam_izin'));
+                $totalS   = $mahasiswas->sum(fn($m) => $m->absensis->sum('jam_sakit'));
+                $totalA   = $mahasiswas->sum(fn($m) => $m->absensis->sum('jam_alpha'));
                 $totalAll = $totalH + $totalI + $totalS + $totalA;
                 $pctH = $totalAll > 0 ? round($totalH/$totalAll*100) : 0;
                 $pctI = $totalAll > 0 ? round($totalI/$totalAll*100) : 0;
                 $pctS = $totalAll > 0 ? round($totalS/$totalAll*100) : 0;
                 $pctA = $totalAll > 0 ? round($totalA/$totalAll*100) : 0;
             @endphp
-
             <div class="donut-wrap-v2">
                 <div class="donut-canvas-box">
                     <canvas id="absensiChart" width="140" height="140"></canvas>
@@ -230,12 +296,7 @@
                     </div>
                 </div>
                 <div class="legend-v2">
-                    @foreach([
-                        ['#22C55E','Hadir',$totalH,$pctH],
-                        ['#FBBF24','Izin',$totalI,$pctI],
-                        ['#3B82F6','Sakit',$totalS,$pctS],
-                        ['#EF4444','Alpha',$totalA,$pctA],
-                    ] as [$color,$label,$val,$pct])
+                    @foreach([['#22C55E','Hadir',$totalH,$pctH],['#FBBF24','Izin',$totalI,$pctI],['#3B82F6','Sakit',$totalS,$pctS],['#EF4444','Alpha',$totalA,$pctA]] as [$color,$label,$val,$pct])
                     <div>
                         <div class="legend-v2-row">
                             <div class="legend-v2-left">
@@ -253,34 +314,28 @@
     </div>
 </div>
 
-{{-- Ringkasan Kompensasi --}}
-@php
-    $kompenPending = $mahasiswas->filter(function($m) {
-        return $m->kompensasis->where('status','pending')->isNotEmpty();
-    });
-@endphp
+{{-- ══ ALERT KOMPENSASI (NEW — ringkas) ══ --}}
 @if($kompenPending->count() > 0)
-<div style="background:#FFFBEB;border:1px solid #FDE68A;border-left:4px solid #F59E0B;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FFFBEB;border:1px solid #FDE68A;border-left:4px solid #F59E0B;border-radius:10px;padding:11px 16px;margin-bottom:16px;flex-wrap:wrap;">
     <div style="display:flex;align-items:center;gap:10px;">
-        <i class="bi bi-clipboard2-check-fill" style="font-size:20px;color:#F59E0B;"></i>
+        <i class="bi bi-clipboard2-check-fill" style="color:#F59E0B;font-size:16px;flex-shrink:0;"></i>
         <div>
-            <div style="font-size:13.5px;font-weight:700;color:#92400E;">
-                {{ $kompenPending->count() }} Mahasiswa Belum Lunas Kompensasi
+            <div style="font-size:13px;font-weight:700;color:#92400E;">
+                {{ $kompenPending->count() }} mahasiswa belum lunas kompensasi
             </div>
-            <div style="font-size:12px;color:#78350F;margin-top:2px;">
-                Ingatkan mahasiswa untuk menyelesaikan kompensasi alpha sesegera mungkin.
+            <div style="font-size:11.5px;color:#78350F;margin-top:1px;">
+                Ingatkan mahasiswa untuk menyelesaikan kompensasi alpha sesegera mungkin
             </div>
         </div>
     </div>
-    <span style="background:#FEF3C7;color:#92400E;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;">
-        {{ $kompenPending->count() }} Pending
+    <span style="background:#FEF3C7;color:#92400E;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;">
+        ⏳ {{ $kompenPending->count() }} Pending
     </span>
 </div>
 @endif
 
-{{-- TABEL MAHASISWA --}}
+{{-- ══ TABEL MAHASISWA (NEW) ══ --}}
 <div class="section-label">Data Mahasiswa Bimbingan</div>
-
 <div class="card-white tbl-card-v2">
     <div class="tbl-head-v2">
         <div>
@@ -306,22 +361,22 @@
         </div>
     </div>
 
-    <div style="overflow-x:auto;">
-        <table class="ac-table-v2">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <table class="mhs-table" style="min-width:520px;">
             <thead>
                 <tr>
-                    <th style="width:40px;">#</th>
+                    <th style="width:36px;">#</th>
                     <th>Mahasiswa</th>
                     <th style="text-align:center;">IPK</th>
-                    <th style="text-align:center;">IP Sem</th>
+                    <th class="hide-mobile" style="text-align:center;">IP Sem</th>
                     <th style="text-align:center;">Alpha</th>
-                    <th style="text-align:center;">Grade Min</th>
-                    <th>Status</th>
-                    <th></th>
+                    <th class="hide-mobile" style="text-align:center;">Grade Min</th>
+                    <th style="text-align:center;">Status</th>
+                    <th style="width:80px;"></th>
                 </tr>
             </thead>
             <tbody id="mhsBody">
-                @foreach($mahasiswas as $i => $mhs)
+                @foreach($mahasiswas->sortByDesc(fn($m) => $m->isBerisiko()) as $i => $mhs)
                 @php
                     $ipkMhs   = $mhs->ipk_val ?? $mhs->ipk;
                     $semAktif = $mhs->kelas->semester ?? 6;
@@ -332,19 +387,25 @@
                     $gradeMin = $grades->contains('E') ? 'E' : ($grades->contains('D') ? 'D' : ($grades->contains('C') ? 'C' : ($grades->contains('B') ? 'B' : 'A')));
                     $colors   = ['#2563EB','#16A34A','#7C3AED','#F59E0B','#EF4444','#0891B2','#DB2777'];
                     $aColor   = $colors[$i % count($colors)];
+                    $hasKompen = $mhs->kompensasis->where('status','pending')->isNotEmpty();
                 @endphp
-                <tr data-nama="{{ strtolower($mhs->nama) }}"
-                    data-status="{{ $berisiko ? 'berisiko' : 'aman' }}"
-                    style="{{ $berisiko ? 'background:rgba(239,68,68,.03);' : '' }}">
-                    <td class="muted" style="{{ $berisiko ? 'border-left:3px solid #EF4444;' : '' }}">{{ $i+1 }}</td>
+                <tr class="{{ $berisiko ? 'row-risk' : '' }}"
+                    data-nama="{{ strtolower($mhs->nama) }}"
+                    data-status="{{ $berisiko ? 'berisiko' : 'aman' }}">
+                    <td style="font-size:12px;color:var(--text-3);font-weight:500;">{{ $i+1 }}</td>
                     <td>
-                        <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="display:flex;align-items:center;gap:9px;">
                             <div style="width:34px;height:34px;border-radius:50%;background:{{ $aColor }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">
                                 {{ strtoupper(substr($mhs->nama,0,1)) }}
                             </div>
-                            <div>
-                                <div style="font-weight:600;color:var(--text-1);font-size:13.5px;">{{ $mhs->nama }}</div>
+                            <div style="min-width:0;">
+                                <div style="font-weight:600;font-size:13.5px;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;">{{ $mhs->nama }}</div>
                                 <div style="font-size:11px;color:var(--text-3);font-family:monospace;">{{ $mhs->nim }}</div>
+                                @if($hasKompen)
+                                <span style="display:inline-flex;align-items:center;gap:2px;background:#FEF3C7;color:#92400E;border-radius:20px;padding:1px 6px;font-size:9.5px;font-weight:700;margin-top:2px;">
+                                    <i class="bi bi-clipboard2-check-fill" style="font-size:8px;"></i> Kompen
+                                </span>
+                                @endif
                             </div>
                         </div>
                     </td>
@@ -352,33 +413,34 @@
                         <div style="font-weight:700;font-size:14px;color:{{ $ipkMhs < 2.5 ? '#EF4444' : ($ipkMhs >= 3.5 ? '#22C55E' : 'var(--text-1)') }};">
                             {{ number_format($ipkMhs, 2) }}
                         </div>
-                        <div style="width:50px;height:4px;background:#F1F5F9;border-radius:2px;overflow:hidden;margin:4px auto 0;">
-                            <div style="height:100%;width:{{ ($ipkMhs/4)*100 }}%;background:var(--blue);border-radius:2px;"></div>
+                        <div style="width:44px;height:4px;background:#F1F5F9;border-radius:2px;overflow:hidden;margin:4px auto 0;">
+                            <div style="height:100%;width:{{ min(($ipkMhs/4)*100,100) }}%;background:{{ $ipkMhs < 2.5 ? '#EF4444' : '#2563EB' }};border-radius:2px;"></div>
                         </div>
                     </td>
-                    <td style="text-align:center;font-size:13px;font-weight:600;color:{{ $ipSem < 2.5 ? '#EF4444' : 'var(--text-1)' }};">
+                    <td class="hide-mobile" style="text-align:center;font-size:13px;font-weight:600;color:{{ $ipSem < 2.5 ? '#EF4444' : 'var(--text-1)' }};">
                         {{ number_format($ipSem, 2) }}
                     </td>
-                    <td style="text-align:center;font-weight:700;color:{{ $totalAlp>=18 ? '#EF4444' : ($totalAlp>=14 ? '#F59E0B' : 'var(--text-2)') }};">
+                    <td style="text-align:center;font-weight:700;font-size:13px;color:{{ $totalAlp>=18 ? '#EF4444' : ($totalAlp>=14 ? '#F59E0B' : 'var(--text-2)') }};">
                         {{ $totalAlp }}j {{ $totalAlp>=18 ? '⛔' : ($totalAlp>=14 ? '⚠️' : '') }}
                     </td>
-                    <td style="text-align:center;">
+                    <td class="hide-mobile" style="text-align:center;">
                         <span class="grade-pill grade-{{ $gradeMin }}">{{ $gradeMin }}</span>
                     </td>
-                    <td>
+                    <td style="text-align:center;">
                         @if($berisiko)
-                            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;background:#FEE2E2;color:#991B1B;">
-                                <i class="bi bi-exclamation-circle-fill"></i> Berisiko
-                            </span>
+                        <span style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#FEE2E2;color:#991B1B;white-space:nowrap;">
+                            <i class="bi bi-exclamation-circle-fill" style="font-size:10px;"></i> Berisiko
+                        </span>
                         @else
-                            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;background:#DCFCE7;color:#166534;">
-                                <i class="bi bi-check-circle-fill"></i> Aman
-                            </span>
+                        <span style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#DCFCE7;color:#166534;white-space:nowrap;">
+                            <i class="bi bi-check-circle-fill" style="font-size:10px;"></i> Aman
+                        </span>
                         @endif
                     </td>
-                    <td>
-                        <a href="{{ route('dosen.mahasiswa.detail', $mhs->id) }}" class="btn-outline" style="font-size:12px;padding:5px 12px;">
-                            Detail
+                    <td style="text-align:center;">
+                        <a href="{{ route('dosen.mahasiswa.detail', $mhs->id) }}"
+                           style="display:inline-flex;align-items:center;gap:3px;padding:5px 10px;border-radius:7px;font-size:12px;font-weight:600;background:var(--blue);color:#fff;text-decoration:none;">
+                            <i class="bi bi-eye-fill" style="font-size:11px;"></i> Detail
                         </a>
                     </td>
                 </tr>
@@ -387,18 +449,23 @@
         </table>
     </div>
 
-    <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap;">
-        <div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:600;background:#EFF6FF;color:#1D4ED8;">
+    <div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;">
+        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:#EFF6FF;color:#1D4ED8;">
             <i class="bi bi-people-fill"></i> {{ $totalMahasiswa }} mahasiswa
-        </div>
+        </span>
         @if($totalBerisiko > 0)
-        <div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:600;background:#FEE2E2;color:#991B1B;">
+        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:#FEE2E2;color:#991B1B;">
             <i class="bi bi-exclamation-triangle-fill"></i> {{ $totalBerisiko }} berisiko
-        </div>
+        </span>
         @endif
-        <div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:600;background:#FFFBEB;color:#92400E;">
+        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:#FFFBEB;color:#92400E;">
             <i class="bi bi-award"></i> IPK rata-rata {{ number_format($rataRataIpk, 2) }}
-        </div>
+        </span>
+        @if($kompenPending->count() > 0)
+        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:#FEF3C7;color:#92400E;">
+            <i class="bi bi-clipboard2-check-fill"></i> {{ $kompenPending->count() }} kompen pending
+        </span>
+        @endif
     </div>
 </div>
 
@@ -411,80 +478,32 @@
     $gradeCount = ['A'=>0,'B'=>0,'C'=>0,'D'=>0,'E'=>0];
     foreach($mahasiswas as $mhs) {
         foreach($mhs->nilais as $n) {
-            if(isset($gradeCount[$n->grade])) {
-                $gradeCount[$n->grade]++;
-            }
+            if(isset($gradeCount[$n->grade])) $gradeCount[$n->grade]++;
         }
     }
 @endphp
-
-var gradeLabels = ['A','B','C','D','E'];
-var gradeData   = [{{ $gradeCount['A'] }},{{ $gradeCount['B'] }},{{ $gradeCount['C'] }},{{ $gradeCount['D'] }},{{ $gradeCount['E'] }}];
-var gradeColors = ['#22C55E','#3B82F6','#FBBF24','#F97316','#EF4444'];
-
-var barCtx = document.getElementById('nilaiChart').getContext('2d');
-new Chart(barCtx, {
-    type: 'bar',
-    data: {
-        labels: gradeLabels,
-        datasets: [{
-            label: 'Jumlah Mahasiswa',
-            data: gradeData,
-            backgroundColor: gradeColors,
-            borderRadius: 6,
-            borderSkipped: false,
-            maxBarThickness: 48,
-        }]
-    },
-    options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                backgroundColor: '#0F172A', padding:10, cornerRadius:8,
-                callbacks: { label: function(c) { return ' ' + c.raw + ' mahasiswa'; } }
-            }
-        },
-        scales: {
-            x: { grid: { display: false }, ticks: { font: { family:'Plus Jakarta Sans', size:12 }, color:'#64748B' } },
-            y: { beginAtZero: true, ticks: { stepSize:1, font: { family:'Plus Jakarta Sans', size:12 }, color:'#64748B' }, grid: { color:'#F8FAFC' }, border: { display:false } }
-        }
-    }
+new Chart(document.getElementById('nilaiChart').getContext('2d'), {
+    type:'bar',
+    data:{labels:['A','B','C','D','E'],datasets:[{data:[{{ $gradeCount['A'] }},{{ $gradeCount['B'] }},{{ $gradeCount['C'] }},{{ $gradeCount['D'] }},{{ $gradeCount['E'] }}],backgroundColor:['#22C55E','#3B82F6','#FBBF24','#F97316','#EF4444'],borderRadius:6,borderSkipped:false,maxBarThickness:48}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0F172A',padding:10,cornerRadius:8,callbacks:{label:c=>' '+c.raw+' mahasiswa'}}},scales:{x:{grid:{display:false},ticks:{font:{family:'Plus Jakarta Sans',size:12},color:'#64748B'}},y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'Plus Jakarta Sans',size:12},color:'#64748B'},grid:{color:'#F8FAFC'},border:{display:false}}}}
 });
 
-var donutCtx = document.getElementById('absensiChart').getContext('2d');
-new Chart(donutCtx, {
-    type: 'doughnut',
-    data: {
-        labels: ['Hadir','Izin','Sakit','Alpha'],
-        datasets: [{
-            data: [{{ $totalH ?? 0 }},{{ $totalI ?? 0 }},{{ $totalS ?? 0 }},{{ $totalA ?? 0 }}],
-            backgroundColor: ['#22C55E','#FBBF24','#3B82F6','#EF4444'],
-            borderWidth: 3, borderColor: '#FFFFFF', hoverOffset: 5,
-        }]
-    },
-    options: {
-        responsive: false, maintainAspectRatio: false, cutout: '68%',
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                backgroundColor: '#0F172A', padding:10, cornerRadius:8,
-                callbacks: { label: function(c) { return ' '+c.label+': '+c.raw+' jam'; } }
-            }
-        }
-    }
+new Chart(document.getElementById('absensiChart').getContext('2d'), {
+    type:'doughnut',
+    data:{labels:['Hadir','Izin','Sakit','Alpha'],datasets:[{data:[{{ $totalH ?? 0 }},{{ $totalI ?? 0 }},{{ $totalS ?? 0 }},{{ $totalA ?? 0 }}],backgroundColor:['#22C55E','#FBBF24','#3B82F6','#EF4444'],borderWidth:3,borderColor:'#FFFFFF',hoverOffset:5}]},
+    options:{responsive:false,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#0F172A',padding:10,cornerRadius:8,callbacks:{label:c=>' '+c.label+': '+c.raw+' jam'}}}}
 });
 
 document.getElementById('searchMhs').addEventListener('input', function() {
     var q = this.value.toLowerCase();
-    document.querySelectorAll('#mhsBody tr').forEach(function(r) {
+    document.querySelectorAll('#mhsBody tr').forEach(r => {
         r.style.display = (r.dataset.nama||'').includes(q) ? '' : 'none';
     });
 });
 
 document.getElementById('filterMhsBtn').addEventListener('filterChange', function(e) {
     var val = e.detail.value;
-    document.querySelectorAll('#mhsBody tr').forEach(function(r) {
+    document.querySelectorAll('#mhsBody tr').forEach(r => {
         if (!val) { r.style.display=''; return; }
         r.style.display = r.dataset.status===val ? '' : 'none';
     });
