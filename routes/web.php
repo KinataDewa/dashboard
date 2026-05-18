@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\MatkulController;
 use App\Http\Controllers\Admin\KelasController as AdminKelasController;
 use App\Http\Controllers\Admin\ImportController;
 use App\Http\Controllers\Admin\KompensasiController;
+use App\Http\Controllers\Admin\AnalitikController;
 
 // ── Root redirect ────────────────────────────────────────
 Route::get('/', function () {
@@ -57,6 +58,8 @@ Route::middleware(['auth', 'role.admin'])
     ->group(function () {
         Route::get('/dashboard',         [AdminDashboard::class, 'index'])->name('dashboard');
         Route::post('/kirim-peringatan', [AdminDashboard::class, 'kirimPeringatan'])->name('kirim.peringatan');
+        Route::get('/analitik',            [AnalitikController::class, 'index'])->name('analitik.index');
+        Route::get('/analitik/chart-data', [AnalitikController::class, 'chartData'])->name('analitik.chart-data');
 
         // Import data
         Route::prefix('import')->name('import.')->group(function () {
@@ -80,7 +83,7 @@ Route::middleware(['auth', 'role.admin'])
             Route::post('/{kompensasi}/ttd-kajur',         [KompensasiController::class, 'ttdKajur'])->name('ttd-kajur');
             Route::delete('/{kompensasi}',                 [KompensasiController::class, 'destroy'])->name('destroy');
         });
-
+        
         // CRUD resources
         Route::resource('mahasiswa', AdminMahasiswaController::class);
         Route::resource('dosen',     AdminDosenController::class);

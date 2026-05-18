@@ -504,6 +504,11 @@
             </span>
             @endif
         </a>
+        <a href="{{ route('admin.analitik.index') }}"
+        class="nav-link-item {{ request()->routeIs('admin.analitik*') ? 'active' : '' }}">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>Analitik Tren</span>
+        </a>
     </nav>
     <div class="sidebar-footer">
         <form method="POST" action="{{ route('logout') }}">
