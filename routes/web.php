@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\KelasController as AdminKelasController;
 use App\Http\Controllers\Admin\ImportController;
 use App\Http\Controllers\Admin\KompensasiController;
 use App\Http\Controllers\Admin\AnalitikController;
+use App\Http\Controllers\Admin\BerisikoController;
 
 // ── Root redirect ────────────────────────────────────────
 Route::get('/', function () {
@@ -84,6 +85,9 @@ Route::middleware(['auth', 'role.admin'])
             Route::delete('/{kompensasi}',                 [KompensasiController::class, 'destroy'])->name('destroy');
         });
         
+        Route::get('/berisiko', [BerisikoController::class, 'index'])->name('berisiko.index');
+
+
         // CRUD resources
         Route::resource('mahasiswa', AdminMahasiswaController::class);
         Route::resource('dosen',     AdminDosenController::class);

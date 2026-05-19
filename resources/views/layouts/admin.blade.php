@@ -504,11 +504,25 @@
             </span>
             @endif
         </a>
+
         <a href="{{ route('admin.analitik.index') }}"
         class="nav-link-item {{ request()->routeIs('admin.analitik*') ? 'active' : '' }}">
             <i class="bi bi-graph-up-arrow"></i>
             <span>Analitik Tren</span>
         </a>
+
+        <a href="{{ route('admin.berisiko.index') }}"
+        class="nav-link-item {{ request()->routeIs('admin.berisiko*') ? 'active' : '' }}">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>Mahasiswa Berisiko</span>
+            @php $jmlBerisiko = \App\Models\Mahasiswa::all()->filter(fn($m) => $m->isBerisiko())->count(); @endphp
+            @if($jmlBerisiko > 0)
+            <span style="margin-left:auto;background:#EF4444;color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:700;">
+                {{ $jmlBerisiko }}
+            </span>
+            @endif
+        </a>
+        
     </nav>
     <div class="sidebar-footer">
         <form method="POST" action="{{ route('logout') }}">
