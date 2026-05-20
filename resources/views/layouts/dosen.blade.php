@@ -674,6 +674,28 @@
                 <span class="nav-badge">{{ $jmlBerisiko }}</span>
             @endif
         </a>
+        <a href="{{ route('dosen.berisiko.index') }}"
+            class="nav-link-item {{ request()->routeIs('dosen.berisiko*') ? 'active' : '' }}">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>Mahasiswa Berisiko</span>
+            @php
+                $dosenLogin  = \App\Models\Dosen::where('user_id', auth()->id())->first();
+                $jmlBerisiko = $dosenLogin
+                    ? \App\Models\Mahasiswa::with(['nilais','absensis'])
+                        ->where('dosen_pa_id', $dosenLogin->id)
+                        ->get()
+                        ->filter(fn($m) =>
+                            $m->nilais->whereIn('grade',['D','E'])->count() > 0
+                            || $m->absensis->sum('jam_alpha') >= 18
+                        )->count()
+                    : 0;
+            @endphp
+            @if($jmlBerisiko > 0)
+            <span style="margin-left:auto;background:#EF4444;color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:700;">
+                {{ $jmlBerisiko }}
+            </span>
+            @endif
+        </a>
     </nav>
     <div class="sidebar-footer">
         <form method="POST" action="{{ route('logout') }}">
@@ -714,8 +736,7 @@
                                     <i class="bi bi-exclamation-triangle-fill"></i>
                                 </div>
                                 <div class="notif-entry-text">
-                                    <strong>{{ $mhs->nama }}</strong> terdeteksi berisiko akademik.
-                                    Segera lakukan bimbingan.
+                                <strong>{{ is_array($mhs) ? $mhs['nama'] : $mhs->nama }}</strong>                                    Segera lakukan bimbingan.
                                 </div>
                             </div>
                             @endforeach

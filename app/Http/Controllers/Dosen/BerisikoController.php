@@ -1,33 +1,36 @@
 <?php
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mahasiswa;
-use App\Models\Kelas;
+use App\Models\Dosen;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BerisikoController extends Controller
 {
     public function index(Request $request)
     {
-        $kelasId     = $request->get('kelas_id');
+        $dosen = Dosen::where('user_id', Auth::id())->first();
+
+        if (!$dosen) {
+            abort(403, 'Data dosen tidak ditemukan.');
+        }
+
         $filterJenis = $request->get('jenis', 'semua');
 
-        $kelasList = Kelas::orderBy('nama')->get();
+        $kelasIds = \App\Models\Kelas::where('dosen_pa_id', $dosen->id)
+            ->pluck('id');
 
-        $query = Mahasiswa::with([
+        $semuaMahasiswa = Mahasiswa::with([
             'user',
             'kelas',
             'dosen',
             'nilais',
             'absensis',
-        ]);
-
-        if ($kelasId) {
-            $query->where('kelas_id', $kelasId);
-        }
-
-        $semuaMahasiswa = $query->get();
+        ])
+        ->whereIn('kelas_id', $kelasIds)
+        ->get();
 
         $mahasiswaBerisiko = $semuaMahasiswa->filter(function ($mhs) use ($filterJenis) {
             // Semester terakhir berdasarkan nilai
@@ -72,7 +75,6 @@ class BerisikoController extends Controller
                 'nim'         => $mhs->nim,
                 'nama'        => $mhs->nama ?? $mhs->user->name ?? '-',
                 'kelas'       => $mhs->kelas->nama ?? '-',
-                'dosen_pa'    => optional($mhs->dosen)->nama ?? '-',
                 'ipk'         => number_format($ipk, 2),
                 'jumlah_de'   => $nilaiDE->count(),
                 'total_alpha' => $totalAlpha,
@@ -90,8 +92,11 @@ class BerisikoController extends Controller
             'berisiko_keduanya' => $mahasiswaBerisiko->filter(fn($m) => count($m['kategori']) >= 2)->count(),
         ];
 
-        return view('admin.berisiko.index', compact(
-            'mahasiswaBerisiko', 'summary', 'kelasList', 'kelasId', 'filterJenis'
-        ));
+        return view('dosen.berisiko', [
+            'dosen'             => $dosen,
+            'mahasiswaBerisiko' => $mahasiswaBerisiko,
+            'summary'           => $summary,
+            'filterJenis'       => $filterJenis,
+        ]);
     }
 }
