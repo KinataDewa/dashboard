@@ -1,4 +1,3 @@
-{{-- resources/views/admin/analitik/index.blade.php --}}
 @extends('layouts.admin')
 @section('title', 'Analitik Tren Akademik')
 @section('page-title', 'Analitik Tren Akademik')
@@ -6,62 +5,43 @@
 
 @push('styles')
 <style>
-/* ── Trend Card ──────────────────────────────────── */
 .trend-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;}
 .trend-card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
 .trend-card-title{font-size:14px;font-weight:700;color:var(--text-1);}
 .trend-card-sub{font-size:11.5px;color:var(--text-2);margin-top:2px;}
-
-/* ── Prediksi Box ────────────────────────────────── */
 .pred-box{background:#F8FAFF;border:1.5px solid #BFDBFE;border-radius:10px;padding:14px 16px;margin-top:14px;}
 .pred-label{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
 .pred-val{font-size:32px;font-weight:800;color:var(--blue);letter-spacing:-1px;line-height:1;}
 .pred-desc{font-size:11.5px;color:var(--text-2);margin-top:6px;line-height:1.5;}
-
-/* ── Trend Badge ─────────────────────────────────── */
+.interpretasi-box{margin-top:10px;font-size:12px;line-height:1.6;padding:10px 12px;background:#F8FAFF;border-radius:8px;border:1px solid #DBEAFE;min-height:20px;}
 .trend-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
 .trend-naik{background:#DCFCE7;color:#15803D;}
 .trend-turun{background:#FEE2E2;color:#991B1B;}
 .trend-stabil{background:#F1F5F9;color:#475569;}
-
-/* ── Summary Table ───────────────────────────────── */
 .sum-table{width:100%;border-collapse:collapse;}
 .sum-table thead th{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;padding:8px 14px;border-bottom:1.5px solid var(--border);background:#FAFBFF;white-space:nowrap;}
 .sum-table tbody tr{border-bottom:1px solid #F8FAFC;transition:background .12s;}
 .sum-table tbody tr:last-child{border-bottom:none;}
 .sum-table tbody tr:hover{background:#F8FAFF;}
 .sum-table tbody td{padding:12px 14px;font-size:13px;vertical-align:middle;}
-
-/* ── IPK Bar ─────────────────────────────────────── */
 .ipk-mini-bar{width:80px;height:5px;background:#F1F5F9;border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:6px;}
 .ipk-mini-fill{height:100%;border-radius:3px;}
-
-/* ── Angkatan Selector ───────────────────────────── */
 .angkatan-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
 .angkatan-pill{padding:6px 16px;border-radius:20px;font-size:12.5px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);color:var(--text-2);background:var(--white);transition:all .15s;}
 .angkatan-pill:hover{border-color:var(--blue);color:var(--blue);}
 .angkatan-pill.active{background:var(--blue);color:#fff;border-color:var(--blue);}
-
-/* ── Chart Container ─────────────────────────────── */
 .chart-box{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;}
 .chart-box-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
 .chart-box-title{font-size:15px;font-weight:700;color:var(--text-1);}
 .chart-box-sub{font-size:12px;color:var(--text-2);margin-top:2px;}
-
-/* ── ARIMA Detail ────────────────────────────────── */
 .arima-detail{background:#F8FAFF;border:1px solid #DBEAFE;border-radius:10px;padding:14px;margin-top:14px;}
 .arima-title{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 .arima-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #EFF6FF;font-size:12px;}
 .arima-row:last-child{border-bottom:none;}
 .arima-key{color:var(--text-2);font-weight:500;}
 .arima-val{font-weight:700;color:var(--text-1);font-family:monospace;}
+.metode-card{background:#FAFBFF;border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;gap:10px;align-items:flex-start;}
 
-/* ── Metode Cards ────────────────────────────────── */
-.metode-card{background:#FAFBFF;border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;gap:12px;align-items:flex-start;}
-
-@media(max-width:992px){
-    .col-lg-4-right{margin-top:16px;}
-}
 @media(max-width:768px){
     .hide-mobile{display:none!important;}
     .pred-val{font-size:24px;}
@@ -73,7 +53,6 @@
 
 @section('content')
 
-{{-- Banner --}}
 @include('components.page-banner', [
     'gradient'  => 'linear-gradient(135deg, #0C1445 0%, #1E3A8A 40%, #2563EB 100%)',
     'icon'      => 'bi-graph-up-arrow',
@@ -88,7 +67,7 @@
     'badge_label' => "Total\nAngkatan",
 ])
 
-{{-- ══ RINGKASAN PER ANGKATAN ══ --}}
+{{-- RINGKASAN --}}
 <div class="section-label">Ringkasan Tren per Angkatan</div>
 <div class="card-white tbl-card-v2 mb-4">
     <div class="tbl-head-v2">
@@ -165,10 +144,9 @@
     </div>
 </div>
 
-{{-- ══ VISUALISASI ══ --}}
+{{-- VISUALISASI --}}
 <div class="section-label">Visualisasi Tren per Angkatan</div>
 
-{{-- Selector --}}
 <div class="angkatan-pills">
     @foreach($angkatanList as $idx => $angkatan)
     <button class="angkatan-pill {{ $idx === 0 ? 'active' : '' }}"
@@ -179,11 +157,13 @@
     @endforeach
 </div>
 
-{{-- Chart + Sidebar — FIX: align-items:flex-start agar kanan tidak stretch --}}
+{{-- ══ LAYOUT: Kiri=Chart+MetodeCard | Kanan=Prediksi+Kalkulasi ══ --}}
 <div class="row g-3 mb-4" style="align-items:flex-start;">
 
-    {{-- Kiri: Chart --}}
-    <div class="col-lg-8">
+    {{-- KIRI: Chart + Tentang Metode --}}
+    <div class="col-lg-8 d-flex flex-column gap-3">
+
+        {{-- Chart --}}
         <div class="chart-box">
             <div class="chart-box-head">
                 <div>
@@ -207,13 +187,65 @@
                 </div>
             </div>
         </div>
+
+        {{-- Tentang Metode — sekarang di bawah chart, sejajar kolom kanan --}}
+        <div class="card-white tbl-card-v2">
+            <div class="tbl-head-v2" style="margin-bottom:12px;">
+                <div>
+                    <div class="tbl-title-v2">Tentang Metode ARIMA (0,1,1)</div>
+                    <div class="tbl-sub-v2">Tahapan analisis tren dan prediksi nilai akademik</div>
+                </div>
+            </div>
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <div class="metode-card">
+                        <div style="width:36px;height:36px;border-radius:10px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+                            <i class="bi bi-1-circle-fill" style="color:#2563EB;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:12.5px;font-weight:700;color:var(--text-1);margin-bottom:3px;">Pengumpulan Data</div>
+                            <div style="font-size:11.5px;color:var(--text-2);line-height:1.6;">
+                                Data nilai diambil dari basis data, dikelompokkan per angkatan dan semester, lalu dihitung rata-ratanya membentuk data time series.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metode-card">
+                        <div style="width:36px;height:36px;border-radius:10px;background:#F5F3FF;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+                            <i class="bi bi-2-circle-fill" style="color:#7C3AED;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:12.5px;font-weight:700;color:var(--text-1);margin-bottom:3px;">Differencing (d=1)</div>
+                            <div style="font-size:11.5px;color:var(--text-2);line-height:1.6;">
+                                Satu kali differencing untuk menstabilkan data time series dengan menghitung selisih nilai antar semester berurutan.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metode-card">
+                        <div style="width:36px;height:36px;border-radius:10px;background:#FFF7ED;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+                            <i class="bi bi-3-circle-fill" style="color:#EA580C;"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:12.5px;font-weight:700;color:var(--text-1);margin-bottom:3px;">Prediksi ARIMA(0,1,1)</div>
+                            <div style="font-size:11.5px;color:var(--text-2);line-height:1.6;">
+                                Rata-rata perubahan differencing ditambahkan ke nilai terakhir untuk menghasilkan prediksi semester berikutnya.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    {{-- Kanan: Prediksi + ARIMA — FIX: height:auto, tidak ada height:100% --}}
-    <div class="col-lg-4">
+    {{-- KANAN: Hasil Prediksi + Detail Kalkulasi --}}
+    <div class="col-lg-4 d-flex flex-column gap-3">
 
         {{-- Hasil Prediksi --}}
-        <div class="trend-card mb-3">
+        <div class="trend-card">
             <div class="trend-card-head">
                 <div>
                     <div class="trend-card-title">Hasil Prediksi</div>
@@ -227,9 +259,10 @@
                 <div class="pred-desc" id="predDesc">Memuat data...</div>
             </div>
             <div style="margin-top:10px;" id="predTrend"></div>
+            <div class="interpretasi-box" id="predInterpretasi"></div>
         </div>
 
-        {{-- Detail Kalkulasi --}}
+        {{-- Detail Kalkulasi ARIMA --}}
         <div class="trend-card">
             <div class="trend-card-head">
                 <div>
@@ -251,52 +284,6 @@
     </div>
 </div>
 
-{{-- ══ PENJELASAN METODE ══ --}}
-<div class="section-label">Tentang Metode</div>
-<div class="card-white tbl-card-v2">
-    <div class="row g-3">
-        <div class="col-md-4">
-            <div class="metode-card">
-                <div style="width:40px;height:40px;border-radius:10px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">
-                    <i class="bi bi-1-circle-fill" style="color:#2563EB;"></i>
-                </div>
-                <div>
-                    <div style="font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:4px;">Pengumpulan Data</div>
-                    <div style="font-size:12px;color:var(--text-2);line-height:1.6;">
-                        Data nilai akademik diambil dari basis data, dikelompokkan berdasarkan angkatan dan semester, lalu dihitung rata-ratanya membentuk data time series.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="metode-card">
-                <div style="width:40px;height:40px;border-radius:10px;background:#F5F3FF;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">
-                    <i class="bi bi-2-circle-fill" style="color:#7C3AED;"></i>
-                </div>
-                <div>
-                    <div style="font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:4px;">Differencing (d=1)</div>
-                    <div style="font-size:12px;color:var(--text-2);line-height:1.6;">
-                        Satu kali differencing dilakukan untuk menstabilkan data time series dengan menghitung selisih nilai antar semester yang berurutan.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="metode-card">
-                <div style="width:40px;height:40px;border-radius:10px;background:#FFF7ED;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">
-                    <i class="bi bi-3-circle-fill" style="color:#EA580C;"></i>
-                </div>
-                <div>
-                    <div style="font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:4px;">Prediksi ARIMA(0,1,1)</div>
-                    <div style="font-size:12px;color:var(--text-2);line-height:1.6;">
-                        Rata-rata perubahan dari hasil differencing ditambahkan ke nilai terakhir untuk menghasilkan prediksi rata-rata nilai semester berikutnya.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 @endsection
 
 @push('scripts')
@@ -312,24 +299,21 @@ function loadChart(angkatan, btn) {
     var data = trendDataAll[angkatan];
     if (!data || !data.historis) return;
 
-    var historis = data.historis;
-    var prediksi = data.prediksi;
-    var diff     = data.differencing || [];
-    var histKeys = Object.keys(historis);
-    var histVals = Object.values(historis);
+    var historis    = data.historis;
+    var prediksi    = data.prediksi;
+    var diff        = data.differencing || [];
+    var histKeys    = Object.keys(historis);
+    var histVals    = Object.values(historis);
     var semTerakhir = Math.max(...histKeys.map(Number));
 
-    // Labels: semester historis + prediksi
     var labels = histKeys.map(s => 'Semester ' + s);
     if (prediksi !== null) labels.push('Sem ' + (semTerakhir + 1) + ' (Prediksi)');
 
-    // Dataset historis: nilai + null di akhir
     var dataHistoris = [...histVals];
     if (prediksi !== null) dataHistoris.push(null);
 
-    // Dataset prediksi: null sampai titik terakhir historis, lalu nilai prediksi
     var dataPrediksi = Array(histVals.length - 1).fill(null);
-    dataPrediksi.push(histVals[histVals.length - 1]); // sambung dari nilai terakhir
+    dataPrediksi.push(histVals[histVals.length - 1]);
     if (prediksi !== null) dataPrediksi.push(prediksi);
 
     if (currentChart) currentChart.destroy();
@@ -398,10 +382,8 @@ function loadChart(angkatan, btn) {
         }
     });
 
-    // Update title
     document.getElementById('chartTitle').textContent = 'Tren Rata-rata Nilai — Angkatan ' + angkatan;
 
-    // Update prediksi info
     if (prediksi !== null) {
         document.getElementById('predValue').textContent = Number(prediksi).toFixed(2);
         var lastVal = histVals[histVals.length - 1];
@@ -420,14 +402,36 @@ function loadChart(angkatan, btn) {
             : '<span class="trend-badge trend-stabil"><i class="bi bi-dash"></i> Tren Stabil</span>';
         document.getElementById('predTrend').innerHTML = badge;
         document.getElementById('chartTrendBadge').innerHTML = badge;
+
+        // Interpretasi otomatis
+        var interpretasi = '';
+        var warnaInt = '';
+        if (prediksi >= 3.5) {
+            interpretasi = '✅ Performa sangat baik. Angkatan ini diprediksi mempertahankan prestasi akademik yang tinggi.';
+            warnaInt = '#15803D';
+        } else if (prediksi >= 3.0) {
+            interpretasi = '👍 Performa baik. Angkatan ini diprediksi memiliki rata-rata nilai yang memuaskan.';
+            warnaInt = '#1D4ED8';
+        } else if (prediksi >= 2.5) {
+            interpretasi = '⚠️ Performa cukup. Perlu perhatian agar rata-rata nilai tidak terus menurun.';
+            warnaInt = '#92400E';
+        } else {
+            interpretasi = '🚨 Performa rendah. Angkatan ini membutuhkan intervensi akademik segera dari jurusan.';
+            warnaInt = '#991B1B';
+        }
+        var intEl = document.getElementById('predInterpretasi');
+        if (intEl) { intEl.style.color = warnaInt; intEl.textContent = interpretasi; }
+
     } else {
         document.getElementById('predValue').textContent = '—';
         document.getElementById('predDesc').textContent = 'Data belum cukup untuk prediksi';
         document.getElementById('predTrend').innerHTML = '';
         document.getElementById('chartTrendBadge').innerHTML = '';
+        var intEl = document.getElementById('predInterpretasi');
+        if (intEl) intEl.textContent = '';
     }
 
-    // Update ARIMA detail
+    // ARIMA detail
     var html = '';
     if (diff.length > 0) {
         html += '<div style="font-size:10.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Differencing (d=1)</div>';
@@ -437,7 +441,6 @@ function loadChart(angkatan, btn) {
                 '<span class="arima-val" style="color:' + (d >= 0 ? '#22C55E' : '#EF4444') + ';">' +
                 (d >= 0 ? '+' : '') + d.toFixed(4) + '</span></div>';
         });
-
         var meanDiff = diff.reduce((a,b) => a+b, 0) / diff.length;
         html += '<div style="font-size:10.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px;">Kalkulasi Prediksi</div>';
         html += '<div class="arima-row"><span class="arima-key">Mean Diff</span><span class="arima-val">' + meanDiff.toFixed(4) + '</span></div>';
