@@ -434,7 +434,7 @@
                 <div class="mhs-alert-desc">
                     Total alpha Anda sudah <strong>{{ $totalAlpha }} jam</strong>
                     dari batas maksimal <strong>18 jam</strong>.
-                    {{ $totalAlpha >= 18 ? 'Anda berisiko tidak dapat mengikuti UAS!' : (18 - $totalAlpha) . ' jam lagi Anda tidak dapat mengikuti UAS.' }}
+                    {{ $totalAlpha >= 18 ? 'Anda Termasuk Mahasiswa Beresiko!' : (18 - $totalAlpha) . ' jam lagi Anda termasuk mahasiswa beresiko.' }}
                 </div>
             @endif
  
@@ -555,7 +555,7 @@
                     </div>
                     <div class="stat-card-note mt-2">
                         @if($totalAlpha >= 18)
-                            <span class="stat-card-badge badge-down">⛔ Melewati batas UAS!</span>
+                            <span class="stat-card-badge badge-down">⛔ Termasuk Mahasiswa Beresiko!</span>
                         @elseif($totalAlpha >= 14)
                             <span class="stat-card-badge badge-warn">⚠ {{ 18 - $totalAlpha }} jam lagi batas</span>
                         @else
@@ -567,7 +567,7 @@
         </div>
     </div>
 </div>
-@php
+{{-- @php
     $kompenAktif = $mahasiswa->getKompensasiSemester($semesterAktif);
 @endphp
 @if($kompenAktif)
@@ -594,7 +594,7 @@
         </div>
     </div>
 </div>
-@endif
+@endif --}}
 
 {{-- @if(isset($kompenAktif) && $kompenAktif && !$kompenAktif->isLunas())
 <div class="card-white" style="border-left:4px solid #F59E0B;border-radius:12px;padding:16px 20px;margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">

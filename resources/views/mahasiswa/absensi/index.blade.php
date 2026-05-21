@@ -151,7 +151,7 @@
             </div>
             @if($sumAlpha >= 14)
             <div class="absen-warn" style="color:{{ $sumAlpha>=18 ? '#EF4444' : '#F59E0B' }};">
-                {{ $sumAlpha >= 18 ? '⛔ Melewati batas UAS!' : '⚠ ' . (18-$sumAlpha) . ' jam lagi batas' }}
+                {{ $sumAlpha >= 18 ? '⛔ Termasuk Mahasiswa Beresiko!' : '⚠ ' . (18-$sumAlpha) . ' jam lagi batas' }}
             </div>
             @endif
         </div>

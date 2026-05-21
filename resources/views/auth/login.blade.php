@@ -195,7 +195,7 @@
             <div class="brand"><div class="brand-dot"></div>Academia</div>
         </div>
         <div class="left-mid">
-            <div class="left-tagline">Sistem<br>Informasi<br><span>Akademik</span><br>Terpadu</div>
+            <div class="left-tagline">Dashboard<br><span>Akademik</span><br>Terpadu</div>
             <p class="left-desc">Platform digital untuk memantau performa akademik mahasiswa, absensi, dan nilai secara real-time.</p>
         </div>
         <div class="stats-strip">
