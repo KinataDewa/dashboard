@@ -22,25 +22,37 @@ class MahasiswaBerisiko extends Mailable
     {
         $this->mahasiswa = $mahasiswa;
 
-        $this->nilaiDE = $mahasiswa->nilais
-            ->whereIn('grade', ['D', 'E'])
-            ->map(fn($n) => [
-                'nama'  => $n->mataKuliah->nama ?? '-',
-                'grade' => $n->grade,
-                'nilai' => round((float)$n->nilai_akhir, 1),
-            ])->values()->toArray();
+        // Gunakan semester terakhir agar email hanya mencantumkan kondisi terkini
+        $semNilai = $mahasiswa->nilais->max('semester') ?? 0;
+        $semAlpha = $mahasiswa->absensis->max('semester') ?? 0;
 
-        $this->absensiKritis = $mahasiswa->absensis
-            ->where('jam_alpha', '>=', 14)
-            ->map(fn($a) => [
-                'nama'      => $a->mataKuliah->nama ?? '-',
-                'jam_alpha' => (int)$a->jam_alpha,
-                'sisa'      => max(0, 18 - (int)$a->jam_alpha),
-                'kritis'    => $a->jam_alpha >= 18,
-            ])->values()->toArray();
+        $this->nilaiDE = $semNilai > 0
+            ? $mahasiswa->nilais
+                ->where('semester', $semNilai)
+                ->whereIn('grade', ['D', 'E'])
+                ->map(fn($n) => [
+                    'nama'  => $n->mataKuliah->nama ?? '-',
+                    'grade' => $n->grade,
+                    'nilai' => round((float) $n->nilai_akhir, 1),
+                ])->values()->toArray()
+            : [];
 
-        $this->ipk        = round((float)($mahasiswa->ipk ?? 0), 2);
-        $this->totalAlpha = (int)$mahasiswa->absensis->sum('jam_alpha');
+        $this->absensiKritis = $semAlpha > 0
+            ? $mahasiswa->absensis
+                ->where('semester', $semAlpha)
+                ->where('jam_alpha', '>=', 14)
+                ->map(fn($a) => [
+                    'nama'      => $a->mataKuliah->nama ?? '-',
+                    'jam_alpha' => (int) $a->jam_alpha,
+                    'sisa'      => max(0, 18 - (int) $a->jam_alpha),
+                    'kritis'    => $a->jam_alpha >= 18,
+                ])->values()->toArray()
+            : [];
+
+        $this->ipk        = round((float) ($mahasiswa->ipk ?? 0), 2);
+        $this->totalAlpha = $semAlpha > 0
+            ? (int) $mahasiswa->absensis->where('semester', $semAlpha)->sum('jam_alpha')
+            : 0;
     }
 
     public function envelope(): Envelope

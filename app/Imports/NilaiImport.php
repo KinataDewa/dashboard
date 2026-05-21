@@ -28,11 +28,13 @@ class NilaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnErr
             return null;
         }
  
-        // Hitung nilai akhir & grade
+        // Hitung nilai akhir & grade (bobot dikonfigurasi di config/akademik.php)
         $tugas  = floatval($row['nilai_tugas']);
         $uts    = floatval($row['nilai_uts']);
         $uas    = floatval($row['nilai_uas']);
-        $akhir  = ($tugas * 0.3) + ($uts * 0.3) + ($uas * 0.4);
+        $akhir  = ($tugas * config('akademik.bobot_nilai.tugas', 0.3))
+                + ($uts   * config('akademik.bobot_nilai.uts',   0.3))
+                + ($uas   * config('akademik.bobot_nilai.uas',   0.4));
         $grade  = match(true) {
             $akhir >= 80 => 'A',
             $akhir >= 70 => 'B',

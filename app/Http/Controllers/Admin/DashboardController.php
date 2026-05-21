@@ -18,8 +18,9 @@ class DashboardController extends Controller
         $totalMatkul    = MataKuliah::count();
         $totalKelas     = Kelas::count();
  
-        // Mahasiswa berisiko (nilai D/E atau alpha >= 18)
+        // Mahasiswa aktif berisiko (nilai D/E atau alpha >= 18 di semester terakhir)
         $mahasiswaBerisiko = Mahasiswa::with(['nilais', 'absensis'])
+            ->where('status', 'aktif')
             ->get()
             ->filter(fn($m) => $m->isBerisiko())
             ->count();
@@ -42,9 +43,18 @@ class DashboardController extends Controller
         $gagal    = 0;
 
         foreach ($mahasiswas as $mhs) {
-            $nilaiDE    = $mhs->nilais->whereIn('grade', ['D', 'E']);
-            $totalAlpha = $mhs->absensis->sum('jam_alpha');
-            $isBerisiko = $nilaiDE->count() > 0 || $totalAlpha >= 18;
+            // Gunakan semester terakhir agar penilaian risiko konsisten
+            $semNilai   = $mhs->nilais->max('semester') ?? 0;
+            $nilaiDE    = $semNilai > 0
+                ? $mhs->nilais->where('semester', $semNilai)->whereIn('grade', ['D', 'E'])
+                : collect();
+
+            $semAlpha   = $mhs->absensis->max('semester') ?? 0;
+            $totalAlpha = $semAlpha > 0
+                ? $mhs->absensis->where('semester', $semAlpha)->sum('jam_alpha')
+                : 0;
+
+            $isBerisiko = $nilaiDE->isNotEmpty() || $totalAlpha >= 18;
 
             if (!$isBerisiko || !$mhs->user) continue;
 

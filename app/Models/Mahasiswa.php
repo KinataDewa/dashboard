@@ -3,10 +3,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Mahasiswa extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id', 'nim', 'nama', 'kelas_id',
@@ -47,37 +48,29 @@ class Mahasiswa extends Model
     // ── Helper: IP semester tertentu ─────────────────
     public function getIpSemester(int $semester): float
     {
-        $nilais = $this->nilais()
-            ->where('semester', $semester)
-            ->with('mataKuliah')
-            ->get();
-
-        if ($nilais->isEmpty()) return 0.0;
-
-        $totalBobot = 0;
-        $totalSks   = 0;
-
-        foreach ($nilais as $n) {
-            $bobot = match($n->grade) {
-                'A'     => 4,
-                'B'     => 3,
-                'C'     => 2,
-                'D'     => 1,
-                default => 0,
-            };
-            $sks         = $n->mataKuliah->sks ?? 0;
-            $totalBobot += $bobot * $sks;
-            $totalSks   += $sks;
+        // Pakai koleksi yang sudah di-eager-load jika tersedia, hindari query tambahan
+        if ($this->relationLoaded('nilais')) {
+            $nilais = $this->nilais->where('semester', $semester);
+        } else {
+            $nilais = $this->nilais()->where('semester', $semester)
+                           ->with('mataKuliah')->get();
         }
 
-        return $totalSks > 0 ? round($totalBobot / $totalSks, 2) : 0.0;
+        return $this->hitungIpDariKoleksi($nilais);
     }
 
     // ── Helper: IPK kumulatif ────────────────────────
     public function getIpkAttribute(): float
     {
-        $nilais = $this->nilais()->with('mataKuliah')->get();
+        $nilais = $this->relationLoaded('nilais')
+            ? $this->nilais
+            : $this->nilais()->with('mataKuliah')->get();
 
+        return $this->hitungIpDariKoleksi($nilais);
+    }
+
+    private function hitungIpDariKoleksi($nilais): float
+    {
         if ($nilais->isEmpty()) return 0.0;
 
         $totalBobot = 0;
@@ -85,11 +78,7 @@ class Mahasiswa extends Model
 
         foreach ($nilais as $n) {
             $bobot = match($n->grade) {
-                'A'     => 4,
-                'B'     => 3,
-                'C'     => 2,
-                'D'     => 1,
-                default => 0,
+                'A' => 4, 'B' => 3, 'C' => 2, 'D' => 1, default => 0,
             };
             $sks         = $n->mataKuliah->sks ?? 0;
             $totalBobot += $bobot * $sks;
@@ -99,12 +88,18 @@ class Mahasiswa extends Model
         return $totalSks > 0 ? round($totalBobot / $totalSks, 2) : 0.0;
     }
 
-    // ── Helper: cek mahasiswa berisiko ───────────────
+    // ── Helper: cek mahasiswa berisiko (semester terakhir saja, grade D/E) ─
     public function isBerisiko(): bool
     {
-        // Sistem otomatis cek dari data nilai dan absensi
-        $nilaiRendah = $this->nilais->whereIn('grade', ['C', 'D', 'E'])->count();
-        $totalAlpha  = $this->absensis->sum('jam_alpha');
+        $semNilai    = $this->nilais->max('semester') ?? 0;
+        $nilaiRendah = $semNilai > 0
+            ? $this->nilais->where('semester', $semNilai)->whereIn('grade', ['D', 'E'])->count()
+            : 0;
+
+        $semAlpha   = $this->absensis->max('semester') ?? 0;
+        $totalAlpha = $semAlpha > 0
+            ? $this->absensis->where('semester', $semAlpha)->sum('jam_alpha')
+            : 0;
 
         return $nilaiRendah > 0 || $totalAlpha >= 18;
     }
@@ -133,17 +128,21 @@ class Mahasiswa extends Model
     }
  
     // Ambil kompensasi semester tertentu
-    public function getKompensasiSemester(int $semester, string $tahunAkademik = '2024/2025')
+    public function getKompensasiSemester(int $semester, ?string $tahunAkademik = null)
     {
+        $tahunAkademik ??= config('akademik.tahun_akademik');
+
         return $this->kompensasis
             ->where('semester', $semester)
             ->where('tahun_akademik', $tahunAkademik)
             ->first();
     }
- 
+
     // Cek apakah punya kompen pending di semester tertentu
-    public function hasPendingKompen(int $semester, string $tahunAkademik = '2024/2025'): bool
+    public function hasPendingKompen(int $semester, ?string $tahunAkademik = null): bool
     {
+        $tahunAkademik ??= config('akademik.tahun_akademik');
+
         return $this->kompensasis
             ->where('semester', $semester)
             ->where('tahun_akademik', $tahunAkademik)

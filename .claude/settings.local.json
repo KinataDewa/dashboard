@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Path \"C:\\\\laragon\\\\www\\\\dashboard\" -Force)",
-      "Bash(Select-Object Name, PSIsContainer)"
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(Get-ChildItem -Path \"C:\\\\laragon\\\\www\\\\dashboard\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(php artisan *)"
     ]
   }
 }

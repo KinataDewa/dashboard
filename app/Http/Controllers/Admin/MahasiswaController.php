@@ -149,13 +149,14 @@ class MahasiswaController extends Controller
     public function destroy(Mahasiswa $mahasiswa)
     {
         $nama = $mahasiswa->nama;
- 
+
         DB::transaction(function () use ($mahasiswa) {
-            $userId = $mahasiswa->user_id;
+            // Soft-delete mahasiswa — data nilai & absensi tetap tersimpan
             $mahasiswa->delete();
-            User::find($userId)?->delete();
+            // Cabut role agar user tidak bisa login ke area mahasiswa
+            $mahasiswa->user?->removeRole('mahasiswa');
         });
- 
+
         return redirect()->route('admin.mahasiswa.index')
             ->with('success', 'Mahasiswa ' . $nama . ' berhasil dihapus.');
     }
