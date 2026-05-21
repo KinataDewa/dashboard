@@ -24,11 +24,24 @@ class DashboardController extends Controller
             ->with('mataKuliah')
             ->get();
  
-        // Absensi semester aktif
-        $absensis = $mahasiswa->absensis()
-            ->where('semester', $semesterAktif)
-            ->with('mataKuliah')
-            ->get();
+        // Load all absensis (all semesters) — needed for donut filter
+        $allAbsensis = $mahasiswa->absensis()->with('mataKuliah')->get();
+
+        // Absensi semester aktif (for table and footer)
+        $absensis = $allAbsensis->where('semester', $semesterAktif)->values();
+
+        // Pre-aggregate per semester for the donut chart filter
+        $semesterListAbsensi = $allAbsensis->pluck('semester')->unique()->sort()->values()->toArray();
+        $absensiPerSemester  = [];
+        foreach ($semesterListAbsensi as $sem) {
+            $semData = $allAbsensis->where('semester', $sem);
+            $absensiPerSemester[(int) $sem] = [
+                'hadir' => (int) $semData->sum('jam_hadir'),
+                'izin'  => (int) $semData->sum('jam_izin'),
+                'sakit' => (int) $semData->sum('jam_sakit'),
+                'alpha' => (int) $semData->sum('jam_alpha'),
+            ];
+        }
  
         // IP semester aktif
         $ipSemester = $mahasiswa->getIpSemester($semesterAktif);
@@ -58,7 +71,7 @@ class DashboardController extends Controller
             'mahasiswa', 'nilais', 'absensis',
             'ipSemester', 'ipk', 'nilaiDE', 'absensiKritis',
             'semesterAktif', 'tahunAkademik', 'rataRataKelas',
-            'kompenAktif'
+            'kompenAktif', 'absensiPerSemester', 'semesterListAbsensi'
         ));
     }
 }

@@ -33,6 +33,12 @@
 .legend-bar{width:100%;height:4px;background:#F1F5F9;border-radius:2px;margin-top:3px;overflow:hidden;}
 .legend-bar-fill{height:100%;border-radius:2px;}
 
+/* ── Stat card clickable ─────────────────────────── */
+.stat-card-link{display:block;text-decoration:none;color:inherit;}
+.stat-card-link .stat-card-v2{cursor:pointer;transition:transform .18s ease,box-shadow .18s ease;}
+.stat-card-link:hover .stat-card-v2{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.11);}
+.stat-card-link:active .stat-card-v2{transform:translateY(-1px);}
+
 /* ── Status Bar (NEW) ────────────────────────────── */
 .status-summary{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
 .status-bar-wrap{flex:1;min-width:180px;}
@@ -125,44 +131,53 @@
 {{-- ══ STAT CARDS (LAMA) ══ --}}
 <div class="section-label">Ringkasan Kelas</div>
 <div class="row g-3 mb-4">
+    {{-- Card 1: Total Mahasiswa — klik ke halaman kelas/mahasiswa --}}
     <div class="col-sm-3 col-6">
-        <div class="stat-card-v2">
-            <div class="stat-card-accent" style="background:linear-gradient(90deg,#2563EB,#60A5FA);"></div>
-            <div class="stat-card-body">
-                <div class="stat-icon-box" style="background:#EFF6FF;">
-                    <i class="bi bi-people-fill" style="color:#2563EB;"></i>
-                </div>
-                <div class="stat-card-info">
-                    <div class="stat-card-label">Total Mahasiswa</div>
-                    <div class="stat-card-value" style="color:#2563EB;">{{ $totalMahasiswa }}</div>
-                    <div class="stat-card-note">
-                        <span class="stat-card-badge badge-blue"><i class="bi bi-mortarboard"></i> Aktif</span>
+        <a href="{{ route('dosen.kelas') }}" class="stat-card-link" title="Lihat data mahasiswa">
+            <div class="stat-card-v2">
+                <div class="stat-card-accent" style="background:linear-gradient(90deg,#2563EB,#60A5FA);"></div>
+                <div class="stat-card-body">
+                    <div class="stat-icon-box" style="background:#EFF6FF;">
+                        <i class="bi bi-people-fill" style="color:#2563EB;"></i>
+                    </div>
+                    <div class="stat-card-info">
+                        <div class="stat-card-label">Total Mahasiswa</div>
+                        <div class="stat-card-value" style="color:#2563EB;">{{ $totalMahasiswa }}</div>
+                        <div class="stat-card-note">
+                            <span class="stat-card-badge badge-blue"><i class="bi bi-mortarboard"></i> Aktif</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
+
+    {{-- Card 2: Mahasiswa Berisiko — klik ke halaman berisiko --}}
     <div class="col-sm-3 col-6">
-        <div class="stat-card-v2">
-            <div class="stat-card-accent" style="background:{{ $totalBerisiko>0 ? 'linear-gradient(90deg,#EF4444,#FCA5A5)' : 'linear-gradient(90deg,#22C55E,#86EFAC)' }};"></div>
-            <div class="stat-card-body">
-                <div class="stat-icon-box" style="background:{{ $totalBerisiko>0 ? '#FEF2F2' : '#F0FDF4' }};">
-                    <i class="bi bi-{{ $totalBerisiko>0 ? 'exclamation-triangle-fill' : 'shield-check-fill' }}" style="color:{{ $totalBerisiko>0 ? '#EF4444' : '#22C55E' }};"></i>
-                </div>
-                <div class="stat-card-info">
-                    <div class="stat-card-label">Mahasiswa Berisiko</div>
-                    <div class="stat-card-value" style="color:{{ $totalBerisiko>0 ? '#EF4444' : '#22C55E' }};">{{ $totalBerisiko }}</div>
-                    <div class="stat-card-note">
-                        @if($totalBerisiko>0)
-                            <span class="stat-card-badge badge-down">Perlu bimbingan</span>
-                        @else
-                            <span class="stat-card-badge badge-up">Semua aman</span>
-                        @endif
+        <a href="{{ route('dosen.berisiko.index') }}" class="stat-card-link" title="Lihat mahasiswa berisiko">
+            <div class="stat-card-v2">
+                <div class="stat-card-accent" style="background:{{ $totalBerisiko>0 ? 'linear-gradient(90deg,#EF4444,#FCA5A5)' : 'linear-gradient(90deg,#22C55E,#86EFAC)' }};"></div>
+                <div class="stat-card-body">
+                    <div class="stat-icon-box" style="background:{{ $totalBerisiko>0 ? '#FEF2F2' : '#F0FDF4' }};">
+                        <i class="bi bi-{{ $totalBerisiko>0 ? 'exclamation-triangle-fill' : 'shield-check-fill' }}" style="color:{{ $totalBerisiko>0 ? '#EF4444' : '#22C55E' }};"></i>
+                    </div>
+                    <div class="stat-card-info">
+                        <div class="stat-card-label">Mahasiswa Berisiko</div>
+                        <div class="stat-card-value" style="color:{{ $totalBerisiko>0 ? '#EF4444' : '#22C55E' }};">{{ $totalBerisiko }}</div>
+                        <div class="stat-card-note">
+                            @if($totalBerisiko>0)
+                                <span class="stat-card-badge badge-down">Perlu bimbingan</span>
+                            @else
+                                <span class="stat-card-badge badge-up">Semua aman</span>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
+
+    {{-- Card 3: Rata-rata IPK — tidak perlu link --}}
     <div class="col-sm-3 col-6">
         <div class="stat-card-v2">
             <div class="stat-card-accent" style="background:linear-gradient(90deg,#F59E0B,#FCD34D);"></div>
@@ -178,22 +193,26 @@
             </div>
         </div>
     </div>
+
+    {{-- Card 4: Total Nilai D/E — klik ke berisiko dengan filter nilai --}}
     <div class="col-sm-3 col-6">
-        <div class="stat-card-v2">
-            <div class="stat-card-accent" style="background:linear-gradient(90deg,#7C3AED,#A78BFA);"></div>
-            <div class="stat-card-body">
-                <div class="stat-icon-box" style="background:#F5F3FF;">
-                    <i class="bi bi-graph-down-arrow" style="color:#7C3AED;"></i>
-                </div>
-                <div class="stat-card-info">
-                    <div class="stat-card-label">Total Nilai D/E</div>
-                    <div class="stat-card-value" style="color:#7C3AED;">{{ $totalNilaiDE }}</div>
-                    <div class="stat-card-note">
-                        <span class="stat-card-badge" style="background:#F5F3FF;color:#7C3AED;">Semua matkul</span>
+        <a href="{{ route('dosen.berisiko.index') }}?jenis=nilai" class="stat-card-link" title="Lihat mahasiswa dengan nilai D/E">
+            <div class="stat-card-v2">
+                <div class="stat-card-accent" style="background:linear-gradient(90deg,#7C3AED,#A78BFA);"></div>
+                <div class="stat-card-body">
+                    <div class="stat-icon-box" style="background:#F5F3FF;">
+                        <i class="bi bi-graph-down-arrow" style="color:#7C3AED;"></i>
+                    </div>
+                    <div class="stat-card-info">
+                        <div class="stat-card-label">Total Nilai D/E</div>
+                        <div class="stat-card-value" style="color:#7C3AED;">{{ $totalNilaiDE }}</div>
+                        <div class="stat-card-note">
+                            <span class="stat-card-badge" style="background:#F5F3FF;color:#7C3AED;">Sem. terakhir</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
@@ -252,7 +271,7 @@
             <div class="chart-head-v2">
                 <div>
                     <div class="chart-title-v2">Distribusi Nilai Kelas</div>
-                    <div class="chart-sub-v2">Jumlah mahasiswa per grade · Semua mata kuliah</div>
+                    <div class="chart-sub-v2">Jumlah nilai per grade · Semester terakhir</div>
                 </div>
             </div>
             <div style="position:relative;height:220px;margin-top:14px;">
@@ -273,19 +292,16 @@
             <div class="chart-head-v2">
                 <div>
                     <div class="chart-title-v2">Rekap Absensi Kelas</div>
-                    <div class="chart-sub-v2">Total jam kehadiran seluruh mahasiswa</div>
+                    <div class="chart-sub-v2">Total jam kehadiran · Semester terakhir</div>
                 </div>
             </div>
             @php
-                $totalH   = $mahasiswas->sum(fn($m) => $m->absensis->sum('jam_hadir'));
-                $totalI   = $mahasiswas->sum(fn($m) => $m->absensis->sum('jam_izin'));
-                $totalS   = $mahasiswas->sum(fn($m) => $m->absensis->sum('jam_sakit'));
-                $totalA   = $mahasiswas->sum(fn($m) => $m->absensis->sum('jam_alpha'));
+                // $totalH/I/S/A sudah dihitung di controller dari semester terakhir — jangan timpa
                 $totalAll = $totalH + $totalI + $totalS + $totalA;
-                $pctH = $totalAll > 0 ? round($totalH/$totalAll*100) : 0;
-                $pctI = $totalAll > 0 ? round($totalI/$totalAll*100) : 0;
-                $pctS = $totalAll > 0 ? round($totalS/$totalAll*100) : 0;
-                $pctA = $totalAll > 0 ? round($totalA/$totalAll*100) : 0;
+                $pctH = $totalAll > 0 ? round($totalH / $totalAll * 100) : 0;
+                $pctI = $totalAll > 0 ? round($totalI / $totalAll * 100) : 0;
+                $pctS = $totalAll > 0 ? round($totalS / $totalAll * 100) : 0;
+                $pctA = $totalAll > 0 ? round($totalA / $totalAll * 100) : 0;
             @endphp
             <div class="donut-wrap-v2">
                 <div class="donut-canvas-box">
@@ -303,7 +319,9 @@
                                 <div class="legend-v2-dot" style="background:{{ $color }};"></div>
                                 <span class="legend-v2-label">{{ $label }}</span>
                             </div>
-                            <span class="legend-v2-val" style="{{ $label==='Alpha' && $val>0 ? 'color:#EF4444;' : '' }}">{{ $val }}j</span>
+                            <span class="legend-v2-val" style="{{ $label==='Alpha' && $val>0 ? 'color:#EF4444;' : '' }}">
+                                {{ $val }}j <span style="font-weight:400;color:var(--text-3);font-size:11px;">({{ $pct }}%)</span>
+                            </span>
                         </div>
                         <div class="legend-bar"><div class="legend-bar-fill" style="width:{{ $pct }}%;background:{{ $color }};"></div></div>
                     </div>
@@ -381,10 +399,12 @@
                     $ipkMhs   = $mhs->ipk_val ?? $mhs->ipk;
                     $semAktif = $mhs->kelas->semester ?? 6;
                     $ipSem    = $mhs->getIpSemester($semAktif);
-                    $berisiko = $mhs->is_berisiko ?? $mhs->isBerisiko();
-                    $totalAlp = $mhs->absensis->sum('jam_alpha');
-                    $grades   = $mhs->nilais->pluck('grade');
-                    $gradeMin = $grades->contains('E') ? 'E' : ($grades->contains('D') ? 'D' : ($grades->contains('C') ? 'C' : ($grades->contains('B') ? 'B' : 'A')));
+                    $berisiko    = $mhs->is_berisiko ?? $mhs->isBerisiko();
+                    $semAlphaTbl = $mhs->absensis->max('semester') ?? 0;
+                    $totalAlp    = $semAlphaTbl > 0 ? $mhs->absensis->where('semester', $semAlphaTbl)->sum('jam_alpha') : 0;
+                    $semNilaiTbl = $mhs->nilais->max('semester') ?? 0;
+                    $grades      = $semNilaiTbl > 0 ? $mhs->nilais->where('semester', $semNilaiTbl)->pluck('grade') : collect();
+                    $gradeMin    = $grades->contains('E') ? 'E' : ($grades->contains('D') ? 'D' : ($grades->contains('C') ? 'C' : ($grades->contains('B') ? 'B' : 'A')));
                     $colors   = ['#2563EB','#16A34A','#7C3AED','#F59E0B','#EF4444','#0891B2','#DB2777'];
                     $aColor   = $colors[$i % count($colors)];
                     $hasKompen = $mhs->kompensasis->where('status','pending')->isNotEmpty();
@@ -473,25 +493,97 @@
 
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script>
-@php
-    $gradeCount = ['A'=>0,'B'=>0,'C'=>0,'D'=>0,'E'=>0];
-    foreach($mahasiswas as $mhs) {
-        foreach($mhs->nilais as $n) {
-            if(isset($gradeCount[$n->grade])) $gradeCount[$n->grade]++;
+// Bar chart distribusi nilai — data dari semester terakhir (dihitung di controller)
+new Chart(document.getElementById('nilaiChart').getContext('2d'), {
+    plugins: [ChartDataLabels],
+    type: 'bar',
+    data: {
+        labels: ['A', 'B', 'C', 'D', 'E'],
+        datasets: [{
+            data: [
+                {{ $gradeDistribusi['A'] }},
+                {{ $gradeDistribusi['B'] }},
+                {{ $gradeDistribusi['C'] }},
+                {{ $gradeDistribusi['D'] }},
+                {{ $gradeDistribusi['E'] }}
+            ],
+            backgroundColor: ['#22C55E', '#3B82F6', '#FBBF24', '#F97316', '#EF4444'],
+            borderRadius: 6,
+            borderSkipped: false,
+            maxBarThickness: 48
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#0F172A',
+                padding: 10,
+                cornerRadius: 8,
+                callbacks: { label: c => ' ' + c.raw + ' nilai' }
+            },
+            datalabels: {
+                anchor: 'end',
+                align: 'top',
+                offset: 2,
+                formatter: val => val > 0 ? val : '',
+                font: { family: 'Plus Jakarta Sans', weight: '700', size: 12 },
+                color: '#1E293B'
+            }
+        },
+        layout: { padding: { top: 20 } },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { font: { family: 'Plus Jakarta Sans', size: 12 }, color: '#64748B' }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, font: { family: 'Plus Jakarta Sans', size: 12 }, color: '#64748B' },
+                grid: { color: '#F8FAFC' },
+                border: { display: false }
+            }
         }
     }
-@endphp
-new Chart(document.getElementById('nilaiChart').getContext('2d'), {
-    type:'bar',
-    data:{labels:['A','B','C','D','E'],datasets:[{data:[{{ $gradeCount['A'] }},{{ $gradeCount['B'] }},{{ $gradeCount['C'] }},{{ $gradeCount['D'] }},{{ $gradeCount['E'] }}],backgroundColor:['#22C55E','#3B82F6','#FBBF24','#F97316','#EF4444'],borderRadius:6,borderSkipped:false,maxBarThickness:48}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0F172A',padding:10,cornerRadius:8,callbacks:{label:c=>' '+c.raw+' mahasiswa'}}},scales:{x:{grid:{display:false},ticks:{font:{family:'Plus Jakarta Sans',size:12},color:'#64748B'}},y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'Plus Jakarta Sans',size:12},color:'#64748B'},grid:{color:'#F8FAFC'},border:{display:false}}}}
 });
 
+// Donut chart absensi — data dari semester terakhir (dihitung di controller)
 new Chart(document.getElementById('absensiChart').getContext('2d'), {
-    type:'doughnut',
-    data:{labels:['Hadir','Izin','Sakit','Alpha'],datasets:[{data:[{{ $totalH ?? 0 }},{{ $totalI ?? 0 }},{{ $totalS ?? 0 }},{{ $totalA ?? 0 }}],backgroundColor:['#22C55E','#FBBF24','#3B82F6','#EF4444'],borderWidth:3,borderColor:'#FFFFFF',hoverOffset:5}]},
-    options:{responsive:false,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#0F172A',padding:10,cornerRadius:8,callbacks:{label:c=>' '+c.label+': '+c.raw+' jam'}}}}
+    type: 'doughnut',
+    data: {
+        labels: ['Hadir', 'Izin', 'Sakit', 'Alpha'],
+        datasets: [{
+            data: [{{ $totalH ?? 0 }}, {{ $totalI ?? 0 }}, {{ $totalS ?? 0 }}, {{ $totalA ?? 0 }}],
+            backgroundColor: ['#22C55E', '#FBBF24', '#3B82F6', '#EF4444'],
+            borderWidth: 3,
+            borderColor: '#FFFFFF',
+            hoverOffset: 5
+        }]
+    },
+    options: {
+        responsive: false,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#0F172A',
+                padding: 10,
+                cornerRadius: 8,
+                callbacks: {
+                    label: c => {
+                        const total = c.dataset.data.reduce((a, b) => a + b, 0);
+                        const pct   = total > 0 ? Math.round(c.raw / total * 100) : 0;
+                        return ' ' + c.label + ': ' + c.raw + ' jam (' + pct + '%)';
+                    }
+                }
+            }
+        }
+    }
 });
 
 document.getElementById('searchMhs').addEventListener('input', function() {

@@ -660,15 +660,20 @@
             <div class="chart-head-v2">
                 <div>
                     <div class="chart-title-v2">Laporan Absensi</div>
-                    <div class="chart-sub-v2">Distribusi kehadiran semester {{ $semesterAktif }}</div>
+                    <div class="chart-sub-v2" id="absensiChartSub">Distribusi kehadiran semester {{ $semesterAktif }}</div>
                 </div>
                 <div class="filter-wrap">
-                    <button class="btn-filter">
+                    <button class="btn-filter" id="filterAbsensiDonutBtn">
                         <i class="bi bi-sliders2" style="font-size:12px;"></i> Filter
                     </button>
-                    <div class="filter-menu">
-                        <div class="filter-menu-label">Periode</div>
-                        <div class="filter-opt active">Semester Ini</div>
+                    <div class="filter-menu" id="filterAbsensiDonutMenu">
+                        <div class="filter-menu-label">Pilih Semester</div>
+                        @foreach($semesterListAbsensi as $sem)
+                        <div class="filter-opt {{ (int)$sem === (int)$semesterAktif ? 'active' : '' }}" data-val="{{ $sem }}">Semester {{ $sem }}</div>
+                        @endforeach
+                        @if(!in_array((int)$semesterAktif, array_map('intval', $semesterListAbsensi)))
+                        <div class="filter-opt active" data-val="{{ $semesterAktif }}">Semester {{ $semesterAktif }}</div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -689,8 +694,8 @@
                 <div class="donut-canvas-box">
                     <canvas id="absensiChart" width="148" height="148"></canvas>
                     <div class="donut-center-text">
-                        <div class="donut-center-num">{{ $pctH }}%</div>
-                        <div class="donut-center-sub">Hadir</div>
+                        <div class="donut-center-num" id="donutCenterNum">{{ $pctH }}%</div>
+                        <div class="donut-center-sub" id="donutCenterSub">Hadir</div>
                     </div>
                 </div>
                 <div class="legend-v2">
@@ -700,9 +705,9 @@
                                 <div class="legend-v2-dot" style="background:#22C55E;"></div>
                                 <span class="legend-v2-label">Hadir</span>
                             </div>
-                            <span class="legend-v2-val">{{ $sumHadir }}j</span>
+                            <span class="legend-v2-val" id="legendHadirVal">{{ $sumHadir }}j</span>
                         </div>
-                        <div class="legend-v2-bar"><div class="legend-v2-bar-fill" style="width:{{ $pctH }}%;background:#22C55E;"></div></div>
+                        <div class="legend-v2-bar"><div class="legend-v2-bar-fill" id="legendHadirBar" style="width:{{ $pctH }}%;background:#22C55E;"></div></div>
                     </div>
                     <div>
                         <div class="legend-v2-row">
@@ -710,9 +715,9 @@
                                 <div class="legend-v2-dot" style="background:#FBBF24;"></div>
                                 <span class="legend-v2-label">Izin</span>
                             </div>
-                            <span class="legend-v2-val">{{ $sumIzin }}j</span>
+                            <span class="legend-v2-val" id="legendIzinVal">{{ $sumIzin }}j</span>
                         </div>
-                        <div class="legend-v2-bar"><div class="legend-v2-bar-fill" style="width:{{ $pctI }}%;background:#FBBF24;"></div></div>
+                        <div class="legend-v2-bar"><div class="legend-v2-bar-fill" id="legendIzinBar" style="width:{{ $pctI }}%;background:#FBBF24;"></div></div>
                     </div>
                     <div>
                         <div class="legend-v2-row">
@@ -720,9 +725,9 @@
                                 <div class="legend-v2-dot" style="background:#3B82F6;"></div>
                                 <span class="legend-v2-label">Sakit</span>
                             </div>
-                            <span class="legend-v2-val">{{ $sumSakit }}j</span>
+                            <span class="legend-v2-val" id="legendSakitVal">{{ $sumSakit }}j</span>
                         </div>
-                        <div class="legend-v2-bar"><div class="legend-v2-bar-fill" style="width:{{ $pctS }}%;background:#3B82F6;"></div></div>
+                        <div class="legend-v2-bar"><div class="legend-v2-bar-fill" id="legendSakitBar" style="width:{{ $pctS }}%;background:#3B82F6;"></div></div>
                     </div>
                     <div>
                         <div class="legend-v2-row">
@@ -730,9 +735,9 @@
                                 <div class="legend-v2-dot" style="background:#EF4444;"></div>
                                 <span class="legend-v2-label">Alpha</span>
                             </div>
-                            <span class="legend-v2-val" style="color:{{ $sumAlp >= 14 ? '#EF4444' : 'var(--text-1)' }};">{{ $sumAlp }}j</span>
+                            <span class="legend-v2-val" id="legendAlphaVal" style="color:{{ $sumAlp >= 14 ? '#EF4444' : 'var(--text-1)' }};">{{ $sumAlp }}j</span>
                         </div>
-                        <div class="legend-v2-bar"><div class="legend-v2-bar-fill" style="width:{{ $pctA }}%;background:#EF4444;"></div></div>
+                        <div class="legend-v2-bar"><div class="legend-v2-bar-fill" id="legendAlphaBar" style="width:{{ $pctA }}%;background:#EF4444;"></div></div>
                     </div>
                 </div>
             </div>
@@ -1043,8 +1048,9 @@ var barChart = new Chart(barCtx, {
 });
 
 // ── DONUT CHART ────────────────────────────────────
+var ABSENSI_DATA = @json($absensiPerSemester);
 var donutCtx = document.getElementById('absensiChart').getContext('2d');
-new Chart(donutCtx, {
+var donutChart = new Chart(donutCtx, {
     type: 'doughnut',
     data: {
         labels: ['Alpha','Izin','Sakit','Hadir'],
@@ -1088,6 +1094,33 @@ document.getElementById('filterBarBtn').addEventListener('filterChange', functio
     barChart.data.datasets[0].data            = idx.map(function(i){return barData[i];});
     barChart.data.datasets[0].backgroundColor = idx.map(function(i){return barColors[i];});
     barChart.update();
+});
+
+// ── FILTER SEMESTER DONUT ABSENSI ──────────────────
+document.getElementById('filterAbsensiDonutBtn').addEventListener('filterChange', function(e) {
+    var sem = parseInt(e.detail.value);
+    var d   = ABSENSI_DATA[sem] || {hadir:0, izin:0, sakit:0, alpha:0};
+    var tot = d.hadir + d.izin + d.sakit + d.alpha;
+    var pH  = tot > 0 ? Math.round(d.hadir / tot * 100) : 0;
+    var pI  = tot > 0 ? Math.round(d.izin  / tot * 100) : 0;
+    var pS  = tot > 0 ? Math.round(d.sakit / tot * 100) : 0;
+    var pA  = tot > 0 ? Math.round(d.alpha / tot * 100) : 0;
+
+    donutChart.data.datasets[0].data = [d.alpha, d.izin, d.sakit, d.hadir];
+    donutChart.update();
+
+    document.getElementById('absensiChartSub').textContent  = 'Distribusi kehadiran semester ' + sem;
+    document.getElementById('donutCenterNum').textContent    = pH + '%';
+
+    document.getElementById('legendHadirVal').textContent  = d.hadir + 'j';
+    document.getElementById('legendHadirBar').style.width  = pH + '%';
+    document.getElementById('legendIzinVal').textContent   = d.izin  + 'j';
+    document.getElementById('legendIzinBar').style.width   = pI + '%';
+    document.getElementById('legendSakitVal').textContent  = d.sakit + 'j';
+    document.getElementById('legendSakitBar').style.width  = pS + '%';
+    document.getElementById('legendAlphaVal').textContent  = d.alpha + 'j';
+    document.getElementById('legendAlphaVal').style.color  = d.alpha >= 14 ? '#EF4444' : 'var(--text-1)';
+    document.getElementById('legendAlphaBar').style.width  = pA + '%';
 });
 
 // ── FILTER ABSENSI ─────────────────────────────────

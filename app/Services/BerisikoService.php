@@ -45,7 +45,7 @@ class BerisikoService
                 'total_alpha' => $totalAlpha,
                 'kategori'    => $kategori,
             ];
-        })->sortByDesc(fn($m) => count($m['kategori']))->values();
+        })->sortBy('nama')->values();
     }
 
     public static function buildSummary(Collection $semua, Collection $berisiko): array

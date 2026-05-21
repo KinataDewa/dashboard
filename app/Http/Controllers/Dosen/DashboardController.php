@@ -14,10 +14,9 @@ class DashboardController extends Controller
         $user  = auth()->user();
         $dosen = Dosen::where('user_id', $user->id)->firstOrFail();
 
-        $kelas = Kelas::where('dosen_pa_id', $dosen->id)->get();
-
-        // Semua mahasiswa bimbingan dosen ini
-        $mahasiswas = Mahasiswa::where('dosen_pa_id', $dosen->id)
+        $kelas    = Kelas::where('dosen_pa_id', $dosen->id)->get();
+        $kelasIds = $kelas->pluck('id');
+        $mahasiswas = Mahasiswa::whereIn('kelas_id', $kelasIds)
             ->with([
                 'kelas',
                 'nilais.mataKuliah',
@@ -45,28 +44,39 @@ class DashboardController extends Controller
                 : 0;
         });
 
-        // Hitung untuk chart — gunakan semester terakhir absensi
-        $totalH = $mahasiswas->sum(function ($m) {
-            $sem = $m->absensis->max('semester') ?? 0;
-            return $sem > 0 ? $m->absensis->where('semester', $sem)->sum('jam_hadir') : 0;
-        });
-        $totalI = $mahasiswas->sum(function ($m) {
-            $sem = $m->absensis->max('semester') ?? 0;
-            return $sem > 0 ? $m->absensis->where('semester', $sem)->sum('jam_izin') : 0;
-        });
-        $totalS = $mahasiswas->sum(function ($m) {
-            $sem = $m->absensis->max('semester') ?? 0;
-            return $sem > 0 ? $m->absensis->where('semester', $sem)->sum('jam_sakit') : 0;
-        });
-        $totalA = $mahasiswas->sum(function ($m) {
-            $sem = $m->absensis->max('semester') ?? 0;
-            return $sem > 0 ? $m->absensis->where('semester', $sem)->sum('jam_alpha') : 0;
-        });
+
+        $gradeDistribusi = ['A' => 0, 'B' => 0, 'C' => 0, 'D' => 0, 'E' => 0];
+        foreach ($mahasiswas as $mhs) {
+            $maxSem = (int) $mhs->nilais->max('semester');
+            if ($maxSem === 0) continue;
+
+            foreach ($mhs->nilais as $nilai) {
+                if ((int) $nilai->semester !== $maxSem) continue;
+                if (array_key_exists($nilai->grade, $gradeDistribusi)) {
+                    $gradeDistribusi[$nilai->grade]++;
+                }
+            }
+        }
+
+        $totalH = $totalI = $totalS = $totalA = 0;
+        foreach ($mahasiswas as $mhs) {
+            $maxSem = (int) $mhs->absensis->max('semester');
+            if ($maxSem === 0) continue;
+
+            foreach ($mhs->absensis as $abs) {
+                if ((int) $abs->semester !== $maxSem) continue;
+                $totalH += (int) $abs->jam_hadir;
+                $totalI += (int) $abs->jam_izin;
+                $totalS += (int) $abs->jam_sakit;
+                $totalA += (int) $abs->jam_alpha;
+            }
+        }
 
         return view('dosen.dashboard', compact(
             'dosen', 'kelas', 'mahasiswas', 'mahasiswaBerisiko',
             'totalMahasiswa', 'totalBerisiko', 'rataRataIpk', 'totalNilaiDE',
-            'totalH', 'totalI', 'totalS', 'totalA'
+            'totalH', 'totalI', 'totalS', 'totalA',
+            'gradeDistribusi'
         ));
     }
 }

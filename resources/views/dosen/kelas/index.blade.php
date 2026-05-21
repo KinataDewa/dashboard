@@ -117,7 +117,7 @@
                 </tr>
             </thead>
             <tbody id="mhsBody">
-                @forelse($mahasiswas as $i => $mhs)
+                @forelse($mahasiswas->sortBy('nama')->values() as $i => $mhs)
                 @php
                     $ipkMhs   = $mhs->ipk_val ?? $mhs->ipk;
                     $berisiko = $mhs->is_berisiko ?? $mhs->isBerisiko();
