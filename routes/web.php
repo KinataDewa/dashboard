@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\ImportController;
 use App\Http\Controllers\Admin\KompensasiController;
 use App\Http\Controllers\Admin\AnalitikController;
 use App\Http\Controllers\Admin\BerisikoController as AdminBerisikoController;
+use App\Http\Controllers\Admin\KirimPeringatanController;
 
 // ── Root redirect ────────────────────────────────────────
 Route::get('/', function () {
@@ -90,6 +91,10 @@ Route::middleware(['auth', 'role.admin'])
             Route::delete('/{kompensasi}',         [KompensasiController::class, 'destroy'])->name('destroy');
         });
 
+        Route::get('/kirim-peringatan', [KirimPeringatanController::class, 'index'])->name('kirim-peringatan.index');
+        Route::post('/kirim-peringatan/satu', [KirimPeringatanController::class, 'kirimSatu'])->name('kirim-peringatan.satu');
+        Route::post('/kirim-peringatan/massal', [KirimPeringatanController::class, 'kirimMassal'])->name('kirim-peringatan.massal');
+        
         // CRUD resources
         Route::resource('mahasiswa', AdminMahasiswaController::class);
         Route::resource('dosen',     AdminDosenController::class);

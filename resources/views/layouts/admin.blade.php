@@ -522,6 +522,12 @@
             </span>
             @endif
         </a>
+
+        <a href="{{ route('admin.kirim-peringatan.index') }}"
+        class="nav-link-item {{ request()->routeIs('admin.kirim-peringatan*') ? 'active' : '' }}">
+            <i class="bi bi-envelope-exclamation-fill"></i>
+            <span>Kirim Peringatan</span>
+        </a>
         
     </nav>
     <div class="sidebar-footer">
