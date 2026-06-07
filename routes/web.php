@@ -94,6 +94,7 @@ Route::middleware(['auth', 'role.admin'])
         Route::get('/kirim-peringatan', [KirimPeringatanController::class, 'index'])->name('kirim-peringatan.index');
         Route::post('/kirim-peringatan/satu', [KirimPeringatanController::class, 'kirimSatu'])->name('kirim-peringatan.satu');
         Route::post('/kirim-peringatan/massal', [KirimPeringatanController::class, 'kirimMassal'])->name('kirim-peringatan.massal');
+        Route::get('/kirim-peringatan/history', [KirimPeringatanController::class, 'history'])->name('kirim-peringatan.history');
         
         // CRUD resources
         Route::resource('mahasiswa', AdminMahasiswaController::class);

@@ -38,16 +38,17 @@ class MahasiswaBerisiko extends Mailable
             : [];
 
         $this->absensiKritis = $semAlpha > 0
-            ? $mahasiswa->absensis
-                ->where('semester', $semAlpha)
-                ->where('jam_alpha', '>=', 14)
-                ->map(fn($a) => [
-                    'nama'      => $a->mataKuliah->nama ?? '-',
-                    'jam_alpha' => (int) $a->jam_alpha,
-                    'sisa'      => max(0, 18 - (int) $a->jam_alpha),
-                    'kritis'    => $a->jam_alpha >= 18,
-                ])->values()->toArray()
-            : [];
+        ? $mahasiswa->absensis
+            ->where('semester', $semAlpha)
+            ->where('jam_alpha', '>', 0)
+            ->sortByDesc('jam_alpha')    
+            ->map(fn($a) => [
+                'nama'      => $a->mataKuliah->nama ?? '-',
+                'jam_alpha' => (int) $a->jam_alpha,
+                'sisa'      => max(0, 18 - (int) $a->jam_alpha),
+                'kritis'    => $a->jam_alpha >= 18,
+            ])->values()->toArray()
+        : [];
 
         $this->ipk        = round((float) ($mahasiswa->ipk ?? 0), 2);
         $this->totalAlpha = $semAlpha > 0

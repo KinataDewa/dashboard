@@ -1,13 +1,14 @@
 <?php
-// app/Http/Controllers/Admin/KirimPeringatanController.php
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mahasiswa;
 use App\Models\Kelas;
+use App\Models\EmailLog;
 use App\Mail\MahasiswaBerisiko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
 
 class KirimPeringatanController extends Controller
 {
@@ -84,27 +85,104 @@ class KirimPeringatanController extends Controller
         ));
     }
 
-    // Kirim email ke SATU mahasiswa
+    // ── Halaman History ─────────────────────────────────────
+    public function history(Request $request)
+    {
+        $filterStatus  = $request->get('status', 'semua');
+        $filterKelas   = $request->get('kelas', '');
+        $cari          = $request->get('cari', '');
+
+        $query = EmailLog::with(['mahasiswa.kelas', 'pengirim'])
+            ->orderBy('created_at', 'desc');
+
+        if ($filterStatus !== 'semua') {
+            $query->where('status', $filterStatus);
+        }
+
+        if ($filterKelas) {
+            $query->where('kelas', $filterKelas);
+        }
+
+        if ($cari) {
+            $query->where(function($q) use ($cari) {
+                $q->where('nama_mahasiswa', 'like', "%{$cari}%")
+                  ->orWhere('email_tujuan', 'like', "%{$cari}%");
+            });
+        }
+
+        $logs       = $query->paginate(20)->withQueryString();
+        $kelasList  = EmailLog::distinct()->pluck('kelas')->filter()->sort()->values();
+
+        // Statistik ringkasan
+        $totalLogs      = EmailLog::count();
+        $totalBerhasil  = EmailLog::where('status', 'berhasil')->count();
+        $totalGagal     = EmailLog::where('status', 'gagal')->count();
+        $terakhirKirim  = EmailLog::latest()->first()?->created_at;
+
+        return view('admin.kirim-peringatan.history', compact(
+            'logs', 'kelasList', 'filterStatus', 'filterKelas', 'cari',
+            'totalLogs', 'totalBerhasil', 'totalGagal', 'terakhirKirim'
+        ));
+    }
+
+    // ── Kirim ke SATU mahasiswa ──────────────────────────────
     public function kirimSatu(Request $request)
     {
         $mahasiswaId = $request->input('mahasiswa_id');
-        $mahasiswa   = Mahasiswa::with(['user', 'nilais.mataKuliah', 'absensis'])->findOrFail($mahasiswaId);
+        $mahasiswa   = Mahasiswa::with(['user', 'nilais.mataKuliah', 'absensis', 'kelas'])->findOrFail($mahasiswaId);
+
+        // Hitung kategori risiko untuk log
+        $semNilai   = $mahasiswa->nilais->max('semester') ?? 0;
+        $nilaiDE    = $semNilai > 0 ? $mahasiswa->nilais->where('semester', $semNilai)->whereIn('grade', ['D', 'E']) : collect();
+        $semAlpha   = $mahasiswa->absensis->max('semester') ?? 0;
+        $totalAlpha = $semAlpha > 0 ? $mahasiswa->absensis->where('semester', $semAlpha)->sum('jam_alpha') : 0;
+        $kategori   = [];
+        if ($nilaiDE->isNotEmpty()) $kategori[] = 'nilai';
+        if ($totalAlpha >= 18)      $kategori[] = 'absensi';
 
         try {
             Mail::to($mahasiswa->user->email)->send(new MahasiswaBerisiko($mahasiswa));
+
+            // Simpan log berhasil
+            EmailLog::create([
+                'mahasiswa_id'    => $mahasiswa->id,
+                'email_tujuan'    => $mahasiswa->user->email,
+                'nama_mahasiswa'  => $mahasiswa->nama ?? $mahasiswa->user->name,
+                'kelas'           => $mahasiswa->kelas->nama ?? '-',
+                'kategori_risiko' => $kategori,
+                'jumlah_nilai_de' => $nilaiDE->count(),
+                'total_alpha'     => $totalAlpha,
+                'status'          => 'berhasil',
+                'dikirim_oleh'    => Auth::id(),
+            ]);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Email berhasil dikirim ke ' . $mahasiswa->nama,
+                'message' => 'Email berhasil dikirim ke ' . ($mahasiswa->nama ?? $mahasiswa->user->name),
             ]);
         } catch (\Exception $e) {
+            // Simpan log gagal
+            EmailLog::create([
+                'mahasiswa_id'    => $mahasiswa->id,
+                'email_tujuan'    => $mahasiswa->user->email,
+                'nama_mahasiswa'  => $mahasiswa->nama ?? $mahasiswa->user->name,
+                'kelas'           => $mahasiswa->kelas->nama ?? '-',
+                'kategori_risiko' => $kategori,
+                'jumlah_nilai_de' => $nilaiDE->count(),
+                'total_alpha'     => $totalAlpha,
+                'status'          => 'gagal',
+                'pesan_error'     => $e->getMessage(),
+                'dikirim_oleh'    => Auth::id(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal kirim ke ' . $mahasiswa->nama . ': ' . $e->getMessage(),
+                'message' => 'Gagal kirim ke ' . ($mahasiswa->nama ?? $mahasiswa->user->name) . ': ' . $e->getMessage(),
             ], 500);
         }
     }
 
-    // Kirim email ke BANYAK mahasiswa (massal)
+    // ── Kirim MASSAL ─────────────────────────────────────────
     public function kirimMassal(Request $request)
     {
         $ids      = $request->input('ids', []);
@@ -113,15 +191,46 @@ class KirimPeringatanController extends Controller
         $pesanGagal = [];
 
         foreach ($ids as $id) {
-            $mahasiswa = Mahasiswa::with(['user', 'nilais.mataKuliah', 'absensis'])->find($id);
+            $mahasiswa = Mahasiswa::with(['user', 'nilais.mataKuliah', 'absensis', 'kelas'])->find($id);
             if (!$mahasiswa) continue;
+
+            $semNilai   = $mahasiswa->nilais->max('semester') ?? 0;
+            $nilaiDE    = $semNilai > 0 ? $mahasiswa->nilais->where('semester', $semNilai)->whereIn('grade', ['D', 'E']) : collect();
+            $semAlpha   = $mahasiswa->absensis->max('semester') ?? 0;
+            $totalAlpha = $semAlpha > 0 ? $mahasiswa->absensis->where('semester', $semAlpha)->sum('jam_alpha') : 0;
+            $kategori   = [];
+            if ($nilaiDE->isNotEmpty()) $kategori[] = 'nilai';
+            if ($totalAlpha >= 18)      $kategori[] = 'absensi';
 
             try {
                 Mail::to($mahasiswa->user->email)->send(new MahasiswaBerisiko($mahasiswa));
+                EmailLog::create([
+                    'mahasiswa_id'    => $mahasiswa->id,
+                    'email_tujuan'    => $mahasiswa->user->email,
+                    'nama_mahasiswa'  => $mahasiswa->nama ?? $mahasiswa->user->name,
+                    'kelas'           => $mahasiswa->kelas->nama ?? '-',
+                    'kategori_risiko' => $kategori,
+                    'jumlah_nilai_de' => $nilaiDE->count(),
+                    'total_alpha'     => $totalAlpha,
+                    'status'          => 'berhasil',
+                    'dikirim_oleh'    => Auth::id(),
+                ]);
                 $berhasil++;
             } catch (\Exception $e) {
+                EmailLog::create([
+                    'mahasiswa_id'    => $mahasiswa->id,
+                    'email_tujuan'    => $mahasiswa->user->email,
+                    'nama_mahasiswa'  => $mahasiswa->nama ?? $mahasiswa->user->name,
+                    'kelas'           => $mahasiswa->kelas->nama ?? '-',
+                    'kategori_risiko' => $kategori,
+                    'jumlah_nilai_de' => $nilaiDE->count(),
+                    'total_alpha'     => $totalAlpha,
+                    'status'          => 'gagal',
+                    'pesan_error'     => $e->getMessage(),
+                    'dikirim_oleh'    => Auth::id(),
+                ]);
                 $gagal++;
-                $pesanGagal[] = $mahasiswa->nama . ': ' . $e->getMessage();
+                $pesanGagal[] = ($mahasiswa->nama ?? $mahasiswa->user->name) . ': ' . $e->getMessage();
             }
         }
 

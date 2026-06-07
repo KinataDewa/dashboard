@@ -188,6 +188,12 @@
                 <input type="text" id="cariMhs" placeholder="Cari nama / NIM...">
             </div>
             @if($mahasiswaBerisiko->count() > 0)
+            <a href="{{ route('admin.kirim-peringatan.history') }}"
+                style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:9px;font-size:13px;font-weight:700;background:var(--white);color:var(--text-1);border:1.5px solid var(--border);text-decoration:none;transition:all .15s;"
+                onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'"
+                onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-1)'">
+                <i class="bi bi-clock-history"></i> History Email
+            </a>
             <button class="btn-kirim-massal" id="btnKirimMassal" onclick="kirimMassal()">
                 <i class="bi bi-envelope-fill"></i>
                 Kirim Semua (<span id="totalTerpilih">{{ $mahasiswaBerisiko->count() }}</span>)
