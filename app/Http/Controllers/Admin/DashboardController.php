@@ -37,26 +37,14 @@ class DashboardController extends Controller
             'nilais.mataKuliah',
             'absensis.mataKuliah',
             'kelas', 'dosenPa', 'user',
-        ])->get();
+        ])->where('status', 'aktif')->get();
 
         $terkirim = 0;
         $gagal    = 0;
 
         foreach ($mahasiswas as $mhs) {
-            // Gunakan semester terakhir agar penilaian risiko konsisten
-            $semNilai   = $mhs->nilais->max('semester') ?? 0;
-            $nilaiDE    = $semNilai > 0
-                ? $mhs->nilais->where('semester', $semNilai)->whereIn('grade', ['D', 'E'])
-                : collect();
-
-            $semAlpha   = $mhs->absensis->max('semester') ?? 0;
-            $totalAlpha = $semAlpha > 0
-                ? $mhs->absensis->where('semester', $semAlpha)->sum('jam_alpha')
-                : 0;
-
-            $isBerisiko = $nilaiDE->isNotEmpty() || $totalAlpha >= 18;
-
-            if (!$isBerisiko || !$mhs->user) continue;
+            // Gunakan isBerisiko() agar konsisten dengan Pedoman Akademik D4 TI Polinema
+            if (!$mhs->isBerisiko() || !$mhs->user) continue;
 
             $email = $mhs->user->email ?? null;
             if (!$email) continue;

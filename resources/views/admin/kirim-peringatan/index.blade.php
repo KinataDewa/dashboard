@@ -87,8 +87,9 @@
     'sub'         => 'Kirim notifikasi email akademik ke mahasiswa berisiko secara manual',
     'chips'       => [
         ['icon' => 'bi-exclamation-triangle-fill', 'label' => $summary['total_berisiko'] . ' Mahasiswa Berisiko'],
-        ['icon' => 'bi-x-circle-fill',             'label' => $summary['berisiko_nilai'] . ' Nilai D/E'],
-        ['icon' => 'bi-clock-history',             'label' => $summary['berisiko_absensi'] . ' Alpha ≥18 Jam'],
+        ['icon' => 'bi-clock-history',             'label' => $summary['berisiko_alpha'] . ' Berisiko Alpha (SP I–PS)'],
+        ['icon' => 'bi-x-circle-fill',             'label' => $summary['berisiko_nilai'] . ' Berisiko Nilai'],
+        ['icon' => 'bi-graph-down-arrow',          'label' => $summary['berisiko_ips'] . ' IPS < 2.00'],
     ],
     'badge_num'   => $summary['total_berisiko'],
     'badge_label' => "Total\nBerisiko",
@@ -96,6 +97,7 @@
 
 {{-- Summary Cards --}}
 <div class="sum-cards">
+    {{-- 1. Total --}}
     <div class="sum-card">
         <div class="sum-card-bar" style="background:linear-gradient(90deg,#EF4444,#FCA5A5);"></div>
         <div class="sum-card-body">
@@ -104,28 +106,41 @@
             <div class="sum-card-pct" style="background:#FEE2E2;color:#991B1B;">Perlu dihubungi</div>
         </div>
     </div>
+    {{-- 2. Alpha (SP I–PS) --}}
     <div class="sum-card">
-        <div class="sum-card-bar" style="background:linear-gradient(90deg,#F59E0B,#FCD34D);"></div>
+        <div class="sum-card-bar" style="background:linear-gradient(90deg,#EA580C,#FCD34D);"></div>
         <div class="sum-card-body">
-            <div class="sum-card-val" style="color:#F59E0B;">{{ $summary['berisiko_nilai'] }}</div>
-            <div class="sum-card-lbl">Berisiko Nilai D/E</div>
-            <div class="sum-card-pct" style="background:#FEF9C3;color:#854D0E;">Nilai buruk</div>
+            <div class="sum-card-val" style="color:#EA580C;">{{ $summary['berisiko_alpha'] }}</div>
+            <div class="sum-card-lbl">Berisiko Alpha</div>
+            <div style="font-size:10.5px;color:var(--text-3);margin-top:6px;line-height:1.7;">
+                SP I: <b>{{ $summary['sp1'] }}</b> &nbsp;|&nbsp;
+                SP II: <b>{{ $summary['sp2'] }}</b> &nbsp;|&nbsp;
+                SP III: <b>{{ $summary['sp3'] }}</b> &nbsp;|&nbsp;
+                PS: <b>{{ $summary['ps'] }}</b>
+            </div>
         </div>
     </div>
+    {{-- 3. Nilai (E + D>3) --}}
     <div class="sum-card">
-        <div class="sum-card-bar" style="background:linear-gradient(90deg,#8B5CF6,#A78BFA);"></div>
+        <div class="sum-card-bar" style="background:linear-gradient(90deg,#D97706,#FCD34D);"></div>
         <div class="sum-card-body">
-            <div class="sum-card-val" style="color:#8B5CF6;">{{ $summary['berisiko_absensi'] }}</div>
-            <div class="sum-card-lbl">Alpha ≥18 Jam</div>
-            <div class="sum-card-pct" style="background:#EDE9FE;color:#5B21B6;">Absensi tinggi</div>
+            <div class="sum-card-val" style="color:#D97706;">{{ $summary['berisiko_nilai'] }}</div>
+            <div class="sum-card-lbl">Berisiko Nilai</div>
+            <div style="font-size:10.5px;color:var(--text-3);margin-top:6px;line-height:1.7;">
+                Nilai E: <b>{{ $summary['nilai_e'] }}</b> &nbsp;|&nbsp;
+                D&gt;3: <b>{{ $summary['nilai_d'] }}</b>
+            </div>
         </div>
     </div>
+    {{-- 4. IPS Rendah --}}
     <div class="sum-card">
-        <div class="sum-card-bar" style="background:linear-gradient(90deg,#DC2626,#991B1B);"></div>
+        <div class="sum-card-bar" style="background:linear-gradient(90deg,#7C3AED,#A78BFA);"></div>
         <div class="sum-card-body">
-            <div class="sum-card-val" style="color:#DC2626;">{{ $summary['berisiko_keduanya'] }}</div>
-            <div class="sum-card-lbl">Berisiko Keduanya</div>
-            <div class="sum-card-pct" style="background:#FEE2E2;color:#991B1B;">Prioritas utama</div>
+            <div class="sum-card-val" style="color:#7C3AED;">{{ $summary['berisiko_ips'] }}</div>
+            <div class="sum-card-lbl">IPS &lt; 2.00</div>
+            <div class="sum-card-pct" style="background:#EDE9FE;color:#5B21B6;">
+                <i class="bi bi-graph-down-arrow" style="font-size:10px;"></i> IPS semester rendah
+            </div>
         </div>
     </div>
 </div>
@@ -149,13 +164,17 @@
            class="jenis-pill {{ $filterJenis === 'semua' ? 'active-semua' : '' }}">
             Semua ({{ $summary['total_berisiko'] }})
         </a>
+        <a href="{{ request()->fullUrlWithQuery(['jenis' => 'alpha']) }}"
+           class="jenis-pill {{ $filterJenis === 'alpha' ? 'active-absensi' : '' }}">
+            Alpha / SP ({{ $summary['berisiko_alpha'] }})
+        </a>
         <a href="{{ request()->fullUrlWithQuery(['jenis' => 'nilai']) }}"
            class="jenis-pill {{ $filterJenis === 'nilai' ? 'active-nilai' : '' }}">
             Nilai D/E ({{ $summary['berisiko_nilai'] }})
         </a>
-        <a href="{{ request()->fullUrlWithQuery(['jenis' => 'absensi']) }}"
-           class="jenis-pill {{ $filterJenis === 'absensi' ? 'active-absensi' : '' }}">
-            Alpha ≥18 Jam ({{ $summary['berisiko_absensi'] }})
+        <a href="{{ request()->fullUrlWithQuery(['jenis' => 'ips_rendah']) }}"
+           class="jenis-pill {{ $filterJenis === 'ips_rendah' ? 'active-absensi' : '' }}">
+            IPS&lt;2.00 ({{ $summary['ips_rendah'] }})
         </a>
     </div>
 </div>
@@ -236,14 +255,24 @@
                 @php
                     $colors     = ['#2563EB','#EF4444','#8B5CF6','#F59E0B','#0891B2','#DB2777','#16A34A'];
                     $aColor     = $colors[$i % count($colors)];
-                    $isKeduanya = count($mhs['kategori']) >= 2;
-                    $isNilai    = in_array('nilai', $mhs['kategori']);
-                    $isAbsensi  = in_array('absensi', $mhs['kategori']);
-                    $alphaWidth = min(($mhs['total_alpha'] / 36) * 100, 100);
+                    $isKritis   = array_intersect(['ps','sp3'], $mhs['kategori']) !== [];
+                    $alphaWidth = min(($mhs['total_alpha'] / 56) * 100, 100);
+                    $alphaColor = $mhs['total_alpha'] >= 47 ? '#7F1D1D'
+                        : ($mhs['total_alpha'] >= 36 ? '#DC2626'
+                        : ($mhs['total_alpha'] >= 18 ? '#8B5CF6' : 'var(--text-2)'));
+                    $badgeMap   = [
+                        'ps'         => ['bg' => '#FEE2E2', 'color' => '#7F1D1D', 'icon' => 'bi-x-octagon-fill',          'label' => 'Putus Studi'],
+                        'sp3'        => ['bg' => '#FEE2E2', 'color' => '#DC2626', 'icon' => 'bi-alarm-fill',              'label' => 'SP III'],
+                        'sp2'        => ['bg' => '#FEF3C7', 'color' => '#EA580C', 'icon' => 'bi-clock-fill',              'label' => 'SP II'],
+                        'sp1'        => ['bg' => '#FEF9C3', 'color' => '#D97706', 'icon' => 'bi-clock-history',           'label' => 'SP I'],
+                        'nilai_e'    => ['bg' => '#FEE2E2', 'color' => '#991B1B', 'icon' => 'bi-x-circle-fill',           'label' => 'Nilai E'],
+                        'nilai_d'    => ['bg' => '#FEF9C3', 'color' => '#B45309', 'icon' => 'bi-exclamation-circle-fill', 'label' => 'D>3 MK'],
+                        'ips_rendah' => ['bg' => '#EDE9FE', 'color' => '#5B21B6', 'icon' => 'bi-graph-down-arrow',        'label' => 'IPS<2.00'],
+                    ];
                 @endphp
                 <tr data-nama="{{ strtolower($mhs['nama']) }}" data-nim="{{ $mhs['nim'] }}"
                     data-id="{{ $mhs['id'] }}"
-                    style="{{ $isKeduanya ? 'background:rgba(239,68,68,.025);' : '' }}"
+                    style="{{ $isKritis ? 'background:rgba(239,68,68,.025);' : '' }}"
                     id="row-{{ $mhs['id'] }}">
 
                     <td>
@@ -282,18 +311,30 @@
                     </td>
 
                     <td style="text-align:center;">
-                        <span style="font-weight:800;font-size:16px;color:{{ $mhs['total_alpha'] >= 18 ? '#8B5CF6' : 'var(--text-2)' }};">
+                        <span style="font-weight:800;font-size:16px;color:{{ $alphaColor }};">
                             {{ $mhs['total_alpha'] }}j
                         </span>
+                        @if($mhs['total_alpha'] > 0)
+                        <div style="width:48px;height:3px;background:#F1F5F9;border-radius:2px;overflow:hidden;margin:3px auto 0;">
+                            <div style="height:100%;width:{{ $alphaWidth }}%;background:{{ $alphaColor }};border-radius:2px;"></div>
+                        </div>
+                        @endif
                     </td>
 
                     <td style="text-align:center;">
-                        @if($isKeduanya)
-                        <span class="badge-both"><i class="bi bi-exclamation-triangle-fill" style="font-size:10px;"></i> Nilai + Alpha</span>
-                        @elseif($isNilai)
-                        <span class="badge-de"><i class="bi bi-x-circle-fill" style="font-size:10px;"></i> Nilai D/E</span>
-                        @elseif($isAbsensi)
-                        <span class="badge-alpha"><i class="bi bi-clock-history" style="font-size:10px;"></i> Alpha ≥18j</span>
+                        @php
+                            $shown = array_slice($mhs['kategori'], 0, 2);
+                            $extra = count($mhs['kategori']) - 2;
+                        @endphp
+                        @foreach($shown as $kat)
+                        @php $b = $badgeMap[$kat] ?? ['bg'=>'#F1F5F9','color'=>'#64748B','icon'=>'bi-exclamation','label'=>$kat]; @endphp
+                        <span style="display:inline-flex;align-items:center;gap:2px;border-radius:99px;padding:2px 7px;font-size:10.5px;font-weight:700;background:{{ $b['bg'] }};color:{{ $b['color'] }};margin:1px;white-space:nowrap;">
+                            <i class="bi {{ $b['icon'] }}" style="font-size:9px;"></i>
+                            {{ $b['label'] }}
+                        </span>
+                        @endforeach
+                        @if($extra > 0)
+                        <span style="display:inline-flex;align-items:center;border-radius:99px;padding:2px 7px;font-size:10.5px;font-weight:700;background:#F1F5F9;color:#64748B;margin:1px;">+{{ $extra }}</span>
                         @endif
                     </td>
 

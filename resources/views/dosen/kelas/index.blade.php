@@ -5,14 +5,6 @@
 @section('page-sub', $dosen->nama . ' · ' . $mahasiswas->count() . ' mahasiswa')
 
 @push('styles')
-<style>
-.grade-pill{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:11px;font-weight:800;}
-.grade-A{background:#DCFCE7;color:#15803D;}
-.grade-B{background:#DBEAFE;color:#1D4ED8;}
-.grade-C{background:#FEF9C3;color:#854D0E;}
-.grade-D{background:#FEE2E2;color:#991B1B;}
-.grade-E{background:#FEE2E2;color:#7F1D1D;}
-</style>
 @endpush
 
 @section('content')
@@ -111,7 +103,7 @@
                     <th>Mahasiswa</th>
                     <th style="text-align:center;">IPK</th>
                     <th style="text-align:center;">Alpha Total</th>
-                    <th style="text-align:center;">Grade Min</th>
+                    <th style="text-align:center;">Kategori Risiko</th>
                     <th>Status</th>
                     <th></th>
                 </tr>
@@ -122,12 +114,19 @@
                     $ipkMhs   = $mhs->ipk_val ?? $mhs->ipk;
                     $berisiko = $mhs->is_berisiko ?? $mhs->isBerisiko();
                     $totalAlp = $mhs->absensis->sum('jam_alpha');
-                    $grades   = $mhs->nilais->pluck('grade');
-                    $gradeMin = $grades->isEmpty() ? '—'
-                        : ($grades->contains('E') ? 'E' : ($grades->contains('D') ? 'D'
-                        : ($grades->contains('C') ? 'C' : ($grades->contains('B') ? 'B' : 'A'))));
+                    $kategoriRisiko = $mhs->getKategoriRisiko();
                     $colors = ['#2563EB','#16A34A','#7C3AED','#F59E0B','#EF4444','#0891B2','#DB2777'];
                     $aColor = $colors[$i % count($colors)];
+                    $badgeMap = [
+                        'ps'         => ['bg' => '#FEE2E2', 'color' => '#7F1D1D', 'label' => 'Putus Studi'],
+                        'sp3'        => ['bg' => '#FEE2E2', 'color' => '#DC2626', 'label' => 'SP III'],
+                        'sp2'        => ['bg' => '#FEF3C7', 'color' => '#EA580C', 'label' => 'SP II'],
+                        'sp1'        => ['bg' => '#FEF9C3', 'color' => '#D97706', 'label' => 'SP I'],
+                        'nilai_e'    => ['bg' => '#FEE2E2', 'color' => '#991B1B', 'label' => 'Nilai E'],
+                        'nilai_d'    => ['bg' => '#FEF9C3', 'color' => '#B45309', 'label' => 'D >3'],
+                        'ips_rendah' => ['bg' => '#EDE9FE', 'color' => '#5B21B6', 'label' => 'IPS < 2'],
+                    ];
+                    $extraBadge = max(0, count($kategoriRisiko) - 2);
                 @endphp
                 <tr data-nama="{{ strtolower($mhs->nama) }}"
                     data-status="{{ $berisiko ? 'berisiko' : 'aman' }}"
@@ -159,10 +158,17 @@
                         </span>
                     </td>
                     <td style="text-align:center;">
-                        @if($gradeMin !== '—')
-                            <span class="grade-pill grade-{{ $gradeMin }}">{{ $gradeMin }}</span>
+                        @if(empty($kategoriRisiko))
+                            <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:#DCFCE7;color:#166534;">Aman</span>
                         @else
-                            <span style="color:var(--text-3);font-size:13px;">—</span>
+                            <div style="display:flex;flex-wrap:wrap;gap:3px;justify-content:center;">
+                            @foreach(array_slice($kategoriRisiko, 0, 2) as $kat)
+                                <span style="display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10.5px;font-weight:700;background:{{ $badgeMap[$kat]['bg'] }};color:{{ $badgeMap[$kat]['color'] }};">{{ $badgeMap[$kat]['label'] }}</span>
+                            @endforeach
+                            @if($extraBadge > 0)
+                                <span style="display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10.5px;font-weight:700;background:#F1F5F9;color:#475569;">+{{ $extraBadge }} lagi</span>
+                            @endif
+                            </div>
                         @endif
                     </td>
                     <td>

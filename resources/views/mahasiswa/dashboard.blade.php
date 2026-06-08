@@ -148,14 +148,16 @@
 /* Grade pill */
 .grade-pill {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 28px; height: 28px; border-radius: 50%;
-    font-size: 12px; font-weight: 800;
+    min-width: 28px; height: 28px; border-radius: 50%;
+    font-size: 12px; font-weight: 800; padding: 0 4px;
 }
-.grade-A { background: #DCFCE7; color: #15803D; }
-.grade-B { background: #DBEAFE; color: #1D4ED8; }
-.grade-C { background: #FEF9C3; color: #854D0E; }
-.grade-D { background: #FEE2E2; color: #991B1B; }
-.grade-E { background: #FEE2E2; color: #7F1D1D; }
+.grade-A  { background: #DCFCE7; color: #15803D; }
+.grade-Bp { background: #DBEAFE; color: #1E40AF; }
+.grade-B  { background: #EFF6FF; color: #1D4ED8; }
+.grade-Cp { background: #FEF9C3; color: #78350F; }
+.grade-C  { background: #F5F3FF; color: #6D28D9; }
+.grade-D  { background: #FEE2E2; color: #991B1B; }
+.grade-E  { background: #FEE2E2; color: #7F1D1D; }
 
 /* Score bar mini */
 .score-bar {
@@ -391,71 +393,109 @@
 
 {{-- ══ ALERT MAHASISWA ══ --}}
 @php
-    $totalAlpha    = $absensis->sum('jam_alpha');   // hitung di sini dulu
-    $alertNilaiDE  = $nilaiDE->count() > 0;
-    $alertAlpha    = $totalAlpha >= 14;
-    $showAlert     = $alertNilaiDE || $alertAlpha;
+    // $totalAlpha dan $kategoriRisiko sudah di-pass dari controller
+    $spLabels = [
+        'ps'  => 'Putus Studi',
+        'sp3' => 'SP III',
+        'sp2' => 'SP II',
+        'sp1' => 'SP I',
+    ];
+    $hasAlphaRisk = !empty(array_intersect($kategoriRisiko, ['ps','sp3','sp2','sp1']));
+    $hasNilaiE    = in_array('nilai_e', $kategoriRisiko);
+    $hasNilaiD    = in_array('nilai_d', $kategoriRisiko);
+    $hasIpsRendah = in_array('ips_rendah', $kategoriRisiko);
+    $showAlert    = !empty($kategoriRisiko);
+    $spAktif      = collect(['ps','sp3','sp2','sp1'])->first(fn($k) => in_array($k, $kategoriRisiko));
 @endphp
- 
+
 @if($showAlert)
 <div class="mhs-alert-wrap" id="mhsAlert">
     <div class="mhs-pulse-ring"></div>
- 
+
     <div class="mhs-alert-left">
         <div class="mhs-alert-icon">
             <i class="bi bi-exclamation-triangle-fill"></i>
         </div>
- 
+
         <div class="mhs-alert-content">
-            <div class="mhs-alert-tag">⚡ Perhatian Diperlukan</div>
- 
-            @if($alertNilaiDE && $alertAlpha)
-                <div class="mhs-alert-title">
-                    Nilai D/E & Absensi Anda Memerlukan Perhatian!
-                </div>
+            <div class="mhs-alert-tag">⚡ Peringatan Akademik</div>
+
+            @if($spAktif === 'ps')
+                <div class="mhs-alert-title">Status Putus Studi — Segera Hubungi Jurusan!</div>
                 <div class="mhs-alert-desc">
-                    Anda memiliki <strong>{{ $nilaiDE->count() }} nilai D/E</strong>
-                    dan <strong>{{ $totalAlpha }} jam alpha</strong>
-                    ({{ 18 - $totalAlpha <= 0 ? 'telah melewati' : (18 - $totalAlpha) . ' jam lagi mencapai' }} batas 18 jam).
-                    Segera hubungi Dosen PA Anda!
+                    Total alpha Anda telah mencapai <strong>{{ $totalAlpha }} jam</strong>,
+                    melampaui batas <strong>56 jam (Putus Studi)</strong>.
+                    Hubungi Dosen PA dan Jurusan segera!
                 </div>
-            @elseif($alertNilaiDE)
-                <div class="mhs-alert-title">
-                    {{ $nilaiDE->count() }} Nilai Anda Masuk Kategori D/E!
-                </div>
+            @elseif($spAktif === 'sp3')
+                <div class="mhs-alert-title">Surat Peringatan III — Tindakan Segera Diperlukan!</div>
                 <div class="mhs-alert-desc">
-                    Nilai rendah dapat mempengaruhi IPK dan kelulusan Anda.
-                    Segera konsultasikan dengan <strong>Dosen Pembimbing Akademik</strong> untuk tindakan perbaikan.
+                    Total alpha Anda <strong>{{ $totalAlpha }} jam</strong> (batas SP III: 47 jam).
+                    {{ (56 - $totalAlpha) > 0 ? (56 - $totalAlpha) . ' jam lagi ke batas Putus Studi.' : 'Telah melampaui batas Putus Studi!' }}
+                    Segera konsultasi dengan Dosen PA!
                 </div>
-            @else
-                <div class="mhs-alert-title">
-                    Absensi Anda {{ $totalAlpha >= 18 ? 'Melewati Batas!' : 'Mendekati Batas!' }}
-                </div>
+            @elseif($spAktif === 'sp2')
+                <div class="mhs-alert-title">Surat Peringatan II — Risiko Tinggi!</div>
                 <div class="mhs-alert-desc">
-                    Total alpha Anda sudah <strong>{{ $totalAlpha }} jam</strong>
-                    dari batas maksimal <strong>18 jam</strong>.
-                    {{ $totalAlpha >= 18 ? 'Anda Termasuk Mahasiswa Beresiko!' : (18 - $totalAlpha) . ' jam lagi Anda termasuk mahasiswa beresiko.' }}
+                    Total alpha Anda <strong>{{ $totalAlpha }} jam</strong> (batas SP II: 36 jam).
+                    {{ (47 - $totalAlpha) }} jam lagi ke batas SP III. Perbaiki kehadiran segera!
+                </div>
+            @elseif($spAktif === 'sp1')
+                <div class="mhs-alert-title">Surat Peringatan I — Perhatikan Kehadiran Anda!</div>
+                <div class="mhs-alert-desc">
+                    Total alpha Anda <strong>{{ $totalAlpha }} jam</strong> (batas SP I: 18 jam).
+                    {{ (36 - $totalAlpha) }} jam lagi ke batas SP II. Jaga kehadiran Anda!
+                </div>
+            @elseif($hasNilaiE)
+                <div class="mhs-alert-title">Terdapat Nilai E di Semester Ini!</div>
+                <div class="mhs-alert-desc">
+                    Nilai E merupakan indikator risiko akademik yang dapat mempengaruhi IPS dan kelulusan.
+                    Segera konsultasikan dengan <strong>Dosen Pembimbing Akademik</strong>.
+                </div>
+            @elseif($hasNilaiD)
+                <div class="mhs-alert-title">Nilai D Lebih dari 3 Mata Kuliah!</div>
+                <div class="mhs-alert-desc">
+                    Anda memiliki lebih dari 3 mata kuliah dengan nilai D di semester ini.
+                    Kondisi ini termasuk indikator risiko akademik. Hubungi Dosen PA!
+                </div>
+            @elseif($hasIpsRendah)
+                <div class="mhs-alert-title">IPS Semester Ini di Bawah 2.00!</div>
+                <div class="mhs-alert-desc">
+                    IPS &lt; 2.00 merupakan indikator risiko akademik sesuai Pedoman Akademik D4 TI Polinema.
+                    Segera konsultasikan strategi peningkatan dengan <strong>Dosen PA</strong>.
                 </div>
             @endif
- 
+
             {{-- Detail pills --}}
             <div class="mhs-alert-pills">
-                @if($alertNilaiDE)
-                <span class="mhs-alert-pill">
-                    <i class="bi bi-journal-x"></i>
-                    {{ $nilaiDE->count() }} Nilai D/E
+                @if($spAktif)
+                <span class="mhs-alert-pill pill-danger">
+                    <i class="bi bi-clock-history"></i>
+                    {{ $totalAlpha }}j Alpha — {{ $spLabels[$spAktif] }}
                 </span>
                 @endif
-                @if($alertAlpha)
-                <span class="mhs-alert-pill {{ $totalAlpha >= 18 ? 'pill-danger' : '' }}">
-                    <i class="bi bi-clock-history"></i>
-                    {{ $totalAlpha }}j Alpha {{ $totalAlpha >= 18 ? '⛔' : '⚠️' }}
+                @if($hasNilaiE)
+                <span class="mhs-alert-pill pill-danger">
+                    <i class="bi bi-journal-x"></i>
+                    Ada Nilai E
+                </span>
+                @endif
+                @if($hasNilaiD)
+                <span class="mhs-alert-pill pill-danger">
+                    <i class="bi bi-journal-minus"></i>
+                    D &gt; 3 MK
+                </span>
+                @endif
+                @if($hasIpsRendah)
+                <span class="mhs-alert-pill pill-danger">
+                    <i class="bi bi-graph-down"></i>
+                    IPS &lt; 2.00
                 </span>
                 @endif
             </div>
         </div>
     </div>
- 
+
     <div class="mhs-alert-right">
         <a href="{{ route('mahasiswa.nilai') }}" class="mhs-alert-btn">
             <i class="bi bi-eye-fill"></i>
@@ -535,32 +575,43 @@
     </div>
 
     {{-- Alpha --}}
-    @php $totalAlpha = $absensis->sum('jam_alpha'); @endphp
     <div class="col-sm-4 col-12">
+        @php
+            $alphaColor  = $totalAlpha >= 47 ? '#7F1D1D'
+                : ($totalAlpha >= 36 ? '#DC2626'
+                : ($totalAlpha >= 18 ? '#EF4444'
+                : ($totalAlpha >= 14 ? '#F59E0B' : '#22C55E')));
+            $alphaAccent = $totalAlpha >= 18
+                ? 'linear-gradient(90deg,#EF4444,#FCA5A5)'
+                : ($totalAlpha >= 14 ? 'linear-gradient(90deg,#F59E0B,#FCD34D)'
+                : 'linear-gradient(90deg,#22C55E,#86EFAC)');
+            $spBadge = match(true) {
+                $totalAlpha >= 56 => ['label' => '⛔ Putus Studi', 'class' => 'badge-down'],
+                $totalAlpha >= 47 => ['label' => '⛔ SP III', 'class' => 'badge-down'],
+                $totalAlpha >= 36 => ['label' => '⚠ SP II', 'class' => 'badge-down'],
+                $totalAlpha >= 18 => ['label' => '⚠ SP I', 'class' => 'badge-warn'],
+                $totalAlpha >= 14 => ['label' => '⚡ ' . (18 - $totalAlpha) . 'j lagi SP I', 'class' => 'badge-warn'],
+                default           => ['label' => '✅ Aman', 'class' => 'badge-up'],
+            };
+        @endphp
         <div class="stat-card-v2">
-            <div class="stat-card-accent" style="background: {{ $totalAlpha >= 18 ? 'linear-gradient(90deg,#EF4444,#FCA5A5)' : ($totalAlpha >= 14 ? 'linear-gradient(90deg,#F59E0B,#FCD34D)' : 'linear-gradient(90deg,#22C55E,#86EFAC)') }};"></div>
+            <div class="stat-card-accent" style="background: {{ $alphaAccent }};"></div>
             <div class="stat-card-body">
                 <div class="stat-icon-box" style="background:{{ $totalAlpha >= 14 ? '#FEF3C7' : '#F0FDF4' }};">
-                    <i class="bi bi-clock-fill" style="color:{{ $totalAlpha >= 18 ? '#EF4444' : ($totalAlpha >= 14 ? '#F59E0B' : '#22C55E') }};"></i>
+                    <i class="bi bi-clock-fill" style="color:{{ $alphaColor }};"></i>
                 </div>
                 <div class="stat-card-info">
                     <div class="stat-card-label">Total Jam Ketidakhadiran</div>
-                    <div class="stat-card-value" style="color:{{ $totalAlpha >= 18 ? '#EF4444' : ($totalAlpha >= 14 ? '#F59E0B' : 'var(--text-1)') }};">
+                    <div class="stat-card-value" style="color:{{ $alphaColor }};">
                         {{ $totalAlpha }}
-                        <span style="font-size:16px;font-weight:600;color:var(--text-2);">/ 18 jam</span>
+                        <span style="font-size:16px;font-weight:600;color:var(--text-2);">jam</span>
                     </div>
-                    {{-- Progress to limit --}}
+                    {{-- Progress: 56j = batas Putus Studi --}}
                     <div class="ipk-bar" style="background:#FEF3C7;">
-                        <div class="ipk-bar-fill" style="width:{{ min(($totalAlpha/18)*100, 100) }}%; background:{{ $totalAlpha >= 18 ? '#EF4444' : ($totalAlpha >= 14 ? '#F59E0B' : '#22C55E') }};"></div>
+                        <div class="ipk-bar-fill" style="width:{{ min(($totalAlpha/56)*100, 100) }}%; background:{{ $alphaColor }};"></div>
                     </div>
                     <div class="stat-card-note mt-2">
-                        @if($totalAlpha >= 18)
-                            <span class="stat-card-badge badge-down">⛔ Termasuk Mahasiswa Beresiko!</span>
-                        @elseif($totalAlpha >= 14)
-                            <span class="stat-card-badge badge-warn">⚠ {{ 18 - $totalAlpha }} jam lagi batas</span>
-                        @else
-                            <span class="stat-card-badge badge-up">✅ Aman</span>
-                        @endif
+                        <span class="stat-card-badge {{ $spBadge['class'] }}">{{ $spBadge['label'] }}</span>
                     </div>
                 </div>
             </div>
@@ -644,7 +695,7 @@
             </div>
             {{-- Chart legend --}}
             <div class="d-flex gap-3 flex-wrap mt-3">
-                @foreach(['A'=>['#22C55E','Sangat Baik'],'B'=>['#3B82F6','Baik'],'C'=>['#FBBF24','Cukup'],'D'=>['#F97316','Kurang'],'E'=>['#EF4444','Sangat Kurang']] as $g => $info)
+                @foreach(['A'=>['#22C55E','Sangat Baik'],'B+'=>['#3B82F6','Baik Sekali'],'B'=>['#60A5FA','Baik'],'C+'=>['#FBBF24','Cukup Baik'],'C'=>['#A78BFA','Cukup'],'D'=>['#F97316','Kurang'],'E'=>['#EF4444','Sangat Kurang']] as $g => $info)
                 <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-2);">
                     <div style="width:8px;height:8px;border-radius:2px;background:{{ $info[0] }};flex-shrink:0;"></div>
                     {{ $g }} – {{ $info[1] }}
@@ -792,10 +843,15 @@
                         @php
                             $isDE = in_array($nilai->grade, ['D','E']);
                             $scoreWidth = min($nilai->nilai_akhir, 100);
-                            $scoreColor = $nilai->grade === 'A' ? '#22C55E'
-                                : ($nilai->grade === 'B' ? '#3B82F6'
-                                : ($nilai->grade === 'C' ? '#FBBF24'
-                                : '#EF4444'));
+                            $scoreColor = match($nilai->grade) {
+                                'A'  => '#22C55E',
+                                'B+' => '#3B82F6',
+                                'B'  => '#60A5FA',
+                                'C+' => '#FBBF24',
+                                'C'  => '#A78BFA',
+                                default => '#EF4444',
+                            };
+                            $gradeClass = str_replace('+', 'p', $nilai->grade);
                         @endphp
                         <tr data-matkul="{{ strtolower($nilai->mataKuliah->nama) }}"
                             data-status="{{ $isDE ? 'perhatian' : 'baik' }}">
@@ -815,7 +871,7 @@
                                 </div>
                             </td>
                             <td style="text-align:center;">
-                                <span class="grade-pill grade-{{ $nilai->grade }}">{{ $nilai->grade }}</span>
+                                <span class="grade-pill grade-{{ $gradeClass }}">{{ $nilai->grade }}</span>
                             </td>
                         </tr>
                         @empty
@@ -986,8 +1042,8 @@ var LABELS = @json($cLabels);
 var GRADES = @json($cGrades);
 var VALUES = @json($cValues);
 
-var G2Y = {A:5,B:4,C:3,D:2,E:1};
-var G2C = {A:'#22C55E',B:'#3B82F6',C:'#FBBF24',D:'#F97316',E:'#EF4444'};
+var G2Y = {A:5,'B+':4.5,B:4,'C+':3.5,C:3,D:2,E:1};
+var G2C = {A:'#22C55E','B+':'#3B82F6',B:'#60A5FA','C+':'#FBBF24',C:'#A78BFA',D:'#F97316',E:'#EF4444'};
 var barData   = GRADES.map(function(g){ return G2Y[g]||0; });
 var barColors = GRADES.map(function(g){ return G2C[g]||'#2563EB'; });
 
@@ -1016,9 +1072,8 @@ var barChart = new Chart(barCtx, {
                 callbacks: {
                     title: function(items) { return LABELS[items[0].dataIndex]; },
                     label: function(ctx) {
-                        var map = ['','E','D','C','B','A'];
                         return [
-                            ' Grade  : ' + (map[ctx.raw]||''),
+                            ' Grade  : ' + GRADES[ctx.dataIndex],
                             ' Nilai  : ' + VALUES[ctx.dataIndex]
                         ];
                     }
@@ -1037,7 +1092,7 @@ var barChart = new Chart(barCtx, {
                 min:0, max:5,
                 ticks: {
                     stepSize:1,
-                    callback: function(v){ return ['','E','D','C','B','A'][v]||''; },
+                    callback: function(v){ var m={0:'',1:'E',2:'D',3:'C',4:'B',5:'A'}; return m[v]||''; },
                     font: { family:'Plus Jakarta Sans', size:11 }, color:'#64748B'
                 },
                 grid: { color:'#F8FAFC' },
@@ -1119,7 +1174,7 @@ document.getElementById('filterAbsensiDonutBtn').addEventListener('filterChange'
     document.getElementById('legendSakitVal').textContent  = d.sakit + 'j';
     document.getElementById('legendSakitBar').style.width  = pS + '%';
     document.getElementById('legendAlphaVal').textContent  = d.alpha + 'j';
-    document.getElementById('legendAlphaVal').style.color  = d.alpha >= 14 ? '#EF4444' : 'var(--text-1)';
+    document.getElementById('legendAlphaVal').style.color  = d.alpha >= 18 ? '#EF4444' : 'var(--text-1)';
     document.getElementById('legendAlphaBar').style.width  = pA + '%';
 });
 

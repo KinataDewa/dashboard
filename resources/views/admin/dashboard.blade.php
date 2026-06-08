@@ -183,8 +183,8 @@
                 {{ $mahasiswaBerisiko }} Mahasiswa Terdeteksi Berisiko Akademik
             </div>
             <div class="risk-alert-desc">
-                Terdapat mahasiswa dengan <strong>nilai D/E</strong> atau <strong>absensi ≥18 jam</strong>.
-                DPA perlu segera melakukan bimbingan agar tidak mempengaruhi kelulusan.
+                Terdapat mahasiswa dengan <strong>nilai D/E</strong>, <strong>alpha ≥18 jam (SP I–PS)</strong>, atau <strong>IPS &lt;2.00</strong> di semester terakhir.
+                Segera arahkan DPA untuk bimbingan agar tidak berdampak pada kelulusan.
             </div>
         </div>
     </div>

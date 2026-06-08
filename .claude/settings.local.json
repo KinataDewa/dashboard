@@ -5,7 +5,11 @@
       "Bash(Select-Object Name, PSIsContainer)",
       "Bash(Get-ChildItem -Path \"C:\\\\laragon\\\\www\\\\dashboard\" -Directory)",
       "Bash(Select-Object Name)",
-      "Bash(php artisan *)"
+      "Bash(php artisan *)",
+      "Bash(php -l app/Http/Controllers/Mahasiswa/DashboardController.php)",
+      "Bash(php -l app/Mail/MahasiswaBerisiko.php)",
+      "Bash(php -l app/Http/Controllers/Admin/DashboardController.php)",
+      "Bash(php -l app/Http/Controllers/Admin/KirimPeringatanController.php)"
     ]
   }
 }

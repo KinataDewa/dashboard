@@ -8,12 +8,6 @@
 <style>
 .ipk-bar{width:100%;height:4px;background:#EFF6FF;border-radius:2px;margin-top:6px;overflow:hidden;}
 .ipk-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#2563EB,#60A5FA);}
-.grade-pill{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:11px;font-weight:800;}
-.grade-A{background:#DCFCE7;color:#15803D;}
-.grade-B{background:#DBEAFE;color:#1D4ED8;}
-.grade-C{background:#FEF9C3;color:#854D0E;}
-.grade-D{background:#FEE2E2;color:#991B1B;}
-.grade-E{background:#FEE2E2;color:#7F1D1D;}
 .chart-card-v2{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;}
 .chart-head-v2{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}
 .chart-title-v2{font-size:15px;font-weight:700;color:var(--text-1);}
@@ -388,7 +382,7 @@
                     <th style="text-align:center;">IPK</th>
                     <th class="hide-mobile" style="text-align:center;">IP Sem</th>
                     <th style="text-align:center;">Alpha</th>
-                    <th class="hide-mobile" style="text-align:center;">Grade Min</th>
+                    <th class="hide-mobile" style="text-align:center;">Kategori Risiko</th>
                     <th style="text-align:center;">Status</th>
                     <th style="width:80px;"></th>
                 </tr>
@@ -402,10 +396,18 @@
                     $berisiko    = $mhs->is_berisiko ?? $mhs->isBerisiko();
                     $semAlphaTbl = $mhs->absensis->max('semester') ?? 0;
                     $totalAlp    = $semAlphaTbl > 0 ? $mhs->absensis->where('semester', $semAlphaTbl)->sum('jam_alpha') : 0;
-                    $semNilaiTbl = $mhs->nilais->max('semester') ?? 0;
-                    $grades      = $semNilaiTbl > 0 ? $mhs->nilais->where('semester', $semNilaiTbl)->pluck('grade') : collect();
-                    $gradeMin    = $grades->contains('E') ? 'E' : ($grades->contains('D') ? 'D' : ($grades->contains('C') ? 'C' : ($grades->contains('B') ? 'B' : 'A')));
+                    $kategoriRisiko = $mhs->getKategoriRisiko();
                     $colors   = ['#2563EB','#16A34A','#7C3AED','#F59E0B','#EF4444','#0891B2','#DB2777'];
+                    $badgeMap = [
+                        'ps'         => ['bg' => '#FEE2E2', 'color' => '#7F1D1D', 'label' => 'Putus Studi'],
+                        'sp3'        => ['bg' => '#FEE2E2', 'color' => '#DC2626', 'label' => 'SP III'],
+                        'sp2'        => ['bg' => '#FEF3C7', 'color' => '#EA580C', 'label' => 'SP II'],
+                        'sp1'        => ['bg' => '#FEF9C3', 'color' => '#D97706', 'label' => 'SP I'],
+                        'nilai_e'    => ['bg' => '#FEE2E2', 'color' => '#991B1B', 'label' => 'Nilai E'],
+                        'nilai_d'    => ['bg' => '#FEF9C3', 'color' => '#B45309', 'label' => 'D >3'],
+                        'ips_rendah' => ['bg' => '#EDE9FE', 'color' => '#5B21B6', 'label' => 'IPS < 2'],
+                    ];
+                    $extraBadge = max(0, count($kategoriRisiko) - 2);
                     $aColor   = $colors[$i % count($colors)];
                     $hasKompen = $mhs->kompensasis->where('status','pending')->isNotEmpty();
                 @endphp
@@ -444,7 +446,18 @@
                         {{ $totalAlp }}j {{ $totalAlp>=18 ? '⛔' : ($totalAlp>=14 ? '⚠️' : '') }}
                     </td>
                     <td class="hide-mobile" style="text-align:center;">
-                        <span class="grade-pill grade-{{ $gradeMin }}">{{ $gradeMin }}</span>
+                        @if(empty($kategoriRisiko))
+                            <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:#DCFCE7;color:#166534;">Aman</span>
+                        @else
+                            <div style="display:flex;flex-wrap:wrap;gap:3px;justify-content:center;">
+                            @foreach(array_slice($kategoriRisiko, 0, 2) as $kat)
+                                <span style="display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10.5px;font-weight:700;background:{{ $badgeMap[$kat]['bg'] }};color:{{ $badgeMap[$kat]['color'] }};">{{ $badgeMap[$kat]['label'] }}</span>
+                            @endforeach
+                            @if($extraBadge > 0)
+                                <span style="display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10.5px;font-weight:700;background:#F1F5F9;color:#475569;">+{{ $extraBadge }} lagi</span>
+                            @endif
+                            </div>
+                        @endif
                     </td>
                     <td style="text-align:center;">
                         @if($berisiko)
