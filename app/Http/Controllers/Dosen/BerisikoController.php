@@ -20,20 +20,27 @@ class BerisikoController extends Controller
 
         $filterJenis = $request->get('jenis', 'semua');
 
-        // Query konsisten: pakai dosen_pa_id langsung (sama seperti DashboardController)
+        $kelasIds = \App\Models\Kelas::where('dosen_pa_id', $dosen->id)->pluck('id');
+
         $semuaMahasiswa = Mahasiswa::with([
-            'user',
-            'kelas',
-            'dosen',
-            'nilais.mataKuliah',
-            'absensis',
+            'user', 'kelas', 'dosen', 'nilais.mataKuliah', 'absensis',
         ])
-        ->where('dosen_pa_id', $dosen->id)
-        ->where('status', 'aktif')
+        ->whereIn('kelas_id', $kelasIds)
         ->get();
 
-        $mahasiswaBerisiko = BerisikoService::filterBerisiko($semuaMahasiswa, $filterJenis);
-        $summary           = BerisikoService::buildSummary($semuaMahasiswa, $mahasiswaBerisiko);
+        $mahasiswaBerisiko = BerisikoService::filterAndMap($semuaMahasiswa, $filterJenis);
+
+        $summary = [
+            'total_mahasiswa'  => $semuaMahasiswa->count(),
+            'total_berisiko'   => $mahasiswaBerisiko->count(),
+            'ps'               => $mahasiswaBerisiko->filter(fn($m) => in_array('ps', $m['kategori']))->count(),
+            'sp3'              => $mahasiswaBerisiko->filter(fn($m) => in_array('sp3', $m['kategori']))->count(),
+            'sp2'              => $mahasiswaBerisiko->filter(fn($m) => in_array('sp2', $m['kategori']))->count(),
+            'sp1'              => $mahasiswaBerisiko->filter(fn($m) => in_array('sp1', $m['kategori']))->count(),
+            'nilai_e'          => $mahasiswaBerisiko->filter(fn($m) => in_array('nilai_e', $m['kategori']))->count(),
+            'nilai_d'          => $mahasiswaBerisiko->filter(fn($m) => in_array('nilai_d', $m['kategori']))->count(),
+            'ips_rendah'       => $mahasiswaBerisiko->filter(fn($m) => in_array('ips_rendah', $m['kategori']))->count(),
+        ];
 
         return view('dosen.berisiko', [
             'dosen'             => $dosen,

@@ -13,6 +13,7 @@
 .sum-card-val  { font-size: 30px; font-weight: 800; line-height: 1; letter-spacing: -1px; }
 .sum-card-lbl  { font-size: 12px; color: var(--text-2); margin-top: 4px; font-weight: 500; }
 .sum-card-pct  { font-size: 11px; font-weight: 700; margin-top: 6px; display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 99px; }
+.sum-card-detail { font-size: 10.5px; color: var(--text-3); margin-top: 6px; line-height: 1.7; }
 
 /* ── Filter Bar ──────────────────────────────── */
 .filter-bar {
@@ -44,9 +45,9 @@
 
 .jenis-pills { display: flex; gap: 6px; flex-wrap: wrap; }
 .jenis-pill {
-    padding: 7px 14px;
+    padding: 5px 10px;
     border-radius: 99px;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
     border: 1.5px solid var(--border);
     color: var(--text-2);
@@ -57,9 +58,11 @@
     white-space: nowrap;
 }
 .jenis-pill:hover { border-color: var(--blue); color: var(--blue); }
-.jenis-pill.active-semua  { background: #EF4444; color: #fff; border-color: #EF4444; }
-.jenis-pill.active-nilai  { background: #F59E0B; color: #fff; border-color: #F59E0B; }
-.jenis-pill.active-absensi{ background: #8B5CF6; color: #fff; border-color: #8B5CF6; }
+.jenis-pill.active-semua      { background: #EF4444; color: #fff; border-color: #EF4444; }
+.jenis-pill.active-alpha      { background: #EA580C; color: #fff; border-color: #EA580C; }
+.jenis-pill.active-nilai-e    { background: #991B1B; color: #fff; border-color: #991B1B; }
+.jenis-pill.active-nilai-d    { background: #B45309; color: #fff; border-color: #B45309; }
+.jenis-pill.active-ips-rendah { background: #7C3AED; color: #fff; border-color: #7C3AED; }
 
 .btn-print {
     margin-left: auto;
@@ -94,9 +97,7 @@
 .risk-table tbody td { padding: 12px 14px; vertical-align: middle; font-size: 13px; }
 
 /* ── Kategori badge ──────────────────────────── */
-.badge-de    { display: inline-flex; align-items: center; gap: 3px; background: #FEF9C3; color: #854D0E; border-radius: 99px; padding: 3px 9px; font-size: 11px; font-weight: 700; white-space: nowrap; }
-.badge-alpha { display: inline-flex; align-items: center; gap: 3px; background: #EDE9FE; color: #5B21B6; border-radius: 99px; padding: 3px 9px; font-size: 11px; font-weight: 700; white-space: nowrap; }
-.badge-both  { display: inline-flex; align-items: center; gap: 3px; background: #FEE2E2; color: #991B1B; border-radius: 99px; padding: 3px 9px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.badge-risiko { display: inline-flex; align-items: center; gap: 2px; border-radius: 99px; padding: 2px 7px; font-size: 10.5px; font-weight: 700; white-space: nowrap; margin: 1px; }
 
 /* ── Nomor urut ──────────────────────────────── */
 .no-circle {
@@ -148,7 +149,7 @@
     .hide-mobile { display: none !important; }
 }
 @media (max-width: 480px) {
-    .sum-cards { grid-template-columns: 1fr 1fr; }
+    .sum-cards { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 @endpush
@@ -164,8 +165,8 @@
     'chips'       => [
         ['icon' => 'bi-people-fill',               'label' => $summary['total_mahasiswa'] . ' Total Mahasiswa'],
         ['icon' => 'bi-exclamation-triangle-fill', 'label' => $summary['total_berisiko'] . ' Mahasiswa Berisiko'],
-        ['icon' => 'bi-x-circle-fill',             'label' => $summary['berisiko_nilai'] . ' Nilai D/E'],
-        ['icon' => 'bi-clock-history',             'label' => $summary['berisiko_absensi'] . ' Alpha ≥18 Jam'],
+        ['icon' => 'bi-x-octagon-fill',            'label' => $summary['ps'] . ' Putus Studi'],
+        ['icon' => 'bi-alarm-fill',                'label' => $summary['sp3'] . ' SP III'],
     ],
     'badge_num'   => $summary['total_berisiko'],
     'badge_label' => "Total\nBerisiko",
@@ -173,7 +174,7 @@
 
 {{-- ══ SUMMARY CARDS ══ --}}
 <div class="sum-cards">
-    {{-- Total berisiko --}}
+    {{-- 1. Total Berisiko --}}
     <div class="sum-card">
         <div class="sum-card-bar" style="background:linear-gradient(90deg,#EF4444,#FCA5A5);"></div>
         <div class="sum-card-body">
@@ -185,38 +186,46 @@
         </div>
     </div>
 
-    {{-- Nilai D/E --}}
+    {{-- 2. Berisiko Alpha (SP I + SP II + SP III + PS) --}}
     <div class="sum-card">
-        <div class="sum-card-bar" style="background:linear-gradient(90deg,#F59E0B,#FCD34D);"></div>
+        <div class="sum-card-bar" style="background:linear-gradient(90deg,#EA580C,#FCD34D);"></div>
         <div class="sum-card-body">
-            <div class="sum-card-val" style="color:#F59E0B;">{{ $summary['berisiko_nilai'] }}</div>
-            <div class="sum-card-lbl">Berisiko Nilai D/E</div>
-            <div class="sum-card-pct" style="background:#FEF9C3;color:#854D0E;">
-                <i class="bi bi-x-circle-fill" style="font-size:10px;"></i> Nilai buruk
+            <div class="sum-card-val" style="color:#EA580C;">
+                {{ $summary['sp1'] + $summary['sp2'] + $summary['sp3'] + $summary['ps'] }}
+            </div>
+            <div class="sum-card-lbl">Berisiko Alpha</div>
+            <div class="sum-card-detail">
+                SP I: <b>{{ $summary['sp1'] }}</b> &nbsp;|&nbsp;
+                SP II: <b>{{ $summary['sp2'] }}</b> &nbsp;|&nbsp;
+                SP III: <b>{{ $summary['sp3'] }}</b> &nbsp;|&nbsp;
+                PS: <b>{{ $summary['ps'] }}</b>
             </div>
         </div>
     </div>
 
-    {{-- Alpha --}}
+    {{-- 3. Berisiko Nilai (Nilai E + D>3) --}}
     <div class="sum-card">
-        <div class="sum-card-bar" style="background:linear-gradient(90deg,#8B5CF6,#A78BFA);"></div>
+        <div class="sum-card-bar" style="background:linear-gradient(90deg,#D97706,#FCD34D);"></div>
         <div class="sum-card-body">
-            <div class="sum-card-val" style="color:#8B5CF6;">{{ $summary['berisiko_absensi'] }}</div>
-            <div class="sum-card-lbl">Berisiko Alpha ≥18 Jam</div>
+            <div class="sum-card-val" style="color:#D97706;">
+                {{ $summary['nilai_e'] + $summary['nilai_d'] }}
+            </div>
+            <div class="sum-card-lbl">Berisiko Nilai</div>
+            <div class="sum-card-detail">
+                Nilai E: <b>{{ $summary['nilai_e'] }}</b> &nbsp;|&nbsp;
+                D&gt;3: <b>{{ $summary['nilai_d'] }}</b>
+            </div>
+        </div>
+    </div>
+
+    {{-- 4. IPS Rendah --}}
+    <div class="sum-card">
+        <div class="sum-card-bar" style="background:linear-gradient(90deg,#7C3AED,#A78BFA);"></div>
+        <div class="sum-card-body">
+            <div class="sum-card-val" style="color:#7C3AED;">{{ $summary['ips_rendah'] }}</div>
+            <div class="sum-card-lbl">IPS &lt; 2.00</div>
             <div class="sum-card-pct" style="background:#EDE9FE;color:#5B21B6;">
-                <i class="bi bi-clock-history" style="font-size:10px;"></i> Absensi tinggi
-            </div>
-        </div>
-    </div>
-
-    {{-- Keduanya --}}
-    <div class="sum-card">
-        <div class="sum-card-bar" style="background:linear-gradient(90deg,#DC2626,#991B1B);"></div>
-        <div class="sum-card-body">
-            <div class="sum-card-val" style="color:#DC2626;">{{ $summary['berisiko_keduanya'] }}</div>
-            <div class="sum-card-lbl">Berisiko Keduanya</div>
-            <div class="sum-card-pct" style="background:#FEE2E2;color:#991B1B;">
-                <i class="bi bi-exclamation-triangle-fill" style="font-size:10px;"></i> Prioritas utama
+                <i class="bi bi-graph-down-arrow" style="font-size:10px;"></i> IPS semester rendah
             </div>
         </div>
     </div>
@@ -241,13 +250,21 @@
            class="jenis-pill {{ $filterJenis === 'semua' ? 'active-semua' : '' }}">
             Semua ({{ $summary['total_berisiko'] }})
         </a>
-        <a href="{{ request()->fullUrlWithQuery(['jenis' => 'nilai']) }}"
-           class="jenis-pill {{ $filterJenis === 'nilai' ? 'active-nilai' : '' }}">
-            Nilai D/E ({{ $summary['berisiko_nilai'] }})
+        <a href="{{ request()->fullUrlWithQuery(['jenis' => 'alpha']) }}"
+           class="jenis-pill {{ $filterJenis === 'alpha' ? 'active-alpha' : '' }}">
+            Alpha ({{ $summary['sp1'] + $summary['sp2'] + $summary['sp3'] + $summary['ps'] }})
         </a>
-        <a href="{{ request()->fullUrlWithQuery(['jenis' => 'absensi']) }}"
-           class="jenis-pill {{ $filterJenis === 'absensi' ? 'active-absensi' : '' }}">
-            Alpha ≥18 Jam ({{ $summary['berisiko_absensi'] }})
+        <a href="{{ request()->fullUrlWithQuery(['jenis' => 'nilai_e']) }}"
+           class="jenis-pill {{ $filterJenis === 'nilai_e' ? 'active-nilai-e' : '' }}">
+            Nilai E ({{ $summary['nilai_e'] }})
+        </a>
+        <a href="{{ request()->fullUrlWithQuery(['jenis' => 'nilai_d']) }}"
+           class="jenis-pill {{ $filterJenis === 'nilai_d' ? 'active-nilai-d' : '' }}">
+            D&gt;3 Matkul ({{ $summary['nilai_d'] }})
+        </a>
+        <a href="{{ request()->fullUrlWithQuery(['jenis' => 'ips_rendah']) }}"
+           class="jenis-pill {{ $filterJenis === 'ips_rendah' ? 'active-ips-rendah' : '' }}">
+            IPS&lt;2.00 ({{ $summary['ips_rendah'] }})
         </a>
     </div>
 
@@ -290,8 +307,8 @@
                         <th style="width:40px;">#</th>
                         <th>Mahasiswa</th>
                         <th class="hide-mobile">Kelas</th>
-                        <th class="hide-mobile">Dosen PA</th>
                         <th style="text-align:center;">IPK</th>
+                        <th style="text-align:center;">IPS</th>
                         <th style="text-align:center;">Nilai D/E</th>
                         <th style="text-align:center;">Alpha</th>
                         <th style="text-align:center;">Kategori Risiko</th>
@@ -300,18 +317,24 @@
                 <tbody id="riskBody">
                     @forelse($mahasiswaBerisiko as $i => $mhs)
                     @php
-                        $colors = ['#2563EB','#EF4444','#8B5CF6','#F59E0B','#0891B2','#DB2777','#16A34A'];
-                        $aColor = $colors[$i % count($colors)];
-                        $isKeduanya = count($mhs['kategori']) >= 2;
-                        $isNilai    = in_array('nilai', $mhs['kategori']);
-                        $isAbsensi  = in_array('absensi', $mhs['kategori']);
-                        $alphaWidth = min(($mhs['total_alpha'] / 36) * 100, 100);
+                        $colors     = ['#2563EB','#EF4444','#8B5CF6','#F59E0B','#0891B2','#DB2777','#16A34A'];
+                        $aColor     = $colors[$i % count($colors)];
+                        $isKritis = in_array('ps', $mhs['kategori']) || in_array('sp3', $mhs['kategori']);
+                        $badgeMap = [
+                            'ps'         => ['bg' => '#FEE2E2', 'color' => '#7F1D1D', 'icon' => 'bi-x-octagon-fill',         'label' => 'Putus Studi'],
+                            'sp3'        => ['bg' => '#FEE2E2', 'color' => '#DC2626', 'icon' => 'bi-alarm-fill',             'label' => 'SP III'],
+                            'sp2'        => ['bg' => '#FEF3C7', 'color' => '#EA580C', 'icon' => 'bi-clock-fill',             'label' => 'SP II'],
+                            'sp1'        => ['bg' => '#FEF9C3', 'color' => '#D97706', 'icon' => 'bi-clock-history',          'label' => 'SP I'],
+                            'nilai_e'    => ['bg' => '#FEE2E2', 'color' => '#991B1B', 'icon' => 'bi-x-circle-fill',          'label' => 'Nilai E'],
+                            'nilai_d'    => ['bg' => '#FEF9C3', 'color' => '#B45309', 'icon' => 'bi-exclamation-circle-fill','label' => 'D >3'],
+                            'ips_rendah' => ['bg' => '#EDE9FE', 'color' => '#5B21B6', 'icon' => 'bi-graph-down-arrow',       'label' => 'IPS < 2'],
+                        ];
                     @endphp
                     <tr data-nama="{{ strtolower($mhs['nama']) }}" data-nim="{{ $mhs['nim'] }}"
-                        style="{{ $isKeduanya ? 'background:rgba(239,68,68,.025);' : '' }}">
+                        style="{{ $isKritis ? 'background:rgba(239,68,68,.025);' : '' }}">
 
                         <td>
-                            <div class="no-circle" style="{{ $isKeduanya ? 'background:#FEE2E2;color:#991B1B;' : '' }}">
+                            <div class="no-circle" style="{{ $isKritis ? 'background:#FEE2E2;color:#991B1B;' : '' }}">
                                 {{ $i + 1 }}
                             </div>
                         </td>
@@ -336,10 +359,6 @@
                             {{ $mhs['kelas'] }}
                         </td>
 
-                        <td class="hide-mobile" style="font-size:12.5px;color:var(--text-2);">
-                            {{ $mhs['dosen_pa'] }}
-                        </td>
-
                         <td style="text-align:center;">
                             <span style="font-weight:700;font-size:14px;color:{{ $mhs['ipk'] < 2.5 ? '#EF4444' : 'var(--text-1)' }};">
                                 {{ $mhs['ipk'] }}
@@ -347,42 +366,41 @@
                         </td>
 
                         <td style="text-align:center;">
+                            <span style="font-weight:700;font-size:14px;color:{{ $mhs['ips'] < 2.0 ? '#7C3AED' : 'var(--text-1)' }};">
+                                {{ $mhs['ips'] }}
+                            </span>
+                        </td>
+
+                        <td style="text-align:center;">
                             @if($mhs['jumlah_de'] > 0)
-                            <span style="font-weight:800;font-size:16px;color:#F59E0B;">
+                            <span style="font-weight:800;font-size:15px;color:#F59E0B;">
                                 {{ $mhs['jumlah_de'] }}
                             </span>
-                            <div style="font-size:10.5px;color:var(--text-3);">mata kuliah</div>
                             @else
                             <span style="color:var(--text-3);font-size:12px;">—</span>
                             @endif
                         </td>
 
                         <td style="text-align:center;">
-                            <span style="font-weight:800;font-size:16px;color:{{ $mhs['total_alpha'] >= 18 ? '#8B5CF6' : 'var(--text-2)' }};">
+                            <span style="font-weight:800;font-size:15px;color:{{ $mhs['total_alpha'] >= 18 ? '#8B5CF6' : 'var(--text-2)' }};">
                                 {{ $mhs['total_alpha'] }}j
                             </span>
-                            <div class="alpha-bar-wrap" style="margin:4px auto 0;">
-                                <div class="alpha-bar-fill"
-                                     style="width:{{ $alphaWidth }}%;background:{{ $mhs['total_alpha'] >= 18 ? '#8B5CF6' : '#94A3B8' }};"></div>
-                            </div>
                         </td>
 
                         <td style="text-align:center;">
-                            @if($isKeduanya)
-                            <span class="badge-both">
-                                <i class="bi bi-exclamation-triangle-fill" style="font-size:10px;"></i>
-                                Nilai + Alpha
+                            @php
+                                $shown = array_slice($mhs['kategori'], 0, 2);
+                                $extra = count($mhs['kategori']) - 2;
+                            @endphp
+                            @foreach($shown as $kat)
+                            @php $b = $badgeMap[$kat] ?? ['bg'=>'#F1F5F9','color'=>'#64748B','icon'=>'bi-exclamation','label'=>$kat]; @endphp
+                            <span class="badge-risiko" style="background:{{ $b['bg'] }};color:{{ $b['color'] }};">
+                                <i class="bi {{ $b['icon'] }}" style="font-size:9px;"></i>
+                                {{ $b['label'] }}
                             </span>
-                            @elseif($isNilai)
-                            <span class="badge-de">
-                                <i class="bi bi-x-circle-fill" style="font-size:10px;"></i>
-                                Nilai D/E
-                            </span>
-                            @elseif($isAbsensi)
-                            <span class="badge-alpha">
-                                <i class="bi bi-clock-history" style="font-size:10px;"></i>
-                                Alpha ≥18j
-                            </span>
+                            @endforeach
+                            @if($extra > 0)
+                            <span class="badge-risiko" style="background:#F1F5F9;color:#64748B;">+{{ $extra }} lagi</span>
                             @endif
                         </td>
                     </tr>
@@ -405,21 +423,26 @@
 
         {{-- Footer tabel --}}
         <div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;" class="no-print">
-            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:#FEE2E2;color:#991B1B;">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                {{ $mahasiswaBerisiko->count() }} mahasiswa berisiko
+            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:#FEE2E2;color:#7F1D1D;">
+                <i class="bi bi-x-octagon-fill"></i> {{ $summary['ps'] }} Putus Studi
             </span>
-            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:#FEF9C3;color:#854D0E;">
-                <i class="bi bi-x-circle-fill"></i>
-                {{ $summary['berisiko_nilai'] }} berisiko nilai D/E
+            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:#FEE2E2;color:#DC2626;">
+                <i class="bi bi-alarm-fill"></i> {{ $summary['sp3'] }} SP III
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:#FEF3C7;color:#EA580C;">
+                <i class="bi bi-clock-fill"></i> {{ $summary['sp2'] }} SP II
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:#FEF9C3;color:#D97706;">
+                <i class="bi bi-clock-history"></i> {{ $summary['sp1'] }} SP I
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:#FEE2E2;color:#991B1B;">
+                <i class="bi bi-x-circle-fill"></i> {{ $summary['nilai_e'] }} Nilai E
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:#FEF9C3;color:#B45309;">
+                <i class="bi bi-exclamation-circle-fill"></i> {{ $summary['nilai_d'] }} D&gt;3 Matkul
             </span>
             <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:#EDE9FE;color:#5B21B6;">
-                <i class="bi bi-clock-history"></i>
-                {{ $summary['berisiko_absensi'] }} berisiko alpha
-            </span>
-            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;background:#FEE2E2;color:#991B1B;">
-                <i class="bi bi-exclamation-circle-fill"></i>
-                {{ $summary['berisiko_keduanya'] }} berisiko keduanya
+                <i class="bi bi-graph-down-arrow"></i> {{ $summary['ips_rendah'] }} IPS&lt;2.00
             </span>
         </div>
     </div>

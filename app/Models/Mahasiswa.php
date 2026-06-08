@@ -14,7 +14,7 @@ class Mahasiswa extends Model
         'angkatan', 'status', 'dosen_pa_id', 'no_hp', 'alamat'
     ];
 
-    // ── Relasi ──────────────────────────────────────
+    // ── Relasi ───────────────────────────────────────────────
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -45,21 +45,24 @@ class Mahasiswa extends Model
         return $this->hasMany(Absensi::class);
     }
 
-    // ── Helper: IP semester tertentu ─────────────────
+    public function kompensasis()
+    {
+        return $this->hasMany(Kompensasi::class);
+    }
+
+    // ── Helper: IP semester tertentu ─────────────────────────
     public function getIpSemester(int $semester): float
     {
-        // Pakai koleksi yang sudah di-eager-load jika tersedia, hindari query tambahan
-        if ($this->relationLoaded('nilais')) {
-            $nilais = $this->nilais->where('semester', $semester);
-        } else {
-            $nilais = $this->nilais()->where('semester', $semester)
-                           ->with('mataKuliah')->get();
-        }
+        if ($semester === 0) return 0.0;
+
+        $nilais = $this->relationLoaded('nilais')
+            ? $this->nilais->where('semester', $semester)
+            : $this->nilais()->where('semester', $semester)->with('mataKuliah')->get();
 
         return $this->hitungIpDariKoleksi($nilais);
     }
 
-    // ── Helper: IPK kumulatif ────────────────────────
+    // ── Helper: IPK kumulatif ─────────────────────────────────
     public function getIpkAttribute(): float
     {
         $nilais = $this->relationLoaded('nilais')
@@ -69,6 +72,8 @@ class Mahasiswa extends Model
         return $this->hitungIpDariKoleksi($nilais);
     }
 
+    // ── Helper: hitung IP dari koleksi nilai ─────────────────
+    // Support grade B+ dan C+ sesuai Pedoman Akademik D4 TI Polinema
     private function hitungIpDariKoleksi($nilais): float
     {
         if ($nilais->isEmpty()) return 0.0;
@@ -78,7 +83,13 @@ class Mahasiswa extends Model
 
         foreach ($nilais as $n) {
             $bobot = match($n->grade) {
-                'A' => 4, 'B' => 3, 'C' => 2, 'D' => 1, default => 0,
+                'A'  => 4.0,
+                'B+' => 3.5,
+                'B'  => 3.0,
+                'C+' => 2.5,
+                'C'  => 2.0,
+                'D'  => 1.0,
+                default => 0.0, // E dan null
             };
             $sks         = $n->mataKuliah->sks ?? 0;
             $totalBobot += $bobot * $sks;
@@ -88,23 +99,59 @@ class Mahasiswa extends Model
         return $totalSks > 0 ? round($totalBobot / $totalSks, 2) : 0.0;
     }
 
-    // ── Helper: cek mahasiswa berisiko (semester terakhir saja, grade D/E) ─
+    // ── Helper: cek berisiko (boolean) ───────────────────────
+    // Berdasarkan Pedoman Akademik D4 TI Polinema 2022/2023
     public function isBerisiko(): bool
     {
-        $semNilai    = $this->nilais->max('semester') ?? 0;
-        $nilaiRendah = $semNilai > 0
-            ? $this->nilais->where('semester', $semNilai)->whereIn('grade', ['D', 'E'])->count()
-            : 0;
+        return !empty($this->getKategoriRisiko());
+    }
 
+    
+    public function getKategoriRisiko(): array
+    {
+        $semNilai   = $this->nilais->max('semester') ?? 0;
         $semAlpha   = $this->absensis->max('semester') ?? 0;
         $totalAlpha = $semAlpha > 0
             ? $this->absensis->where('semester', $semAlpha)->sum('jam_alpha')
             : 0;
 
-        return $nilaiRendah > 0 || $totalAlpha >= 18;
+        $kategori = [];
+
+        // ── Kategori Alpha (level SP) ────────────────────────
+        if ($totalAlpha >= 56) {
+            $kategori[] = 'ps';
+        } elseif ($totalAlpha >= 47) {
+            $kategori[] = 'sp3';
+        } elseif ($totalAlpha >= 36) {
+            $kategori[] = 'sp2';
+        } elseif ($totalAlpha >= 18) {
+            $kategori[] = 'sp1';
+        }
+
+        if ($semNilai > 0) {
+            $nilaiSemIni = $this->nilais->where('semester', $semNilai);
+
+            // ── Cek nilai E ──────────────────────────────────
+            if ($nilaiSemIni->contains('grade', 'E')) {
+                $kategori[] = 'nilai_e';
+            }
+
+            // ── Cek nilai D > 3 matkul ───────────────────────
+            if ($nilaiSemIni->where('grade', 'D')->count() > 3) {
+                $kategori[] = 'nilai_d';
+            }
+
+            // ── Cek IPS < 2.00 ───────────────────────────────
+            $ips = $this->getIpSemester($semNilai);
+            if ($ips > 0 && $ips < 2.00) {
+                $kategori[] = 'ips_rendah';
+            }
+        }
+
+        return $kategori;
     }
 
-    // ── Helper: total jam alpha semua matkul ─────────
+    // ── Helper: total jam alpha per semester ─────────────────
     public function getTotalAlpha(int $semester): int
     {
         return $this->absensis()
@@ -112,7 +159,7 @@ class Mahasiswa extends Model
             ->sum('jam_alpha');
     }
 
-    // ── Helper: daftar matkul dengan grade D/E ───────
+    // ── Helper: daftar matkul dengan grade D/E ───────────────
     public function getMataKuliahDE(int $semester)
     {
         return $this->nilais()
@@ -122,12 +169,7 @@ class Mahasiswa extends Model
             ->get();
     }
 
-    public function kompensasis()
-    {
-        return $this->hasMany(Kompensasi::class);
-    }
- 
-    // Ambil kompensasi semester tertentu
+    // ── Helper: kompensasi semester tertentu ─────────────────
     public function getKompensasiSemester(int $semester, ?string $tahunAkademik = null)
     {
         $tahunAkademik ??= config('akademik.tahun_akademik');
@@ -138,7 +180,7 @@ class Mahasiswa extends Model
             ->first();
     }
 
-    // Cek apakah punya kompen pending di semester tertentu
+    // ── Helper: cek kompen pending ───────────────────────────
     public function hasPendingKompen(int $semester, ?string $tahunAkademik = null): bool
     {
         $tahunAkademik ??= config('akademik.tahun_akademik');
@@ -149,6 +191,4 @@ class Mahasiswa extends Model
             ->where('status', 'pending')
             ->isNotEmpty();
     }
-    
 }
-
