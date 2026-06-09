@@ -39,9 +39,10 @@ Route::middleware(['auth', 'role.mahasiswa'])
     ->prefix('mahasiswa')
     ->name('mahasiswa.')
     ->group(function () {
-        Route::get('/dashboard', [MhsDashboard::class,    'index'])->name('dashboard');
-        Route::get('/nilai',     [NilaiController::class,  'index'])->name('nilai');
-        Route::get('/absensi',   [AbsensiController::class,'index'])->name('absensi');
+        Route::get('/dashboard',   [MhsDashboard::class,    'index'])->name('dashboard');
+        Route::get('/nilai',       [NilaiController::class,  'index'])->name('nilai');
+        Route::get('/absensi',     [AbsensiController::class,'index'])->name('absensi');
+        Route::get('/kompensasi',  [App\Http\Controllers\Mahasiswa\KompensasiController::class, 'index'])->name('kompensasi');
     });
 
 // ── DOSEN DPA ────────────────────────────────────────────
@@ -52,7 +53,8 @@ Route::middleware(['auth', 'role.dosen'])
         Route::get('/dashboard',      [DosenDashboard::class,      'index'])->name('dashboard');
         Route::get('/kelas',          [DosenKelasController::class, 'index'])->name('kelas');
         Route::get('/mahasiswa/{id}', [DosenKelasController::class, 'detail'])->name('mahasiswa.detail');
-        Route::get('/berisiko',       [DosenBerisikoController::class, 'index'])->name('berisiko.index'); // ← di dalam group
+        Route::get('/berisiko',     [DosenBerisikoController::class, 'index'])->name('berisiko.index');
+        Route::get('/kompensasi',   [App\Http\Controllers\Dosen\KompensasiController::class, 'index'])->name('kompensasi.index');
     });
 
 // ── ADMIN ────────────────────────────────────────────────

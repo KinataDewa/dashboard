@@ -16,7 +16,7 @@ class BerisikoController extends Controller
         $kelasList   = Kelas::orderBy('nama')->get();
 
         $query = Mahasiswa::with([
-            'user', 'kelas', 'dosen', 'nilais.mataKuliah', 'absensis'
+            'user', 'kelas', 'dosen', 'nilais.mataKuliah', 'absensis', 'kompensasis',
         ])->where('status', 'aktif');
 
         if ($kelasId) {

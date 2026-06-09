@@ -19,7 +19,7 @@ class DashboardController extends Controller
         $totalKelas     = Kelas::count();
  
         // Mahasiswa aktif berisiko (nilai D/E atau alpha >= 18 di semester terakhir)
-        $mahasiswaBerisiko = Mahasiswa::with(['nilais', 'absensis'])
+        $mahasiswaBerisiko = Mahasiswa::with(['nilais', 'absensis', 'kompensasis'])
             ->where('status', 'aktif')
             ->get()
             ->filter(fn($m) => $m->isBerisiko())
@@ -36,7 +36,7 @@ class DashboardController extends Controller
         $mahasiswas = \App\Models\Mahasiswa::with([
             'nilais.mataKuliah',
             'absensis.mataKuliah',
-            'kelas', 'dosenPa', 'user',
+            'kelas', 'dosenPa', 'user', 'kompensasis',
         ])->where('status', 'aktif')->get();
 
         $terkirim = 0;

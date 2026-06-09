@@ -26,6 +26,7 @@ class CekPeringatan extends Command
         $mahasiswas = Mahasiswa::with([
             'nilais.mataKuliah',
             'absensis.mataKuliah',
+            'kompensasis',
             'kelas',
             'dosenPa',
             'user',
@@ -37,27 +38,28 @@ class CekPeringatan extends Command
         $skip     = 0;
 
         foreach ($mahasiswas as $mhs) {
-            $nilaiDE    = $mhs->nilais->whereIn('grade', ['D', 'E']);
-            $totalAlpha = (int)$mhs->absensis->sum('jam_alpha');
-            $isBerisiko = $nilaiDE->count() > 0 || $totalAlpha >= 14;
-
-            if (!$isBerisiko) continue;
+            if (!$mhs->isBerisiko()) continue;
 
             $berisiko++;
 
+            $kategori   = $mhs->getKategoriRisiko();
+            $semNilai   = $mhs->nilais->max('semester') ?? 0;
+            $semAlpha   = $mhs->absensis->max('semester') ?? 0;
+            $nilaiDE    = $semNilai > 0 ? $mhs->nilais->where('semester', $semNilai)->whereIn('grade', ['D', 'E']) : collect();
+            $totalAlpha = $semAlpha > 0 ? (int) $mhs->absensis->where('semester', $semAlpha)->sum('jam_alpha') : 0;
+
             $this->newLine();
             $this->error("  ⚠ {$mhs->nama} ({$mhs->nim})");
+            $this->line("    → Kategori   : " . implode(', ', $kategori));
 
             if ($nilaiDE->count() > 0) {
                 $grades = $nilaiDE->pluck('grade')->join(', ');
                 $this->line("    → Nilai D/E  : {$nilaiDE->count()} matkul ({$grades})");
             }
-            if ($totalAlpha >= 14) {
-                $label = $totalAlpha >= 18 ? '⛔ MELEWATI BATAS' : '⚠ waspada';
-                $this->line("    → Alpha      : {$totalAlpha} jam {$label}");
+            if ($totalAlpha >= 18) {
+                $this->line("    → Alpha      : {$totalAlpha} jam ⛔ MELEWATI BATAS SP I");
             }
 
-            // ── FIX: cek user & email tidak null ──
             if (!$mhs->user) {
                 $this->warn("    → Skip: mahasiswa tidak punya akun user.");
                 $skip++;
@@ -81,10 +83,35 @@ class CekPeringatan extends Command
                 $terkirim++;
                 $this->line("    → ✅ Email terkirim ke: {$email}");
                 Log::info("SIAKAD: Email peringatan terkirim ke {$mhs->nama} ({$email})");
+
+                \App\Models\EmailLog::create([
+                    'mahasiswa_id'    => $mhs->id,
+                    'email_tujuan'    => $email,
+                    'nama_mahasiswa'  => $mhs->nama ?? $mhs->user->name,
+                    'kelas'           => $mhs->kelas->nama ?? '-',
+                    'kategori_risiko' => $kategori,
+                    'jumlah_nilai_de' => $nilaiDE->count(),
+                    'total_alpha'     => $totalAlpha,
+                    'status'          => 'berhasil',
+                    'dikirim_oleh'    => null,
+                ]);
             } catch (\Exception $e) {
                 $gagal++;
                 $this->line("    → ❌ Gagal: " . $e->getMessage());
                 Log::error("SIAKAD: Gagal kirim ke {$mhs->nama}: " . $e->getMessage());
+
+                \App\Models\EmailLog::create([
+                    'mahasiswa_id'    => $mhs->id,
+                    'email_tujuan'    => $email,
+                    'nama_mahasiswa'  => $mhs->nama ?? $mhs->user->name,
+                    'kelas'           => $mhs->kelas->nama ?? '-',
+                    'kategori_risiko' => $kategori,
+                    'jumlah_nilai_de' => $nilaiDE->count(),
+                    'total_alpha'     => $totalAlpha,
+                    'status'          => 'gagal',
+                    'pesan_error'     => $e->getMessage(),
+                    'dikirim_oleh'    => null,
+                ]);
             }
         }
 

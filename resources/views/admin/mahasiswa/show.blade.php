@@ -5,12 +5,14 @@
 
 @push('styles')
 <style>
-.grade-pill{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;font-size:13px;font-weight:800;}
-.grade-A{background:#DCFCE7;color:#15803D;}
-.grade-B{background:#DBEAFE;color:#1D4ED8;}
-.grade-C{background:#FEF9C3;color:#854D0E;}
-.grade-D{background:#FEE2E2;color:#991B1B;}
-.grade-E{background:#FEE2E2;color:#7F1D1D;}
+.grade-pill{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;border-radius:50%;font-size:12px;font-weight:800;padding:0 4px;}
+.grade-A {background:#DCFCE7;color:#15803D;}
+.grade-Bp{background:#DBEAFE;color:#1E40AF;}
+.grade-B {background:#EFF6FF;color:#1D4ED8;}
+.grade-Cp{background:#FEF9C3;color:#78350F;}
+.grade-C {background:#F5F3FF;color:#6D28D9;}
+.grade-D {background:#FEE2E2;color:#991B1B;}
+.grade-E {background:#FEE2E2;color:#7F1D1D;}
 .score-bar{width:60px;height:4px;background:#F1F5F9;border-radius:2px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:6px;}
 .score-bar-fill{height:100%;border-radius:2px;}
 .info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #F1F5F9;gap:8px;}
@@ -176,7 +178,8 @@
                                 </div>
                             </td>
                             <td style="text-align:center;">
-                                <span class="grade-pill grade-{{ $nilai->grade }}">{{ $nilai->grade }}</span>
+                                @php $gradeClass = str_replace('+', 'p', $nilai->grade); @endphp
+                                <span class="grade-pill grade-{{ $gradeClass }}">{{ $nilai->grade }}</span>
                             </td>
                         </tr>
                         @empty

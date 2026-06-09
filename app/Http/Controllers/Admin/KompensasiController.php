@@ -88,18 +88,6 @@ class KompensasiController extends Controller
             'catatan_tugas' => 'nullable|string|max:1000',
         ]);
  
-        // Cek duplikat
-        $existing = Kompensasi::where('mahasiswa_id', $request->mahasiswa_id)
-            ->where('semester', $request->semester)
-            ->where('tahun_akademik', $request->tahun_akademik)
-            ->first();
- 
-        if ($existing) {
-            return back()->withErrors([
-                'mahasiswa_id' => 'Mahasiswa ini sudah memiliki kompensasi untuk semester ' . $request->semester . ' tahun ' . $request->tahun_akademik . '.'
-            ])->withInput();
-        }
- 
         $jamKompen = Kompensasi::hitungJamKompen(
             $request->jam_alpha,
             $request->multiplier

@@ -23,7 +23,7 @@ class BerisikoController extends Controller
         $kelasIds = \App\Models\Kelas::where('dosen_pa_id', $dosen->id)->pluck('id');
 
         $semuaMahasiswa = Mahasiswa::with([
-            'user', 'kelas', 'dosen', 'nilais.mataKuliah', 'absensis',
+            'user', 'kelas', 'dosen', 'nilais.mataKuliah', 'absensis', 'kompensasis',
         ])
         ->whereIn('kelas_id', $kelasIds)
         ->get();

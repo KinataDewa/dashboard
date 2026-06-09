@@ -532,6 +532,24 @@
         <a href="{{ route('mahasiswa.dashboard') }}" class="sidebar-brand">Academia</a>
     </div>
 
+    @php
+        $_sisaKompen = 0;
+        if (auth()->check()) {
+            $_mhsSidebar = \App\Models\Mahasiswa::where('user_id', auth()->id())
+                ->with(['absensis', 'kompensasis'])
+                ->first();
+            if ($_mhsSidebar) {
+                $_absByS = $_mhsSidebar->absensis->groupBy('semester');
+                $_komByS = $_mhsSidebar->kompensasis->groupBy('semester');
+                foreach ($_absByS as $_sem => $_abs) {
+                    $_alpha = (int) $_abs->sum('jam_alpha');
+                    if ($_alpha < 18) continue;
+                    $_selesai = (int) ($_komByS->get($_sem, collect())->where('status', 'lunas')->sum('jam_kompen_wajib'));
+                    $_sisaKompen += max(0, $_alpha * 2 - $_selesai);
+                }
+            }
+        }
+    @endphp
     <nav class="sidebar-nav">
         <span class="nav-label">Menu</span>
         <a href="{{ route('mahasiswa.dashboard') }}"
@@ -548,6 +566,16 @@
            class="nav-link-item {{ request()->routeIs('mahasiswa.absensi') ? 'active' : '' }}">
             <i class="bi bi-calendar2-check-fill"></i>
             <span>Riwayat Absensi</span>
+        </a>
+        <a href="{{ route('mahasiswa.kompensasi') }}"
+           class="nav-link-item {{ request()->routeIs('mahasiswa.kompensasi') ? 'active' : '' }}">
+            <i class="bi bi-clipboard2-check-fill"></i>
+            <span>Kompensasi</span>
+            @if($_sisaKompen > 0)
+            <span style="margin-left:auto;min-width:18px;height:18px;background:#EF4444;color:#fff;border-radius:20px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 5px;">
+                !
+            </span>
+            @endif
         </a>
     </nav>
 

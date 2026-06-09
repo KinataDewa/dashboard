@@ -1021,6 +1021,70 @@
     </div>
 </div>
 
+{{-- ══ RIWAYAT KOMPENSASI ══ --}}
+<div class="section-label" style="margin-top:24px;">Riwayat Kompensasi</div>
+<div class="tbl-card-v2">
+    <div class="tbl-head-v2">
+        <div>
+            <div class="tbl-title-v2">Riwayat Kompensasi</div>
+            <div class="tbl-sub-v2">Seluruh semester · {{ $kompensasis->count() }} data</div>
+        </div>
+    </div>
+
+    @if($kompensasis->isEmpty())
+    <div style="text-align:center;padding:36px 24px;color:var(--text-3);">
+        <i class="bi bi-clipboard2-x" style="font-size:28px;display:block;margin-bottom:8px;opacity:.5;"></i>
+        Tidak ada riwayat kompensasi.
+    </div>
+    @else
+    <div style="overflow-x:auto;">
+        <table class="ac-table-v2">
+            <thead>
+                <tr>
+                    <th>Semester</th>
+                    <th style="text-align:center;">Jam Alpha</th>
+                    <th style="text-align:center;">Jam Kompensasi Wajib</th>
+                    <th style="text-align:center;">Status</th>
+                    <th style="text-align:center;">TTD Admin</th>
+                    <th style="text-align:center;">TTD Kajur</th>
+                    <th style="text-align:center;">Tanggal Lunas</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($kompensasis as $kompen)
+                <tr>
+                    <td>
+                        <div style="font-weight:600;color:var(--text-1);">Semester {{ $kompen->semester }}</div>
+                        @if($kompen->tahun_akademik)
+                        <div style="font-size:11px;color:var(--text-3);margin-top:1px;">{{ $kompen->tahun_akademik }}</div>
+                        @endif
+                    </td>
+                    <td style="text-align:center;font-weight:700;color:#EF4444;">{{ $kompen->jam_alpha }}j</td>
+                    <td style="text-align:center;font-weight:700;color:var(--text-1);">{{ $kompen->jam_kompen_wajib }}j</td>
+                    <td style="text-align:center;">
+                        @if($kompen->status === 'lunas')
+                            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#DCFCE7;color:#15803D;">
+                                <i class="bi bi-check-circle-fill" style="font-size:10px;"></i> Lunas
+                            </span>
+                        @else
+                            <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#FEF9C3;color:#854D0E;">
+                                <i class="bi bi-hourglass-split" style="font-size:10px;"></i> Belum Lunas
+                            </span>
+                        @endif
+                    </td>
+                    <td style="text-align:center;font-size:16px;">{{ $kompen->ttd_admin ? '✅' : '⏳' }}</td>
+                    <td style="text-align:center;font-size:16px;">{{ $kompen->ttd_kajur ? '✅' : '⏳' }}</td>
+                    <td style="text-align:center;font-size:13px;color:var(--text-2);">
+                        {{ $kompen->tanggal_lunas ? $kompen->tanggal_lunas->format('d M Y') : '—' }}
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+</div>
+
 @endsection
 
 @push('scripts')

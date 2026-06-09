@@ -61,7 +61,8 @@
                             </span>
                         </td>
                         <td class="text-center">
-                            <span class="grade-badge grade-{{ $nilai->grade }}">{{ $nilai->grade }}</span>
+                            @php $gradeClass = str_replace('+', 'p', $nilai->grade); @endphp
+                            <span class="grade-badge grade-{{ $gradeClass }}">{{ $nilai->grade }}</span>
                         </td>
                     </tr>
                     @empty
@@ -108,7 +109,7 @@
         {{-- DISTRIBUSI GRADE --}}
         <div class="section-card">
             <div class="section-title mb-3">Distribusi Grade</div>
-            @foreach(['A'=>'success','B'=>'info','C'=>'warning','D'=>'danger','E'=>'danger'] as $grade => $color)
+            @foreach(['A'=>'success','B+'=>'primary','B'=>'info','C+'=>'warning','C'=>'warning','D'=>'danger','E'=>'danger'] as $grade => $color)
             @php $count = $nilais->where('grade', $grade)->count(); @endphp
             <div class="d-flex align-items-center gap-3 mb-2">
                 <span style="font-family:'Space Mono';font-size:13px;font-weight:700;width:20px;color:var(--navy);">{{ $grade }}</span>

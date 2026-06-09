@@ -20,7 +20,7 @@ class KirimPeringatanController extends Controller
         $kelasList   = Kelas::orderBy('nama')->get();
 
         $query = Mahasiswa::with([
-            'user', 'kelas', 'dosen', 'nilais.mataKuliah', 'absensis'
+            'user', 'kelas', 'dosen', 'nilais.mataKuliah', 'absensis', 'kompensasis',
         ])->where('status', 'aktif');
 
         if ($kelasId) {
@@ -100,7 +100,7 @@ class KirimPeringatanController extends Controller
     {
         $mahasiswaId = $request->input('mahasiswa_id');
         $mahasiswa   = Mahasiswa::with([
-            'user', 'nilais.mataKuliah', 'absensis', 'kelas'
+            'user', 'nilais.mataKuliah', 'absensis', 'kelas', 'kompensasis',
         ])->findOrFail($mahasiswaId);
 
         // Gunakan getKategoriRisiko() sesuai Pedoman Akademik D4 TI Polinema
@@ -164,7 +164,7 @@ class KirimPeringatanController extends Controller
 
         foreach ($ids as $id) {
             $mahasiswa = Mahasiswa::with([
-                'user', 'nilais.mataKuliah', 'absensis', 'kelas'
+                'user', 'nilais.mataKuliah', 'absensis', 'kelas', 'kompensasis',
             ])->find($id);
             if (!$mahasiswa) continue;
 

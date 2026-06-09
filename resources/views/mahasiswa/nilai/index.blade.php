@@ -27,7 +27,7 @@
         ['icon' => 'bi-trophy-fill',          'label' => $nilais->where('grade','A')->count() . ' Nilai A'],
         ['icon' => 'bi-exclamation-triangle', 'label' => $nilaiDE . ' Nilai D/E'],
     ],
-    'badge_num'    => $nilais->where('grade','A')->count() + $nilais->where('grade','B')->count(),
+    'badge_num'    => $nilais->whereIn('grade',['A','B+','B','C+'])->count(),
     'badge_label'  => "Nilai\nBaik",
     'badge2_num'   => $nilaiDE,
     'badge2_label' => "Perlu\nPerhatian",
@@ -126,7 +126,7 @@
                     <td class="muted" style="text-align:center;">{{ $nilai->mataKuliah->sks }}</td>
                     <td class="muted" style="text-align:center;">{{ $nilai->mataKuliah->sks * 14 }}</td>
                     <td style="text-align:center;">
-                        <span style="font-weight:800;font-size:15px;color:{{ $isDE ? '#EF4444' : ($nilai->grade==='A' ? '#22C55E' : ($nilai->grade==='B' ? '#2563EB' : 'var(--text-1)')) }};">
+                        <span style="font-weight:800;font-size:15px;color:{{ $isDE ? '#EF4444' : ($nilai->grade==='A' ? '#22C55E' : (in_array($nilai->grade,['B+','B']) ? '#2563EB' : 'var(--text-1)')) }};">
                             {{ $nilai->grade }}
                         </span>
                     </td>

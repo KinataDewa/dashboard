@@ -62,7 +62,7 @@ class BerisikoService
             $semNilai   = $mhs->nilais->max('semester') ?? 0;
             $semAlpha   = $mhs->absensis->max('semester') ?? 0;
             $totalAlpha = $semAlpha > 0
-                ? $mhs->absensis->where('semester', $semAlpha)->sum('jam_alpha')
+                ? (int) $mhs->absensis->where('semester', $semAlpha)->sum('jam_alpha')
                 : 0;
             $nilaiDE    = $semNilai > 0
                 ? $mhs->nilais->where('semester', $semNilai)->whereIn('grade', ['D', 'E'])
@@ -73,19 +73,25 @@ class BerisikoService
             $ips        = $mhs->getIpSemester($semNilai);
             $kategori   = $mhs->getKategoriRisiko();
 
+            $jamKompenSelesai = $mhs->relationLoaded('kompensasis')
+                ? (int) $mhs->kompensasis->where('semester', $semAlpha)->where('status', 'lunas')->sum('jam_kompen_wajib')
+                : 0;
+            $alphaEfektif = max(0, $totalAlpha - (int) ($jamKompenSelesai / 2));
+
             return [
-                'id'          => $mhs->id,
-                'nim'         => $mhs->nim,
-                'nama'        => $mhs->nama ?? $mhs->user->name ?? '-',
-                'kelas'       => $mhs->kelas->nama ?? '-',
-                'dosen_pa'    => optional($mhs->dosen)->nama ?? '-',
-                'ipk'         => number_format($mhs->ipk ?? 0, 2),
-                'ips'         => number_format($ips, 2),
-                'jumlah_de'   => $nilaiDE->count(),
-                'jumlah_d'    => $jumlahD,
-                'total_alpha' => $totalAlpha,
-                'kategori'    => $kategori,
-                'skor'        => self::tingkatKeparahan($kategori),
+                'id'             => $mhs->id,
+                'nim'            => $mhs->nim,
+                'nama'           => $mhs->nama ?? $mhs->user->name ?? '-',
+                'kelas'          => $mhs->kelas->nama ?? '-',
+                'dosen_pa'       => optional($mhs->dosen)->nama ?? '-',
+                'ipk'            => number_format($mhs->ipk ?? 0, 2),
+                'ips'            => number_format($ips, 2),
+                'jumlah_de'      => $nilaiDE->count(),
+                'jumlah_d'       => $jumlahD,
+                'total_alpha'    => $totalAlpha,
+                'alpha_efektif'  => $alphaEfektif,
+                'kategori'       => $kategori,
+                'skor'           => self::tingkatKeparahan($kategori),
             ];
         })
         ->sortByDesc('skor')

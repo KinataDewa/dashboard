@@ -45,7 +45,7 @@ class DashboardController extends Controller
         });
 
 
-        $gradeDistribusi = ['A' => 0, 'B' => 0, 'C' => 0, 'D' => 0, 'E' => 0];
+        $gradeDistribusi = ['A' => 0, 'B+' => 0, 'B' => 0, 'C+' => 0, 'C' => 0, 'D' => 0, 'E' => 0];
         foreach ($mahasiswas as $mhs) {
             $maxSem = (int) $mhs->nilais->max('semester');
             if ($maxSem === 0) continue;
@@ -72,11 +72,15 @@ class DashboardController extends Controller
             }
         }
 
+        $kompensasiPending = $mahasiswas->filter(
+            fn($m) => $m->kompensasis->where('status', 'pending')->isNotEmpty()
+        );
+
         return view('dosen.dashboard', compact(
             'dosen', 'kelas', 'mahasiswas', 'mahasiswaBerisiko',
             'totalMahasiswa', 'totalBerisiko', 'rataRataIpk', 'totalNilaiDE',
             'totalH', 'totalI', 'totalS', 'totalA',
-            'gradeDistribusi'
+            'gradeDistribusi', 'kompensasiPending'
         ));
     }
 }

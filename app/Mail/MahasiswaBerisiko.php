@@ -17,6 +17,7 @@ class MahasiswaBerisiko extends Mailable
     public array $absensiAlpha;
     public float $ipk;
     public int   $totalAlpha;
+    public int   $alphaEfektif;
     public array $kategoriRisiko;
     public string $labelKategori;
 
@@ -58,6 +59,11 @@ class MahasiswaBerisiko extends Mailable
         $this->totalAlpha = $semAlpha > 0
             ? (int) $mahasiswa->absensis->where('semester', $semAlpha)->sum('jam_alpha')
             : 0;
+
+        $jamKompenSelesai   = $mahasiswa->relationLoaded('kompensasis')
+            ? (int) $mahasiswa->kompensasis->where('semester', $semAlpha)->where('status', 'lunas')->sum('jam_kompen_wajib')
+            : (int) $mahasiswa->kompensasis()->where('semester', $semAlpha)->where('status', 'lunas')->sum('jam_kompen_wajib');
+        $this->alphaEfektif = max(0, $this->totalAlpha - (int) ($jamKompenSelesai / 2));
 
         // Kategori risiko sesuai Pedoman Akademik D4 TI Polinema 2022/2023
         $this->kategoriRisiko = $mahasiswa->getKategoriRisiko();

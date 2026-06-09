@@ -70,12 +70,14 @@ class DashboardController extends Controller
 
         $kompenAktif = $mahasiswa->getKompensasiSemester($semesterAktif);
 
+        $kompensasis = $mahasiswa->kompensasis()->orderBy('semester', 'desc')->get();
+
         return view('mahasiswa.dashboard', compact(
             'mahasiswa', 'nilais', 'absensis',
             'ipSemester', 'ipk', 'nilaiDE', 'absensiKritis',
             'semesterAktif', 'tahunAkademik', 'rataRataKelas',
             'kompenAktif', 'absensiPerSemester', 'semesterListAbsensi',
-            'totalAlpha', 'kategoriRisiko'
+            'totalAlpha', 'kategoriRisiko', 'kompensasis'
         ));
     }
 }

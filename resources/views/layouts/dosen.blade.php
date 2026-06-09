@@ -666,7 +666,7 @@
                 $dosenUser = auth()->user()->dosen ?? null;
                 if($dosenUser) {
                     $jmlBerisiko = \App\Models\Mahasiswa::where('dosen_pa_id', $dosenUser->id)
-                        ->with(['nilais','absensis'])->get()
+                        ->with(['nilais','absensis','kompensasis'])->get()
                         ->filter(fn($m) => $m->isBerisiko())->count();
                 }
             @endphp
@@ -681,7 +681,7 @@
             @php
                 $dosenLogin  = \App\Models\Dosen::where('user_id', auth()->id())->first();
                 $jmlBerisiko = $dosenLogin
-                    ? \App\Models\Mahasiswa::with(['nilais','absensis'])
+                    ? \App\Models\Mahasiswa::with(['nilais','absensis','kompensasis'])
                         ->where('dosen_pa_id', $dosenLogin->id)
                         ->get()
                         ->filter(fn($m) =>
@@ -694,6 +694,34 @@
             <span style="margin-left:auto;background:#EF4444;color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:700;">
                 {{ $jmlBerisiko }}
             </span>
+            @endif
+        </a>
+        <a href="{{ route('dosen.kompensasi.index') }}"
+            class="nav-link-item {{ request()->routeIs('dosen.kompensasi*') ? 'active' : '' }}">
+            <i class="bi bi-clipboard2-check-fill"></i>
+            <span>Kompensasi</span>
+            @php
+                $dosenForKompen = \App\Models\Dosen::where('user_id', auth()->id())->first();
+                $jmlSisaKompen  = 0;
+                if ($dosenForKompen) {
+                    $kelasIdsNav = \App\Models\Kelas::where('dosen_pa_id', $dosenForKompen->id)->pluck('id');
+                    $mhsNavList  = \App\Models\Mahasiswa::whereIn('kelas_id', $kelasIdsNav)
+                        ->with(['absensis', 'kompensasis'])->get();
+                    foreach ($mhsNavList as $mNav) {
+                        $absBySmtr  = $mNav->absensis->groupBy('semester');
+                        $kompBySmtr = $mNav->kompensasis->groupBy('semester');
+                        foreach ($absBySmtr as $smtr => $absItems) {
+                            $jAlpha = (int) $absItems->sum('jam_alpha');
+                            if ($jAlpha < 18) continue;
+                            $jWajib    = $jAlpha * 2;
+                            $jSelesai  = (int) $kompBySmtr->get($smtr, collect())->where('status','lunas')->sum('jam_kompen_wajib');
+                            if (max(0, $jWajib - $jSelesai) > 0) { $jmlSisaKompen++; break; }
+                        }
+                    }
+                }
+            @endphp
+            @if($jmlSisaKompen > 0)
+            <span class="nav-badge">{{ $jmlSisaKompen }}</span>
             @endif
         </a>
     </nav>

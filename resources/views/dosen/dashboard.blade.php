@@ -272,7 +272,7 @@
                 <canvas id="nilaiChart"></canvas>
             </div>
             <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;">
-                @foreach(['A'=>['#22C55E','Sangat Baik'],'B'=>['#3B82F6','Baik'],'C'=>['#FBBF24','Cukup'],'D'=>['#F97316','Kurang'],'E'=>['#EF4444','Sangat Kurang']] as $g => $info)
+                @foreach(['A'=>['#22C55E','Sangat Baik'],'B+'=>['#60A5FA','Baik+'],'B'=>['#3B82F6','Baik'],'C+'=>['#FBBF24','Cukup+'],'C'=>['#FDE68A','Cukup'],'D'=>['#F97316','Kurang'],'E'=>['#EF4444','Sangat Kurang']] as $g => $info)
                 <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-2);">
                     <div style="width:8px;height:8px;border-radius:2px;background:{{ $info[0] }};flex-shrink:0;"></div>
                     {{ $g }} — {{ $info[1] }}
@@ -494,13 +494,58 @@
         <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:#FFFBEB;color:#92400E;">
             <i class="bi bi-award"></i> IPK rata-rata {{ number_format($rataRataIpk, 2) }}
         </span>
-        @if($kompenPending->count() > 0)
+        @if($kompensasiPending->count() > 0)
         <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:#FEF3C7;color:#92400E;">
-            <i class="bi bi-clipboard2-check-fill"></i> {{ $kompenPending->count() }} kompen pending
+            <i class="bi bi-clipboard2-check-fill"></i> {{ $kompensasiPending->count() }} kompen pending
         </span>
         @endif
     </div>
 </div>
+
+{{-- ══ KOMPENSASI PENDING MAHASISWA ══ --}}
+@if($kompensasiPending->count() > 0)
+<div class="section-label" style="margin-top:24px;">Kompensasi Pending Mahasiswa</div>
+<div class="card-white tbl-card-v2">
+    <div class="tbl-head-v2">
+        <div>
+            <div class="tbl-title-v2">Kompensasi Pending Mahasiswa</div>
+            <div class="tbl-sub-v2">{{ $kompensasiPending->count() }} mahasiswa belum lunas kompensasi</div>
+        </div>
+    </div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <table class="mhs-table" style="min-width:600px;">
+            <thead>
+                <tr>
+                    <th>Nama Mahasiswa</th>
+                    <th>NIM</th>
+                    <th style="text-align:center;">Semester</th>
+                    <th style="text-align:center;">Jam Alpha</th>
+                    <th style="text-align:center;">Jam Kompensasi Wajib</th>
+                    <th style="text-align:center;">TTD Admin</th>
+                    <th style="text-align:center;">TTD Kajur</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($kompensasiPending as $mhs)
+                    @foreach($mhs->kompensasis->where('status', 'pending') as $kompen)
+                    <tr>
+                        <td>
+                            <div style="font-weight:600;font-size:13.5px;color:var(--text-1);">{{ $mhs->nama }}</div>
+                        </td>
+                        <td style="font-size:12px;color:var(--text-3);font-family:monospace;">{{ $mhs->nim }}</td>
+                        <td style="text-align:center;font-weight:600;color:var(--text-1);">{{ $kompen->semester }}</td>
+                        <td style="text-align:center;font-weight:700;color:#EF4444;">{{ $kompen->jam_alpha }}j</td>
+                        <td style="text-align:center;font-weight:700;color:var(--text-1);">{{ $kompen->jam_kompen_wajib }}j</td>
+                        <td style="text-align:center;font-size:16px;">{{ $kompen->ttd_admin ? '✅' : '⏳' }}</td>
+                        <td style="text-align:center;font-size:16px;">{{ $kompen->ttd_kajur ? '✅' : '⏳' }}</td>
+                    </tr>
+                    @endforeach
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
 
 @endsection
 
@@ -513,16 +558,18 @@ new Chart(document.getElementById('nilaiChart').getContext('2d'), {
     plugins: [ChartDataLabels],
     type: 'bar',
     data: {
-        labels: ['A', 'B', 'C', 'D', 'E'],
+        labels: ['A', 'B+', 'B', 'C+', 'C', 'D', 'E'],
         datasets: [{
             data: [
                 {{ $gradeDistribusi['A'] }},
+                {{ $gradeDistribusi['B+'] }},
                 {{ $gradeDistribusi['B'] }},
+                {{ $gradeDistribusi['C+'] }},
                 {{ $gradeDistribusi['C'] }},
                 {{ $gradeDistribusi['D'] }},
                 {{ $gradeDistribusi['E'] }}
             ],
-            backgroundColor: ['#22C55E', '#3B82F6', '#FBBF24', '#F97316', '#EF4444'],
+            backgroundColor: ['#22C55E', '#60A5FA', '#3B82F6', '#FBBF24', '#FDE68A', '#F97316', '#EF4444'],
             borderRadius: 6,
             borderSkipped: false,
             maxBarThickness: 48

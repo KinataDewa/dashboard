@@ -109,22 +109,29 @@ class Mahasiswa extends Model
     
     public function getKategoriRisiko(): array
     {
-        $semNilai   = $this->nilais->max('semester') ?? 0;
-        $semAlpha   = $this->absensis->max('semester') ?? 0;
-        $totalAlpha = $semAlpha > 0
-            ? $this->absensis->where('semester', $semAlpha)->sum('jam_alpha')
+        $semNilai = $this->nilais->max('semester') ?? 0;
+        $semAlpha = $this->absensis->max('semester') ?? 0;
+        $alphaAsli = $semAlpha > 0
+            ? (int) $this->absensis->where('semester', $semAlpha)->sum('jam_alpha')
             : 0;
+
+        // Kurangi dengan kompen yang sudah lunas (kompen = alpha × 2, jadi balik ÷ 2)
+        $jamKompenSelesai = $this->relationLoaded('kompensasis')
+            ? (int) $this->kompensasis->where('semester', $semAlpha)->where('status', 'lunas')->sum('jam_kompen_wajib')
+            : (int) $this->kompensasis()->where('semester', $semAlpha)->where('status', 'lunas')->sum('jam_kompen_wajib');
+
+        $alphaEfektif = max(0, $alphaAsli - ($jamKompenSelesai / 2));
 
         $kategori = [];
 
-        // ── Kategori Alpha (level SP) ────────────────────────
-        if ($totalAlpha >= 56) {
+        // ── Kategori Alpha (level SP) — berdasarkan alpha efektif ──
+        if ($alphaEfektif >= 56) {
             $kategori[] = 'ps';
-        } elseif ($totalAlpha >= 47) {
+        } elseif ($alphaEfektif >= 47) {
             $kategori[] = 'sp3';
-        } elseif ($totalAlpha >= 36) {
+        } elseif ($alphaEfektif >= 36) {
             $kategori[] = 'sp2';
-        } elseif ($totalAlpha >= 18) {
+        } elseif ($alphaEfektif >= 18) {
             $kategori[] = 'sp1';
         }
 

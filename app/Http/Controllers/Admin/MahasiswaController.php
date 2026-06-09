@@ -78,7 +78,7 @@ class MahasiswaController extends Controller
  
     public function show(Mahasiswa $mahasiswa)
     {
-        $mahasiswa->load(['kelas', 'dosenPa', 'user', 'nilais.mataKuliah', 'absensis.mataKuliah']);
+        $mahasiswa->load(['kelas', 'dosenPa', 'user', 'nilais.mataKuliah', 'absensis.mataKuliah', 'kompensasis']);
 
         $semesterAktif = request('semester')
             ? (int) request('semester')

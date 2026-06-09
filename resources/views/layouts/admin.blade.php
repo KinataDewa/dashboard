@@ -515,7 +515,11 @@
         class="nav-link-item {{ request()->routeIs('admin.berisiko*') ? 'active' : '' }}">
             <i class="bi bi-exclamation-triangle-fill"></i>
             <span>Mahasiswa Berisiko</span>
-            @php $jmlBerisiko = \App\Models\Mahasiswa::all()->filter(fn($m) => $m->isBerisiko())->count(); @endphp
+            @php
+                $jmlBerisiko = \App\Models\Mahasiswa::with(['nilais','absensis','kompensasis'])
+                    ->where('status','aktif')->get()
+                    ->filter(fn($m) => $m->isBerisiko())->count();
+            @endphp
             @if($jmlBerisiko > 0)
             <span style="margin-left:auto;background:#EF4444;color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:700;">
                 {{ $jmlBerisiko }}

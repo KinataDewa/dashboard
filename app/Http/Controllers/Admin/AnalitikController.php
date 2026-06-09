@@ -118,11 +118,13 @@ class AnalitikController extends Controller
     // ── Nilai 0-100 ke grade point 0-4 ───────────────────
     private function nilaiToGradePoint(float $nilai): float
     {
-        if ($nilai >= 80) return 4.0;
-        if ($nilai >= 70) return 3.0;
-        if ($nilai >= 60) return 2.0;
-        if ($nilai >= 50) return 1.0;
-        return 0.0;
+        if ($nilai > 80) return 4.0;  // A
+        if ($nilai > 73) return 3.5;  // B+
+        if ($nilai > 65) return 3.0;  // B
+        if ($nilai > 60) return 2.5;  // C+
+        if ($nilai > 50) return 2.0;  // C
+        if ($nilai > 39) return 1.0;  // D
+        return 0.0;                   // E
     }
  
     // ── Deteksi tren: naik/turun/stabil ──────────────────

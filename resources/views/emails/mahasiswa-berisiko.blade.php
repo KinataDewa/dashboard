@@ -393,11 +393,11 @@
                 <div class="alpha-info-label">Status</div>
                 @php
                     $spStatus = match(true) {
-                        $totalAlpha >= 56 => ['label' => '⛔ Putus Studi', 'color' => '#7F1D1D'],
-                        $totalAlpha >= 47 => ['label' => '⛔ SP III', 'color' => '#991B1B'],
-                        $totalAlpha >= 36 => ['label' => '⚠ SP II', 'color' => '#DC2626'],
-                        $totalAlpha >= 18 => ['label' => '⚠ SP I', 'color' => '#EF4444'],
-                        default           => ['label' => '✅ Aman', 'color' => '#15803D'],
+                        $alphaEfektif >= 56 => ['label' => '⛔ Putus Studi', 'color' => '#7F1D1D'],
+                        $alphaEfektif >= 47 => ['label' => '⛔ SP III', 'color' => '#991B1B'],
+                        $alphaEfektif >= 36 => ['label' => '⚠ SP II', 'color' => '#DC2626'],
+                        $alphaEfektif >= 18 => ['label' => '⚠ SP I', 'color' => '#EF4444'],
+                        default             => ['label' => '✅ Aman', 'color' => '#15803D'],
                     };
                 @endphp
                 <div class="alpha-info-val" style="color:{{ $spStatus['color'] }};">{{ $spStatus['label'] }}</div>
