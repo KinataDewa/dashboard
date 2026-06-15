@@ -651,45 +651,25 @@
                             <div class="notif-entry">
                                 <div class="notif-icon-wrap"><i class="bi bi-exclamation-circle-fill"></i></div>
                                 <div class="notif-entry-text">
-                                    Performa akademik pada mata kuliah
-                                    <strong>{{ $n->mataKuliah->nama }}</strong>
-                                    berada di bawah standar! (Nilai {{ $n->grade }}).
+                                    Terdapat nilai di bawah standar pada semester
+                                    <strong>{{ $n->semester }}</strong>. (Nilai {{ $n->grade }}).
                                 </div>
                             </div>
                             @endforeach
                         @endif
- 
+
                         @if(isset($absensiKritis) && is_object($absensiKritis) && $absensiKritis->count() > 0)
                             @foreach($absensiKritis as $a)
                             <div class="notif-entry">
                                 <div class="notif-icon-wrap"><i class="bi bi-clock-fill"></i></div>
                                 <div class="notif-entry-text">
-                                    Alpha <strong>{{ $a->jam_alpha }} jam</strong> pada
-                                    <strong>{{ $a->mataKuliah->nama }}</strong>.
-                                    Mendekati batas 18 jam!
+                                    Total alpha semester <strong>{{ $a->semester }}</strong>:
+                                    <strong>{{ $a->jam_alpha }} jam</strong>. Mendekati batas SP I (18 jam)!
                                 </div>
                             </div>
                             @endforeach
                         @endif
- 
-                        @if($notifCount === 0)
-                        <div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px;">
-                            <i class="bi bi-check-circle d-block mb-1" style="font-size:22px;color:var(--blue-mid);"></i>
-                            Tidak ada notifikasi baru
-                        </div>
-                        @endif
-                        @if(isset($absensiKritis) && $absensiKritis->count() > 0)
-                            @foreach($absensiKritis as $a)
-                            <div class="notif-entry">
-                                <div class="notif-icon-wrap"><i class="bi bi-clock-fill"></i></div>
-                                <div class="notif-entry-text">
-                                    Alpha <strong>{{ $a->jam_alpha }} jam</strong> pada
-                                    <strong>{{ $a->mataKuliah->nama }}</strong>.
-                                    Mendekati batas 18 jam!
-                                </div>
-                            </div>
-                            @endforeach
-                        @endif
+
                         @if($notifCount === 0)
                         <div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px;">
                             <i class="bi bi-check-circle d-block mb-1" style="font-size:22px;color:var(--blue-mid);"></i>

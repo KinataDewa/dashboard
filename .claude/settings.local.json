@@ -14,7 +14,9 @@
       "Bash(Select-Object -First 20)",
       "Bash(php -r \"require 'vendor/autoload.php'; echo 'PHP OK';\")",
       "Bash(php -l app/Imports/RaporImport.php)",
-      "Bash(php -l app/Http/Controllers/Admin/ImportController.php)"
+      "Bash(php -l app/Http/Controllers/Admin/ImportController.php)",
+      "PowerShell(php artisan route:list --path=admin/import 2>&1)",
+      "Bash(php -r ' *)"
     ]
   }
 }

@@ -211,11 +211,30 @@
     content: ''; flex: 1; height: 1px; background: var(--border);
 }
 
+/* Semester filter select */
+.sem-select {
+    padding: 5px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-1);
+    background: var(--white);
+    cursor: pointer;
+    outline: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: border-color .15s;
+}
+.sem-select:focus { border-color: var(--blue); }
+
 @media (max-width: 576px) {
     .stat-card-value { font-size: 26px; }
     .donut-canvas-box { width: 120px; height: 120px; }
     .donut-canvas-box canvas { width: 120px !important; height: 120px !important; }
     .donut-center-num { font-size: 16px; }
+    .ac-table-v2 tbody td,
+    .ac-table-v2 thead th { padding: 8px 6px; font-size: 12px; }
+    .col-sks-hide { display: none; }
 }
 @media(max-width:480px){
     .donut-wrap-v2{flex-direction:column;align-items:center;}
@@ -618,53 +637,6 @@
         </div>
     </div>
 </div>
-{{-- @php
-    $kompenAktif = $mahasiswa->getKompensasiSemester($semesterAktif);
-@endphp
-@if($kompenAktif)
-<div class="col-sm-4 col-12">
-    <div class="stat-card-v2">
-        <div class="stat-card-accent" style="background:{{ $kompenAktif->isLunas() ? 'linear-gradient(90deg,#22C55E,#86EFAC)' : 'linear-gradient(90deg,#F59E0B,#FCD34D)' }};"></div>
-        <div class="stat-card-body">
-            <div class="stat-icon-box" style="background:{{ $kompenAktif->isLunas() ? '#F0FDF4' : '#FEF3C7' }};">
-                <i class="bi bi-clipboard2-check-fill" style="color:{{ $kompenAktif->isLunas() ? '#22C55E' : '#F59E0B' }};"></i>
-            </div>
-            <div class="stat-card-info">
-                <div class="stat-card-label">Kompensasi Sem {{ $semesterAktif }}</div>
-                <div class="stat-card-value" style="color:{{ $kompenAktif->isLunas() ? '#22C55E' : '#F59E0B' }};font-size:24px;">
-                    {{ $kompenAktif->jam_kompen_wajib }}<span style="font-size:14px;font-weight:500;color:var(--text-2);"> jam</span>
-                </div>
-                <div class="stat-card-note mt-1">
-                    @if($kompenAktif->isLunas())
-                        <span class="stat-card-badge badge-up"><i class="bi bi-check-circle-fill"></i> Lunas</span>
-                    @else
-                        <span class="stat-card-badge badge-warn"><i class="bi bi-hourglass-split"></i> Pending</span>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-@endif --}}
-
-{{-- @if(isset($kompenAktif) && $kompenAktif && !$kompenAktif->isLunas())
-<div class="card-white" style="border-left:4px solid #F59E0B;border-radius:12px;padding:16px 20px;margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-    <div style="display:flex;align-items:center;gap:12px;">
-        <div style="width:40px;height:40px;border-radius:10px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">⏳</div>
-        <div>
-            <div style="font-size:14px;font-weight:700;color:var(--text-1);">Kompensasi Semester {{ $semesterAktif }} Belum Lunas</div>
-            <div style="font-size:12.5px;color:var(--text-2);margin-top:2px;">
-                Anda wajib menyelesaikan <strong style="color:#92400E;">{{ $kompenAktif->jam_kompen_wajib }} jam</strong> kompensasi
-                ({{ $kompenAktif->sp_label }} — {{ $kompenAktif->jam_alpha }} jam alpha).
-                Hubungi admin untuk surat kompensasi.
-            </div>
-        </div>
-    </div>
-    <span style="background:#FEF3C7;color:#92400E;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;">
-        {{ $kompenAktif->sp_label }} · Pending
-    </span>
-</div>
-@endif --}}
 
 {{-- ══ CHARTS ══ --}}
 <div class="section-label">Laporan Visual</div>
@@ -676,17 +648,26 @@
             <div class="chart-head-v2">
                 <div>
                     <div class="chart-title-v2">Laporan Nilai</div>
-                    <div class="chart-sub-v2">Nilai akhir per mata kuliah semester {{ $semesterAktif }}</div>
+                    <div class="chart-sub-v2" id="barChartSub">Nilai akhir per mata kuliah semester {{ $semesterAktif }}</div>
                 </div>
-                <div class="filter-wrap">
-                    <button class="btn-filter" id="filterBarBtn">
-                        <i class="bi bi-sliders2" style="font-size:12px;"></i> Filter
-                    </button>
-                    <div class="filter-menu" id="filterBarMenu">
-                        <div class="filter-menu-label">Select Filter</div>
-                        <div class="filter-opt active" data-val="all">Semua Mata Kuliah</div>
-                        <div class="filter-opt" data-val="de">Nilai D/E Saja</div>
-                        <div class="filter-opt" data-val="ab">Nilai A/B Saja</div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <select id="semFilterNilai" class="sem-select" onchange="onSemNilaiChange(this.value)">
+                        @forelse($semesterListNilai as $sem)
+                        <option value="{{ $sem }}" {{ (int)$sem === (int)$semesterAktif ? 'selected' : '' }}>Sem {{ $sem }}</option>
+                        @empty
+                        <option value="{{ $semesterAktif }}">Sem {{ $semesterAktif }}</option>
+                        @endforelse
+                    </select>
+                    <div class="filter-wrap">
+                        <button class="btn-filter" id="filterBarBtn">
+                            <i class="bi bi-sliders2" style="font-size:12px;"></i> Filter
+                        </button>
+                        <div class="filter-menu" id="filterBarMenu">
+                            <div class="filter-menu-label">Select Filter</div>
+                            <div class="filter-opt active" data-val="all">Semua Mata Kuliah</div>
+                            <div class="filter-opt" data-val="de">Nilai D/E Saja</div>
+                            <div class="filter-opt" data-val="ab">Nilai A/B Saja</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -731,12 +712,10 @@
 
             @php
                 $absenAktifDonut = $absensis->first();
-                $sumHadir = $absenAktifDonut?->jam_hadir ?? 0;
                 $sumIzin  = $absenAktifDonut?->jam_izin  ?? 0;
                 $sumSakit = $absenAktifDonut?->jam_sakit ?? 0;
                 $sumAlp   = $absenAktifDonut?->jam_alpha ?? 0;
-                $sumAll   = $sumHadir + $sumIzin + $sumSakit + $sumAlp;
-                $pctH = $sumAll > 0 ? round($sumHadir/$sumAll*100) : 0;
+                $sumAll   = $sumAlp + $sumIzin + $sumSakit;
                 $pctI = $sumAll > 0 ? round($sumIzin/$sumAll*100) : 0;
                 $pctS = $sumAll > 0 ? round($sumSakit/$sumAll*100) : 0;
                 $pctA = $sumAll > 0 ? round($sumAlp/$sumAll*100) : 0;
@@ -746,20 +725,20 @@
                 <div class="donut-canvas-box">
                     <canvas id="absensiChart" width="148" height="148"></canvas>
                     <div class="donut-center-text">
-                        <div class="donut-center-num" id="donutCenterNum">{{ $pctH }}%</div>
-                        <div class="donut-center-sub" id="donutCenterSub">Hadir</div>
+                        <div class="donut-center-num" id="donutCenterNum">{{ $sumAlp }}j</div>
+                        <div class="donut-center-sub" id="donutCenterSub">Alpha</div>
                     </div>
                 </div>
                 <div class="legend-v2">
                     <div>
                         <div class="legend-v2-row">
                             <div class="legend-v2-left">
-                                <div class="legend-v2-dot" style="background:#22C55E;"></div>
-                                <span class="legend-v2-label">Hadir</span>
+                                <div class="legend-v2-dot" style="background:#EF4444;"></div>
+                                <span class="legend-v2-label">Alpha</span>
                             </div>
-                            <span class="legend-v2-val" id="legendHadirVal">{{ $sumHadir }}j</span>
+                            <span class="legend-v2-val" id="legendAlphaVal" style="color:{{ $sumAlp >= 14 ? '#EF4444' : 'var(--text-1)' }};">{{ $sumAlp }}j</span>
                         </div>
-                        <div class="legend-v2-bar"><div class="legend-v2-bar-fill" id="legendHadirBar" style="width:{{ $pctH }}%;background:#22C55E;"></div></div>
+                        <div class="legend-v2-bar"><div class="legend-v2-bar-fill" id="legendAlphaBar" style="width:{{ $pctA }}%;background:#EF4444;"></div></div>
                     </div>
                     <div>
                         <div class="legend-v2-row">
@@ -781,16 +760,6 @@
                         </div>
                         <div class="legend-v2-bar"><div class="legend-v2-bar-fill" id="legendSakitBar" style="width:{{ $pctS }}%;background:#3B82F6;"></div></div>
                     </div>
-                    <div>
-                        <div class="legend-v2-row">
-                            <div class="legend-v2-left">
-                                <div class="legend-v2-dot" style="background:#EF4444;"></div>
-                                <span class="legend-v2-label">Alpha</span>
-                            </div>
-                            <span class="legend-v2-val" id="legendAlphaVal" style="color:{{ $sumAlp >= 14 ? '#EF4444' : 'var(--text-1)' }};">{{ $sumAlp }}j</span>
-                        </div>
-                        <div class="legend-v2-bar"><div class="legend-v2-bar-fill" id="legendAlphaBar" style="width:{{ $pctA }}%;background:#EF4444;"></div></div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -798,7 +767,19 @@
 </div>
 
 {{-- ══ TABEL ══ --}}
-<div class="section-label">Detail Data</div>
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;margin-top:4px;">
+    <div class="section-label" style="margin:0;flex:1;">Detail Data</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:12px;font-weight:600;color:var(--text-2);">Semester</span>
+        <select id="semFilterTbl" class="sem-select" onchange="onSemNilaiChange(this.value)">
+            @forelse($semesterListNilai as $sem)
+            <option value="{{ $sem }}" {{ (int)$sem === (int)$semesterAktif ? 'selected' : '' }}>Semester {{ $sem }}</option>
+            @empty
+            <option value="{{ $semesterAktif }}">Semester {{ $semesterAktif }}</option>
+            @endforelse
+        </select>
+    </div>
+</div>
 <div class="row g-3">
 
     {{-- Nilai Akademik --}}
@@ -807,7 +788,7 @@
             <div class="tbl-head-v2">
                 <div>
                     <div class="tbl-title-v2">Nilai Akademik</div>
-                    <div class="tbl-sub-v2">Semester {{ $semesterAktif }} • {{ $nilais->count() }} mata kuliah</div>
+                    <div class="tbl-sub-v2" id="nilaiTblSub">Semester {{ $semesterAktif }} • {{ $nilais->count() }} mata kuliah</div>
                 </div>
                 <div class="tbl-actions">
                     <div class="search-wrap">
@@ -834,7 +815,7 @@
                     <thead>
                         <tr>
                             <th>Mata Kuliah</th>
-                            <th style="text-align:center;">SKS</th>
+                            <th class="col-sks-hide" style="text-align:center;">SKS</th>
                             <th style="text-align:center;">Nilai</th>
                             <th style="text-align:center;">Grade</th>
                         </tr>
@@ -860,7 +841,7 @@
                                 <div style="font-weight:500;color:var(--text-1);">{{ $nilai->mataKuliah->nama }}</div>
                                 <div style="font-size:11px;color:var(--text-3);margin-top:1px;">{{ $nilai->mataKuliah->kode }}</div>
                             </td>
-                            <td style="text-align:center;color:var(--text-2);">{{ $nilai->mataKuliah->sks }}</td>
+                            <td class="col-sks-hide" style="text-align:center;color:var(--text-2);">{{ $nilai->mataKuliah->sks }}</td>
                             <td style="text-align:center;">
                                 <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
                                     <span style="font-weight:700;font-size:13.5px;color:{{ $scoreColor }};">
@@ -912,7 +893,7 @@
             <div class="tbl-head-v2">
                 <div>
                     <div class="tbl-title-v2">Riwayat Absensi</div>
-                    <div class="tbl-sub-v2">Ringkasan per semester • {{ $allAbsensis->count() }} semester</div>
+                    <div class="tbl-sub-v2" id="absensiTblSub">Semester {{ $semesterAktif }} • {{ $allAbsensis->count() }} data</div>
                 </div>
                 <div class="tbl-actions">
                     <a href="{{ route('mahasiswa.absensi') }}" class="btn-outline">View All</a>
@@ -929,10 +910,10 @@
                             <th style="text-align:center;">Sakit</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="absensiTableBody">
                         @forelse($allAbsensis->sortByDesc('semester') as $absen)
                         @php $isAktif = (int)$absen->semester === (int)$semesterAktif; @endphp
-                        <tr>
+                        <tr data-semester="{{ $absen->semester }}" {{ (int)$absen->semester !== (int)$semesterAktif ? 'style=display:none' : '' }}>
                             <td style="text-align:center;">
                                 <span style="font-weight:700;color:{{ $isAktif ? 'var(--blue)' : 'var(--text-1)' }};">
                                     {{ $absen->semester }}
@@ -1136,15 +1117,10 @@ var donutCtx = document.getElementById('absensiChart').getContext('2d');
 var donutChart = new Chart(donutCtx, {
     type: 'doughnut',
     data: {
-        labels: ['Alpha','Izin','Sakit','Hadir'],
+        labels: ['Alpha','Izin','Sakit'],
         datasets: [{
-            data: [
-                {{ $sumAlp }},
-                {{ $sumIzin }},
-                {{ $sumSakit }},
-                {{ $sumHadir }}
-            ],
-            backgroundColor: ['#EF4444','#FBBF24','#3B82F6','#22C55E'],
+            data: [{{ $sumAlp }}, {{ $sumIzin }}, {{ $sumSakit }}],
+            backgroundColor: ['#EF4444','#FBBF24','#3B82F6'],
             borderWidth: 3,
             borderColor: '#FFFFFF',
             hoverOffset: 5,
@@ -1183,28 +1159,97 @@ document.getElementById('filterBarBtn').addEventListener('filterChange', functio
 document.getElementById('filterAbsensiDonutBtn').addEventListener('filterChange', function(e) {
     var sem = parseInt(e.detail.value);
     var d   = ABSENSI_DATA[sem] || {hadir:0, izin:0, sakit:0, alpha:0};
-    var tot = d.hadir + d.izin + d.sakit + d.alpha;
-    var pH  = tot > 0 ? Math.round(d.hadir / tot * 100) : 0;
+    var tot = d.alpha + d.izin + d.sakit;
+    var pA  = tot > 0 ? Math.round(d.alpha / tot * 100) : 0;
     var pI  = tot > 0 ? Math.round(d.izin  / tot * 100) : 0;
     var pS  = tot > 0 ? Math.round(d.sakit / tot * 100) : 0;
-    var pA  = tot > 0 ? Math.round(d.alpha / tot * 100) : 0;
 
-    donutChart.data.datasets[0].data = [d.alpha, d.izin, d.sakit, d.hadir];
+    donutChart.data.datasets[0].data = [d.alpha, d.izin, d.sakit];
     donutChart.update();
 
-    document.getElementById('absensiChartSub').textContent  = 'Distribusi kehadiran semester ' + sem;
-    document.getElementById('donutCenterNum').textContent    = pH + '%';
+    document.getElementById('absensiChartSub').textContent = 'Distribusi kehadiran semester ' + sem;
+    document.getElementById('donutCenterNum').textContent  = d.alpha + 'j';
 
-    document.getElementById('legendHadirVal').textContent  = d.hadir + 'j';
-    document.getElementById('legendHadirBar').style.width  = pH + '%';
-    document.getElementById('legendIzinVal').textContent   = d.izin  + 'j';
-    document.getElementById('legendIzinBar').style.width   = pI + '%';
-    document.getElementById('legendSakitVal').textContent  = d.sakit + 'j';
-    document.getElementById('legendSakitBar').style.width  = pS + '%';
-    document.getElementById('legendAlphaVal').textContent  = d.alpha + 'j';
-    document.getElementById('legendAlphaVal').style.color  = d.alpha >= 18 ? '#EF4444' : 'var(--text-1)';
-    document.getElementById('legendAlphaBar').style.width  = pA + '%';
+    document.getElementById('legendAlphaVal').textContent = d.alpha + 'j';
+    document.getElementById('legendAlphaVal').style.color = d.alpha >= 18 ? '#EF4444' : 'var(--text-1)';
+    document.getElementById('legendAlphaBar').style.width = pA + '%';
+    document.getElementById('legendIzinVal').textContent  = d.izin  + 'j';
+    document.getElementById('legendIzinBar').style.width  = pI + '%';
+    document.getElementById('legendSakitVal').textContent = d.sakit + 'j';
+    document.getElementById('legendSakitBar').style.width = pS + '%';
 });
+
+// ── FILTER SEMESTER NILAI (chart + kedua tabel) ────
+var NILAI_API_URL = '{{ route("mahasiswa.api.nilai") }}';
+
+function onSemNilaiChange(sem) {
+    sem = parseInt(sem);
+
+    // Sinkron kedua select
+    document.getElementById('semFilterNilai').value = sem;
+    document.getElementById('semFilterTbl').value   = sem;
+
+    // Update subtitle chart
+    document.getElementById('barChartSub').textContent  = 'Nilai akhir per mata kuliah semester ' + sem;
+    document.getElementById('nilaiTblSub').textContent  = 'Semester ' + sem + ' • Memuat…';
+    document.getElementById('absensiTblSub').textContent = 'Semester ' + sem + ' • {{ $allAbsensis->count() }} data';
+
+    // Filter baris absensi
+    document.querySelectorAll('#absensiTableBody tr[data-semester]').forEach(function(r) {
+        r.style.display = parseInt(r.dataset.semester) === sem ? '' : 'none';
+    });
+
+    // Fetch nilai via AJAX
+    fetch(NILAI_API_URL + '?semester=' + sem, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        // Update bar chart
+        var newLabels = [], newData = [], newColors = [], newGrades = [], newValues = [];
+        data.forEach(function(item) {
+            var nm = item.nama_mk.length > 14 ? item.nama_mk.substring(0, 12) + '..' : item.nama_mk;
+            newLabels.push(nm);
+            newGrades.push(item.grade);
+            newValues.push(item.nilai_akhir);
+            newData.push(G2Y[item.grade] || 0);
+            newColors.push(G2C[item.grade] || '#2563EB');
+        });
+        LABELS = newLabels; GRADES = newGrades; VALUES = newValues;
+        barData = newData; barColors = newColors;
+        barChart.data.labels                      = newLabels;
+        barChart.data.datasets[0].data            = newData;
+        barChart.data.datasets[0].backgroundColor = newColors;
+        barChart.update();
+
+        // Update tabel nilai
+        var tbody = document.getElementById('nilaiTableBody');
+        if (!data.length) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:28px;color:var(--text-3);"><i class="bi bi-inbox" style="font-size:24px;display:block;margin-bottom:6px;"></i>Belum ada data nilai.</td></tr>';
+        } else {
+            tbody.innerHTML = data.slice(0,7).map(function(item) {
+                var isDE = item.grade === 'D' || item.grade === 'E';
+                var gc   = item.grade.replace('+','p');
+                var sw   = Math.min(item.nilai_akhir, 100);
+                var col  = G2C[item.grade] || '#2563EB';
+                var nm   = item.nama_mk; var km = item.kode_mk;
+                return '<tr data-matkul="' + nm.toLowerCase() + '" data-status="' + (isDE?'perhatian':'baik') + '">' +
+                    '<td><div style="font-weight:500;color:var(--text-1);">' + nm + '</div>' +
+                    '<div style="font-size:11px;color:var(--text-3);margin-top:1px;">' + km + '</div></td>' +
+                    '<td class="col-sks-hide" style="text-align:center;color:var(--text-2);">' + item.sks + '</td>' +
+                    '<td style="text-align:center;"><div style="display:flex;align-items:center;gap:6px;justify-content:center;">' +
+                    '<span style="font-weight:700;font-size:13.5px;color:' + col + ';">' + item.nilai_akhir.toFixed(1) + '</span>' +
+                    '<div class="score-bar"><div class="score-bar-fill" style="width:' + sw + '%;background:' + col + ';"></div></div></div></td>' +
+                    '<td style="text-align:center;"><span class="grade-pill grade-' + gc + '">' + item.grade + '</span></td>' +
+                    '</tr>';
+            }).join('');
+        }
+        document.getElementById('nilaiTblSub').textContent = 'Semester ' + sem + ' • ' + data.length + ' mata kuliah';
+    })
+    .catch(function() {
+        document.getElementById('nilaiTblSub').textContent = 'Semester ' + sem + ' • Gagal memuat';
+    });
+}
 
 // ── FILTER TABEL NILAI (dashboard) ──────────────────
 document.getElementById('filterNilaiTblBtn').addEventListener('filterChange', function(e) {

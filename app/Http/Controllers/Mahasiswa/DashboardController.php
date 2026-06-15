@@ -72,12 +72,40 @@ class DashboardController extends Controller
 
         $kompensasis = $mahasiswa->kompensasis()->orderBy('semester', 'desc')->get();
 
+        $semesterListNilai = $mahasiswa->nilais
+            ->pluck('semester')->unique()->sort()->values();
+
         return view('mahasiswa.dashboard', compact(
             'mahasiswa', 'nilais', 'absensis', 'allAbsensis',
             'ipSemester', 'ipk', 'nilaiDE', 'absensiKritis',
             'semesterAktif', 'tahunAkademik', 'rataRataKelas',
             'kompenAktif', 'absensiPerSemester', 'semesterListAbsensi',
-            'totalAlpha', 'kategoriRisiko', 'kompensasis'
+            'totalAlpha', 'kategoriRisiko', 'kompensasis',
+            'semesterListNilai'
         ));
+    }
+
+    public function apiNilai(Request $request)
+    {
+        $user      = auth()->user();
+        $mahasiswa = Mahasiswa::where('user_id', $user->id)
+            ->with(['nilais.mataKuliah'])
+            ->firstOrFail();
+
+        $semester = (int) $request->query('semester', 0);
+
+        $nilais = $mahasiswa->nilais
+            ->when($semester > 0, fn ($c) => $c->where('semester', $semester))
+            ->values();
+
+        return response()->json(
+            $nilais->map(fn ($n) => [
+                'nama_mk'    => $n->mataKuliah->nama  ?? '—',
+                'kode_mk'    => $n->mataKuliah->kode  ?? '',
+                'sks'        => $n->mataKuliah->sks   ?? 0,
+                'nilai_akhir'=> round((float) $n->nilai_akhir, 1),
+                'grade'      => $n->grade,
+            ])->values()
+        );
     }
 }

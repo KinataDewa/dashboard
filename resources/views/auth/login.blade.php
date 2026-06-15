@@ -298,14 +298,14 @@
                         <div class="demo-card-email">admin@polinema...</div>
                         <span class="demo-card-tag" style="background:rgba(124,58,237,.15);color:#7C3AED;">Admin</span>
                     </div>
-                    <div class="demo-card" onclick="fillDemo('elok.nur@polinema.ac.id', event)">
+                    <div class="demo-card" onclick="fillDemo('ariadi.retno.tri.hayati.ririd@dosen.polinema.ac.id', event)">
                         <div class="demo-card-role" style="color:#16A34A;">Dosen</div>
-                        <div class="demo-card-email">elok.nur@...</div>
+                        <div class="demo-card-email">ariadi...</div>
                         <span class="demo-card-tag" style="background:rgba(22,163,74,.15);color:#16A34A;">Dosen PA</span>
                     </div>
-                    <div class="demo-card" onclick="fillDemo('kinata.dewa@student.polinema.ac.id', event)">
+                    <div class="demo-card" onclick="fillDemo('2241760047@student.polinema.ac.id', event)">
                         <div class="demo-card-role" style="color:#2563EB;">Mahasiswa</div>
-                        <div class="demo-card-email">kinata.dewa@...</div>
+                        <div class="demo-card-email">latifbima...</div>
                         <span class="demo-card-tag" style="background:rgba(37,99,235,.15);color:#2563EB;">Student</span>
                     </div>
                 </div>

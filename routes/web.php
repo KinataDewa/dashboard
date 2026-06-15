@@ -40,6 +40,7 @@ Route::middleware(['auth', 'role.mahasiswa'])
     ->name('mahasiswa.')
     ->group(function () {
         Route::get('/dashboard',   [MhsDashboard::class,    'index'])->name('dashboard');
+        Route::get('/api/nilai',   [MhsDashboard::class,    'apiNilai'])->name('api.nilai');
         Route::get('/nilai',       [NilaiController::class,  'index'])->name('nilai');
         Route::get('/absensi',     [AbsensiController::class,'index'])->name('absensi');
         Route::get('/kompensasi',  [App\Http\Controllers\Mahasiswa\KompensasiController::class, 'index'])->name('kompensasi');
@@ -50,9 +51,11 @@ Route::middleware(['auth', 'role.dosen'])
     ->prefix('dosen')
     ->name('dosen.')
     ->group(function () {
-        Route::get('/dashboard',      [DosenDashboard::class,      'index'])->name('dashboard');
-        Route::get('/kelas',          [DosenKelasController::class, 'index'])->name('kelas');
-        Route::get('/mahasiswa/{id}', [DosenKelasController::class, 'detail'])->name('mahasiswa.detail');
+        Route::get('/dashboard',          [DosenDashboard::class,      'index'])->name('dashboard');
+        Route::get('/api/nilai-kelas',    [DosenDashboard::class,      'apiNilaiKelas'])->name('api.nilai-kelas');
+        Route::get('/api/absensi-kelas',  [DosenDashboard::class,      'apiAbsensiKelas'])->name('api.absensi-kelas');
+        Route::get('/kelas',              [DosenKelasController::class, 'index'])->name('kelas');
+        Route::get('/mahasiswa/{id}',     [DosenKelasController::class, 'detail'])->name('mahasiswa.detail');
         Route::get('/berisiko',     [DosenBerisikoController::class, 'index'])->name('berisiko.index');
         Route::get('/kompensasi',   [App\Http\Controllers\Dosen\KompensasiController::class, 'index'])->name('kompensasi.index');
     });
