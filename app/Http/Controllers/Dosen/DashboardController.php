@@ -6,52 +6,53 @@ use App\Http\Controllers\Controller;
 use App\Models\Dosen;
 use App\Models\Kelas;
 use App\Models\Mahasiswa;
+use App\Models\KelasMahasiswa;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user  = auth()->user();
         $dosen = Dosen::where('user_id', $user->id)->firstOrFail();
 
-        $kelas    = Kelas::where('dosen_pa_id', $dosen->id)->get();
-        $kelasIds = $kelas->pluck('id');
-        $mahasiswas = Mahasiswa::whereIn('kelas_id', $kelasIds)
+        $kelasIds     = Kelas::where('dosen_pa_id', $dosen->id)->pluck('id');
+        $semesterList = KelasMahasiswa::whereIn('kelas_id', $kelasIds)
+            ->distinct()->orderBy('semester')->pluck('semester');
+        $semesterAktif = (int) $request->get('semester', $semesterList->max() ?? 1);
+
+        $kelas = Kelas::where('dosen_pa_id', $dosen->id)
+            ->where('semester', $semesterAktif)
+            ->get();
+
+        $mahasiswas = Mahasiswa::whereHas('kelasMahasiswas', function ($q) use ($kelasIds, $semesterAktif) {
+            $q->whereIn('kelas_id', $kelasIds)->where('semester', $semesterAktif);
+        })
             ->with([
                 'kelas',
                 'nilais.mataKuliah',
-                'absensis.mataKuliah',
+                'absensis',
                 'user',
                 'kompensasis',
             ])
+            ->orderBy('nama')
             ->get();
 
-        // Tandai berisiko
         $mahasiswaBerisiko = $mahasiswas->filter(fn($m) => $m->isBerisiko());
 
-        // Statistik
         $totalMahasiswa = $mahasiswas->count();
         $totalBerisiko  = $mahasiswaBerisiko->count();
         $rataRataIpk    = $mahasiswas->count() > 0
             ? round($mahasiswas->avg(fn($m) => $m->ipk), 2)
             : 0;
 
-        // Hitung D/E dan alpha dari semester terakhir masing-masing mahasiswa
-        $totalNilaiDE = $mahasiswas->sum(function ($m) {
-            $sem = $m->nilais->max('semester') ?? 0;
-            return $sem > 0
-                ? $m->nilais->where('semester', $sem)->whereIn('grade', ['D', 'E'])->count()
-                : 0;
-        });
-
+        $totalNilaiDE = $mahasiswas->sum(
+            fn ($m) => $m->nilais->where('semester', $semesterAktif)->whereIn('grade', ['D', 'E'])->count()
+        );
 
         $gradeDistribusi = ['A' => 0, 'B+' => 0, 'B' => 0, 'C+' => 0, 'C' => 0, 'D' => 0, 'E' => 0];
         foreach ($mahasiswas as $mhs) {
-            $maxSem = (int) $mhs->nilais->max('semester');
-            if ($maxSem === 0) continue;
-
-            foreach ($mhs->nilais as $nilai) {
-                if ((int) $nilai->semester !== $maxSem) continue;
+            foreach ($mhs->nilais->where('semester', $semesterAktif) as $nilai) {
                 if (array_key_exists($nilai->grade, $gradeDistribusi)) {
                     $gradeDistribusi[$nilai->grade]++;
                 }
@@ -60,11 +61,7 @@ class DashboardController extends Controller
 
         $totalH = $totalI = $totalS = $totalA = 0;
         foreach ($mahasiswas as $mhs) {
-            $maxSem = (int) $mhs->absensis->max('semester');
-            if ($maxSem === 0) continue;
-
-            foreach ($mhs->absensis as $abs) {
-                if ((int) $abs->semester !== $maxSem) continue;
+            foreach ($mhs->absensis->where('semester', $semesterAktif) as $abs) {
                 $totalH += (int) $abs->jam_hadir;
                 $totalI += (int) $abs->jam_izin;
                 $totalS += (int) $abs->jam_sakit;
@@ -80,7 +77,8 @@ class DashboardController extends Controller
             'dosen', 'kelas', 'mahasiswas', 'mahasiswaBerisiko',
             'totalMahasiswa', 'totalBerisiko', 'rataRataIpk', 'totalNilaiDE',
             'totalH', 'totalI', 'totalS', 'totalA',
-            'gradeDistribusi', 'kompensasiPending'
+            'gradeDistribusi', 'kompensasiPending',
+            'semesterList', 'semesterAktif'
         ));
     }
 }

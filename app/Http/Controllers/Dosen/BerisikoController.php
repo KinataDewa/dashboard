@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Dosen;
 use App\Http\Controllers\Controller;
 use App\Models\Mahasiswa;
 use App\Models\Dosen;
+use App\Models\Kelas;
+use App\Models\KelasMahasiswa;
 use App\Services\BerisikoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,27 +21,33 @@ class BerisikoController extends Controller
         }
 
         $filterJenis = $request->get('jenis', 'semua');
+        $kelasIds    = Kelas::where('dosen_pa_id', $dosen->id)->pluck('id');
 
-        $kelasIds = \App\Models\Kelas::where('dosen_pa_id', $dosen->id)->pluck('id');
+        $semesterList  = KelasMahasiswa::whereIn('kelas_id', $kelasIds)
+            ->distinct()->orderBy('semester')->pluck('semester');
+        $semesterAktif = (int) $request->get('semester', $semesterList->max() ?? 1);
 
-        $semuaMahasiswa = Mahasiswa::with([
-            'user', 'kelas', 'dosen', 'nilais.mataKuliah', 'absensis', 'kompensasis',
-        ])
-        ->whereIn('kelas_id', $kelasIds)
-        ->get();
+        $semuaMahasiswa = Mahasiswa::whereHas('kelasMahasiswas', function ($q) use ($kelasIds, $semesterAktif) {
+            $q->whereIn('kelas_id', $kelasIds)->where('semester', $semesterAktif);
+        })
+            ->with([
+                'user', 'kelas', 'dosenPa', 'nilais.mataKuliah', 'absensis', 'kompensasis',
+            ])
+            ->orderBy('nama')
+            ->get();
 
-        $mahasiswaBerisiko = BerisikoService::filterAndMap($semuaMahasiswa, $filterJenis);
+        $mahasiswaBerisiko = BerisikoService::filterAndMap($semuaMahasiswa, $filterJenis, $semesterAktif);
 
         $summary = [
-            'total_mahasiswa'  => $semuaMahasiswa->count(),
-            'total_berisiko'   => $mahasiswaBerisiko->count(),
-            'ps'               => $mahasiswaBerisiko->filter(fn($m) => in_array('ps', $m['kategori']))->count(),
-            'sp3'              => $mahasiswaBerisiko->filter(fn($m) => in_array('sp3', $m['kategori']))->count(),
-            'sp2'              => $mahasiswaBerisiko->filter(fn($m) => in_array('sp2', $m['kategori']))->count(),
-            'sp1'              => $mahasiswaBerisiko->filter(fn($m) => in_array('sp1', $m['kategori']))->count(),
-            'nilai_e'          => $mahasiswaBerisiko->filter(fn($m) => in_array('nilai_e', $m['kategori']))->count(),
-            'nilai_d'          => $mahasiswaBerisiko->filter(fn($m) => in_array('nilai_d', $m['kategori']))->count(),
-            'ips_rendah'       => $mahasiswaBerisiko->filter(fn($m) => in_array('ips_rendah', $m['kategori']))->count(),
+            'total_mahasiswa' => $semuaMahasiswa->count(),
+            'total_berisiko'  => $mahasiswaBerisiko->count(),
+            'ps'              => $mahasiswaBerisiko->filter(fn($m) => in_array('ps',        $m['kategori']))->count(),
+            'sp3'             => $mahasiswaBerisiko->filter(fn($m) => in_array('sp3',       $m['kategori']))->count(),
+            'sp2'             => $mahasiswaBerisiko->filter(fn($m) => in_array('sp2',       $m['kategori']))->count(),
+            'sp1'             => $mahasiswaBerisiko->filter(fn($m) => in_array('sp1',       $m['kategori']))->count(),
+            'nilai_e'         => $mahasiswaBerisiko->filter(fn($m) => in_array('nilai_e',   $m['kategori']))->count(),
+            'nilai_d'         => $mahasiswaBerisiko->filter(fn($m) => in_array('nilai_d',   $m['kategori']))->count(),
+            'ips_rendah'      => $mahasiswaBerisiko->filter(fn($m) => in_array('ips_rendah',$m['kategori']))->count(),
         ];
 
         return view('dosen.berisiko', [
@@ -47,6 +55,8 @@ class BerisikoController extends Controller
             'mahasiswaBerisiko' => $mahasiswaBerisiko,
             'summary'           => $summary,
             'filterJenis'       => $filterJenis,
+            'semesterList'      => $semesterList,
+            'semesterAktif'     => $semesterAktif,
         ]);
     }
 }

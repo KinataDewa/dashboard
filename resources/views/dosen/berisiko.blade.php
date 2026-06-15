@@ -201,8 +201,19 @@
 </div>
 
 {{-- ══ FILTER BAR ══ --}}
+<form method="GET" action="{{ route('dosen.berisiko.index') }}" id="filterForm">
 <div class="filter-bar no-print">
-    <span class="filter-label">Kategori:</span>
+    @if($semesterList->count() > 0)
+    <span class="filter-label">Semester:</span>
+    <select name="semester" class="filter-select" onchange="document.getElementById('filterForm').submit()"
+            style="padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);">
+        @foreach($semesterList as $sem)
+        <option value="{{ $sem }}" {{ $sem == $semesterAktif ? 'selected' : '' }}>Semester {{ $sem }}</option>
+        @endforeach
+    </select>
+    <span class="filter-label" style="margin-left:4px;">Kategori:</span>
+    @endif
+    @if(!$semesterList->count())<span class="filter-label">Kategori:</span>@endif
     <div class="jenis-pills">
         <a href="{{ request()->fullUrlWithQuery(['jenis' => 'semua']) }}"
            class="jenis-pill {{ $filterJenis === 'semua' ? 'active-semua' : '' }}">
@@ -230,6 +241,7 @@
         Cetak / Export
     </button>
 </div>
+</form>
 
 {{-- ══ TABEL ══ --}}
 <div id="printArea">

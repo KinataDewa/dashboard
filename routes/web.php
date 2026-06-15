@@ -75,6 +75,7 @@ Route::middleware(['auth', 'role.admin'])
             Route::get('/',                [ImportController::class, 'index'])->name('index');
             Route::post('/nilai',          [ImportController::class, 'nilai'])->name('nilai');
             Route::post('/absensi',        [ImportController::class, 'absensi'])->name('absensi');
+            Route::post('/rapor',          [ImportController::class, 'rapor'])->name('rapor');
             Route::post('/jadwal',         [ImportController::class, 'jadwal'])->name('jadwal');
             Route::post('/mahasiswa',      [ImportController::class, 'mahasiswa'])->name('mahasiswa');
             Route::post('/dosen',          [ImportController::class, 'dosen'])->name('dosen');

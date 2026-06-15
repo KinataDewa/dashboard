@@ -40,73 +40,87 @@ class BerisikoService
     }
 
     // Filter dan map mahasiswa berisiko
-    public static function filterAndMap(Collection $semuaMahasiswa, string $filterJenis = 'semua'): Collection
+    // $semesterAktif: jika > 0, evaluasi menggunakan semester tersebut (bukan max per mahasiswa)
+    public static function filterAndMap(Collection $semuaMahasiswa, string $filterJenis = 'semua', int $semesterAktif = 0): Collection
     {
-        return $semuaMahasiswa->filter(function ($mhs) use ($filterJenis) {
-            $kategori = $mhs->getKategoriRisiko();
-            if (empty($kategori)) return false;
+        return $semuaMahasiswa
+            ->map(fn ($mhs) => ['mhs' => $mhs, 'kategori' => $mhs->getKategoriRisiko($semesterAktif)])
+            ->filter(function ($item) use ($filterJenis) {
+                $k = $item['kategori'];
+                if (empty($k)) return false;
+                return match ($filterJenis) {
+                    'nilai_e'    => in_array('nilai_e', $k),
+                    'nilai_d'    => in_array('nilai_d', $k),
+                    'ips_rendah' => in_array('ips_rendah', $k),
+                    'sp1'        => in_array('sp1', $k),
+                    'sp2'        => in_array('sp2', $k),
+                    'sp3'        => in_array('sp3', $k),
+                    'ps'         => in_array('ps', $k),
+                    'alpha'      => array_intersect(['sp1','sp2','sp3','ps'], $k) !== [],
+                    'nilai'      => array_intersect(['nilai_e','nilai_d'], $k) !== [],
+                    default      => true,
+                };
+            })
+            ->map(function ($item) use ($semesterAktif) {
+                $mhs      = $item['mhs'];
+                $kategori = $item['kategori'];
 
-            return match($filterJenis) {
-                'nilai_e'    => in_array('nilai_e', $kategori),
-                'nilai_d'    => in_array('nilai_d', $kategori),
-                'ips_rendah' => in_array('ips_rendah', $kategori),
-                'sp1'        => in_array('sp1', $kategori),
-                'sp2'        => in_array('sp2', $kategori),
-                'sp3'        => in_array('sp3', $kategori),
-                'ps'         => in_array('ps', $kategori),
-                'alpha'      => array_intersect(['sp1','sp2','sp3','ps'], $kategori) !== [],
-                'nilai'      => array_intersect(['nilai_e','nilai_d'], $kategori) !== [],
-                default      => true, // semua
-            };
-        })->map(function ($mhs) {
-            $semNilai   = $mhs->nilais->max('semester') ?? 0;
-            $semAlpha   = $mhs->absensis->max('semester') ?? 0;
-            $totalAlpha = $semAlpha > 0
-                ? (int) $mhs->absensis->where('semester', $semAlpha)->sum('jam_alpha')
-                : 0;
-            $nilaiDE    = $semNilai > 0
-                ? $mhs->nilais->where('semester', $semNilai)->whereIn('grade', ['D', 'E'])
-                : collect();
-            $jumlahD    = $semNilai > 0
-                ? $mhs->nilais->where('semester', $semNilai)->where('grade', 'D')->count()
-                : 0;
-            $ips        = $mhs->getIpSemester($semNilai);
-            $kategori   = $mhs->getKategoriRisiko();
+                $semNilai = $semesterAktif > 0 ? $semesterAktif : ($mhs->nilais->max('semester') ?? 0);
+                $semAlpha = $semesterAktif > 0 ? $semesterAktif : ($mhs->absensis->max('semester') ?? 0);
 
-            $jamKompenSelesai = $mhs->relationLoaded('kompensasis')
-                ? (int) $mhs->kompensasis->where('semester', $semAlpha)->where('status', 'lunas')->sum('jam_kompen_wajib')
-                : 0;
-            $alphaEfektif = max(0, $totalAlpha - (int) ($jamKompenSelesai / 2));
+                $totalAlpha = $semAlpha > 0
+                    ? (int) $mhs->absensis->where('semester', $semAlpha)->sum('jam_alpha')
+                    : 0;
+                $nilaiDE = $semNilai > 0
+                    ? $mhs->nilais->where('semester', $semNilai)->whereIn('grade', ['D', 'E'])
+                    : collect();
+                $jumlahD = $semNilai > 0
+                    ? $mhs->nilais->where('semester', $semNilai)->where('grade', 'D')->count()
+                    : 0;
+                $ips = $mhs->getIpSemester($semNilai);
 
-            return [
-                'id'             => $mhs->id,
-                'nim'            => $mhs->nim,
-                'nama'           => $mhs->nama ?? $mhs->user->name ?? '-',
-                'kelas'          => $mhs->kelas->nama ?? '-',
-                'dosen_pa'       => optional($mhs->dosen)->nama ?? '-',
-                'ipk'            => number_format($mhs->ipk ?? 0, 2),
-                'ips'            => number_format($ips, 2),
-                'jumlah_de'      => $nilaiDE->count(),
-                'jumlah_d'       => $jumlahD,
-                'total_alpha'    => $totalAlpha,
-                'alpha_efektif'  => $alphaEfektif,
-                'kategori'       => $kategori,
-                'skor'           => self::tingkatKeparahan($kategori),
-            ];
-        })
-        ->sortByDesc('skor')
-        ->values();
+                $jamKompenSelesai = $mhs->relationLoaded('kompensasis')
+                    ? (int) $mhs->kompensasis->where('semester', $semAlpha)->where('status', 'lunas')->sum('jam_kompen_wajib')
+                    : 0;
+                $alphaEfektif = max(0, $totalAlpha - (int) ($jamKompenSelesai / 2));
+
+                // Resolve kelas dari pivot semester-spesifik jika semesterAktif diberikan
+                $kelasNama = $semesterAktif > 0
+                    ? (\App\Models\KelasMahasiswa::where('mahasiswa_id', $mhs->id)
+                        ->where('semester', $semesterAktif)
+                        ->with('kelas')
+                        ->first()?->kelas?->nama ?? $mhs->kelas?->nama ?? '-')
+                    : ($mhs->kelas?->nama ?? '-');
+
+                return [
+                    'id'            => $mhs->id,
+                    'nim'           => $mhs->nim,
+                    'nama'          => $mhs->nama ?? $mhs->user->name ?? '-',
+                    'kelas'         => $kelasNama,
+                    'dosen_pa'      => optional($mhs->dosenPa)->nama ?? '-',
+                    'ipk'           => number_format($mhs->ipk ?? 0, 2),
+                    'ips'           => number_format($ips, 2),
+                    'jumlah_de'     => $nilaiDE->count(),
+                    'jumlah_d'      => $jumlahD,
+                    'total_alpha'   => $totalAlpha,
+                    'alpha_efektif' => $alphaEfektif,
+                    'kategori'      => $kategori,
+                    'skor'          => self::tingkatKeparahan($kategori),
+                ];
+            })
+            ->sortBy('nama', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
     }
 
-    // Konversi nilai angka ke grade sesuai pedoman Polinema
+    // Konversi nilai angka ke grade sesuai pedoman Polinema D4 TI
     public static function nilaiToGrade(float $nilai): string
     {
-        if ($nilai > 80)  return 'A';
-        if ($nilai > 73)  return 'B+';
-        if ($nilai > 65)  return 'B';
-        if ($nilai > 60)  return 'C+';
-        if ($nilai > 50)  return 'C';
-        if ($nilai > 39)  return 'D';
+        if ($nilai >= 80) return 'A';
+        if ($nilai >= 73) return 'B+';
+        if ($nilai >= 65) return 'B';
+        if ($nilai >= 60) return 'C+';
+        if ($nilai >= 50) return 'C';
+        if ($nilai >= 39) return 'D';
         return 'E';
     }
 

@@ -6,6 +6,7 @@ use App\Models\Mahasiswa;
 use App\Models\Dosen;
 use App\Models\MataKuliah;
 use App\Models\Kelas;
+use App\Models\KelasMahasiswa;
 use App\Mail\MahasiswaBerisiko;
 use Illuminate\Support\Facades\Mail;
 
@@ -13,16 +14,20 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalMahasiswa = Mahasiswa::where('status', 'aktif')->count();
+        $semesterAktif  = KelasMahasiswa::max('semester') ?? 0;
+        $totalMahasiswa = $semesterAktif > 0
+            ? KelasMahasiswa::where('semester', $semesterAktif)->distinct('mahasiswa_id')->count('mahasiswa_id')
+            : Mahasiswa::where('status', 'aktif')->count();
         $totalDosen     = Dosen::count();
         $totalMatkul    = MataKuliah::count();
         $totalKelas     = Kelas::count();
  
-        // Mahasiswa aktif berisiko (nilai D/E atau alpha >= 18 di semester terakhir)
-        $mahasiswaBerisiko = Mahasiswa::with(['nilais', 'absensis', 'kompensasis'])
+        // Mahasiswa aktif berisiko di semester aktif
+        $mahasiswaBerisiko = Mahasiswa::whereHas('kelasMahasiswas', fn($q) => $q->where('semester', $semesterAktif))
+            ->with(['nilais', 'absensis', 'kompensasis'])
             ->where('status', 'aktif')
             ->get()
-            ->filter(fn($m) => $m->isBerisiko())
+            ->filter(fn($m) => $m->getKategoriRisiko($semesterAktif) !== [])
             ->count();
  
         return view('admin.dashboard', compact(
@@ -35,7 +40,7 @@ class DashboardController extends Controller
     {
         $mahasiswas = \App\Models\Mahasiswa::with([
             'nilais.mataKuliah',
-            'absensis.mataKuliah',
+            'absensis',
             'kelas', 'dosenPa', 'user', 'kompensasis',
         ])->where('status', 'aktif')->get();
 

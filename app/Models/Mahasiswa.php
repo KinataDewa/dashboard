@@ -25,11 +25,6 @@ class Mahasiswa extends Model
         return $this->belongsTo(Kelas::class);
     }
 
-    public function dosen()
-    {
-        return $this->belongsTo(\App\Models\Dosen::class, 'dosen_pa_id');
-    }
-
     public function dosenPa()
     {
         return $this->belongsTo(Dosen::class, 'dosen_pa_id');
@@ -48,6 +43,26 @@ class Mahasiswa extends Model
     public function kompensasis()
     {
         return $this->hasMany(Kompensasi::class);
+    }
+
+    public function kelasMahasiswas()
+    {
+        return $this->hasMany(KelasMahasiswa::class);
+    }
+
+    public function getKelasAktif(int $semester, string $tahunAkademik): ?Kelas
+    {
+        return $this->kelasMahasiswas()
+            ->where('semester', $semester)
+            ->where('tahun_akademik', $tahunAkademik)
+            ->with('kelas')
+            ->first()
+            ?->kelas;
+    }
+
+    public function getDosenPaAktif(int $semester, string $tahunAkademik): ?Dosen
+    {
+        return $this->getKelasAktif($semester, $tahunAkademik)?->dosenPa;
     }
 
     // ── Helper: IP semester tertentu ─────────────────────────
@@ -106,19 +121,23 @@ class Mahasiswa extends Model
         return !empty($this->getKategoriRisiko());
     }
 
-    
-    public function getKategoriRisiko(): array
+    public function getKategoriRisiko(int $semesterAktif = 0): array
     {
         $semNilai = $this->nilais->max('semester') ?? 0;
         $semAlpha = $this->absensis->max('semester') ?? 0;
-        $alphaAsli = $semAlpha > 0
-            ? (int) $this->absensis->where('semester', $semAlpha)->sum('jam_alpha')
-            : 0;
 
-        // Kurangi dengan kompen yang sudah lunas (kompen = alpha × 2, jadi balik ÷ 2)
+        // Gunakan semester referensi yang konsisten:
+        // Jika $semesterAktif diberikan (dari controller), pakai itu.
+        // Jika tidak, pakai max dari kedua sumber agar nilai dan alpha dievaluasi di semester yang sama.
+        $semRef = $semesterAktif > 0 ? $semesterAktif : max($semNilai, $semAlpha);
+
+        if ($semRef === 0) return [];
+
+        $alphaAsli = (int) $this->absensis->where('semester', $semRef)->sum('jam_alpha');
+
         $jamKompenSelesai = $this->relationLoaded('kompensasis')
-            ? (int) $this->kompensasis->where('semester', $semAlpha)->where('status', 'lunas')->sum('jam_kompen_wajib')
-            : (int) $this->kompensasis()->where('semester', $semAlpha)->where('status', 'lunas')->sum('jam_kompen_wajib');
+            ? (int) $this->kompensasis->where('semester', $semRef)->where('status', 'lunas')->sum('jam_kompen_wajib')
+            : (int) $this->kompensasis()->where('semester', $semRef)->where('status', 'lunas')->sum('jam_kompen_wajib');
 
         $alphaEfektif = max(0, $alphaAsli - ($jamKompenSelesai / 2));
 
@@ -135,9 +154,9 @@ class Mahasiswa extends Model
             $kategori[] = 'sp1';
         }
 
-        if ($semNilai > 0) {
-            $nilaiSemIni = $this->nilais->where('semester', $semNilai);
+        $nilaiSemIni = $this->nilais->where('semester', $semRef);
 
+        if ($nilaiSemIni->isNotEmpty()) {
             // ── Cek nilai E ──────────────────────────────────
             if ($nilaiSemIni->contains('grade', 'E')) {
                 $kategori[] = 'nilai_e';
@@ -149,7 +168,7 @@ class Mahasiswa extends Model
             }
 
             // ── Cek IPS < 2.00 ───────────────────────────────
-            $ips = $this->getIpSemester($semNilai);
+            $ips = $this->getIpSemester($semRef);
             if ($ips > 0 && $ips < 2.00) {
                 $kategori[] = 'ips_rendah';
             }

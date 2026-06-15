@@ -17,7 +17,6 @@
     'chips'        => [
         ['icon' => 'bi-book-fill',         'label' => $matkuls->total() . ' Mata Kuliah'],
         ['icon' => 'bi-layers-fill',       'label' => 'Multi Semester'],
-        ['icon' => 'bi-person-badge-fill', 'label' => 'Terhubung Dosen'],
     ],
     'badge_num'    => $matkuls->total(),
     'badge_label'  => "Total\nMata Kuliah",
@@ -35,13 +34,7 @@
                 <i class="bi bi-search"></i>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode / nama...">
             </div>
-            <select name="kelas" class="form-select-ac" style="width:auto;padding:6px 32px 6px 11px;">
-                <option value="">Semua Kelas</option>
-                @foreach($kelasList as $kelas)
-                <option value="{{ $kelas->id }}" {{ request('kelas')==$kelas->id ? 'selected':'' }}>{{ $kelas->nama }}</option>
-                @endforeach
-            </select>
-            <button type="submit" class="btn-primary" style="padding:6px 16px;">Filter</button>
+            <button type="submit" class="btn-primary" style="padding:6px 16px;">Cari</button>
         </form>
     </div>
  
@@ -53,9 +46,6 @@
                     <th>Kode</th>
                     <th>Nama Mata Kuliah</th>
                     <th style="text-align:center;">SKS</th>
-                    <th style="text-align:center;">Semester</th>
-                    <th style="text-align:center;">Kelas</th>
-                    <th>Dosen Pengampu</th>
                     <th style="text-align:center;width:100px;">Aksi</th>
                 </tr>
             </thead>
@@ -70,11 +60,6 @@
                     <td style="text-align:center;">
                         <span style="background:#F5F3FF;color:#7C3AED;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;">{{ $mk->sks }} SKS</span>
                     </td>
-                    <td style="text-align:center;font-weight:700;color:var(--text-1);">{{ $mk->semester }}</td>
-                    <td style="text-align:center;">
-                        <span class="badge" style="background:#EFF6FF;color:#1D4ED8;font-weight:700;">{{ $mk->kelas->nama ?? '-' }}</span>
-                    </td>
-                    <td style="font-size:13px;color:var(--text-2);">{{ $mk->dosen->nama ?? '-' }}</td>
                     <td style="text-align:center;">
                         <div style="display:flex;gap:5px;justify-content:center;">
                             <a href="{{ route('admin.matkul.edit', $mk->id) }}" class="btn-edit"><i class="bi bi-pencil-fill"></i></a>
@@ -87,7 +72,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="8"><div class="empty-state"><i class="bi bi-book"></i><p>Tidak ada data mata kuliah.</p></div></td></tr>
+                <tr><td colspan="4"><div class="empty-state"><i class="bi bi-book"></i><p>Tidak ada data mata kuliah.</p></div></td></tr>
                 @endforelse
             </tbody>
         </table>

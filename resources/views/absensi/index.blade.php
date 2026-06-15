@@ -24,25 +24,19 @@
 
 {{-- REKAP TOTAL --}}
 <div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div style="background:rgba(40,199,111,0.08);border:1px solid rgba(40,199,111,0.2);border-radius:14px;padding:18px;text-align:center;">
-            <div style="font-size:36px;font-weight:800;color:var(--success-green);font-family:'Space Mono',monospace;">{{ $totalHadir }}</div>
-            <div style="font-size:11px;color:#8da3c0;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Total Hadir (jam)</div>
-        </div>
-    </div>
-    <div class="col-md-3">
+    <div class="col-md-4">
         <div style="background:rgba(0,180,200,0.08);border:1px solid rgba(0,180,200,0.2);border-radius:14px;padding:18px;text-align:center;">
             <div style="font-size:36px;font-weight:800;color:var(--teal);font-family:'Space Mono',monospace;">{{ $totalIzin }}</div>
             <div style="font-size:11px;color:#8da3c0;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Total Izin (jam)</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-4">
         <div style="background:rgba(255,159,67,0.08);border:1px solid rgba(255,159,67,0.2);border-radius:14px;padding:18px;text-align:center;">
             <div style="font-size:36px;font-weight:800;color:var(--warning-orange);font-family:'Space Mono',monospace;">{{ $totalSakit }}</div>
             <div style="font-size:11px;color:#8da3c0;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Total Sakit (jam)</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-4">
         <div style="background:rgba(232,51,74,0.08);border:1px solid rgba(232,51,74,0.2);border-radius:14px;padding:18px;text-align:center;">
             <div style="font-size:36px;font-weight:800;color:var(--danger-red);font-family:'Space Mono',monospace;">{{ $totalAlpha }}</div>
             <div style="font-size:11px;color:#8da3c0;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Total Alpha (jam)</div>

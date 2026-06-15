@@ -11,7 +11,6 @@ class KelasController extends Controller
     public function index()
     {
         $kelas = Kelas::with(['dosenPa', 'mahasiswas'])
-            ->orderBy('semester')
             ->orderBy('nama')
             ->paginate(15);
         return view('admin.kelas.index', compact('kelas'));

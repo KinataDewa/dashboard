@@ -382,7 +382,7 @@
     'chips'        => [
         ['icon' => 'bi-mortarboard-fill',  'label' => 'Semester ' . $semesterAktif],
         ['icon' => 'bi-book-fill',         'label' => $nilais->count() . ' Mata Kuliah'],
-        ['icon' => 'bi-calendar2-check',   'label' => $absensis->count() . ' Kelas Aktif'],
+        ['icon' => 'bi-x-circle-fill',     'label' => $totalAlpha . 'j Alpha'],
         ['icon' => 'bi-graph-up-arrow',    'label' => 'IPK ' . number_format($ipk, 2)],
     ],
     'badge_num'    => number_format($ipk, 2),
@@ -730,10 +730,11 @@
             </div>
 
             @php
-                $sumHadir = $absensis->sum('jam_hadir');
-                $sumIzin  = $absensis->sum('jam_izin');
-                $sumSakit = $absensis->sum('jam_sakit');
-                $sumAlp   = $absensis->sum('jam_alpha');
+                $absenAktifDonut = $absensis->first();
+                $sumHadir = $absenAktifDonut?->jam_hadir ?? 0;
+                $sumIzin  = $absenAktifDonut?->jam_izin  ?? 0;
+                $sumSakit = $absenAktifDonut?->jam_sakit ?? 0;
+                $sumAlp   = $absenAktifDonut?->jam_alpha ?? 0;
                 $sumAll   = $sumHadir + $sumIzin + $sumSakit + $sumAlp;
                 $pctH = $sumAll > 0 ? round($sumHadir/$sumAll*100) : 0;
                 $pctI = $sumAll > 0 ? round($sumIzin/$sumAll*100) : 0;
@@ -905,32 +906,15 @@
         </div>
     </div>
 
-    {{-- Riwayat Absensi --}}
+    {{-- Riwayat Absensi per Semester --}}
     <div class="col-lg-6 col-12">
         <div class="tbl-card-v2">
             <div class="tbl-head-v2">
                 <div>
                     <div class="tbl-title-v2">Riwayat Absensi</div>
-                    <div class="tbl-sub-v2">Semester {{ $semesterAktif }} • {{ $absensis->count() }} mata kuliah</div>
+                    <div class="tbl-sub-v2">Ringkasan per semester • {{ $allAbsensis->count() }} semester</div>
                 </div>
                 <div class="tbl-actions">
-                    <div class="search-wrap">
-                        <i class="bi bi-search"></i>
-                        <input type="text" placeholder="Search" id="searchAbsensi">
-                    </div>
-                    <div class="filter-wrap">
-                        <button class="btn-filter" id="filterAbsenBtn">
-                            <i class="bi bi-sliders2" style="font-size:12px;"></i>
-                        </button>
-                        <div class="filter-menu" id="filterAbsenMenu">
-                            <div class="filter-menu-label">Filter Status</div>
-                            <div class="filter-opt active" data-val="">Semua</div>
-                            <div class="filter-opt" data-val="hadir">Hadir</div>
-                            <div class="filter-opt" data-val="izin">Izin</div>
-                            <div class="filter-opt" data-val="sakit">Sakit</div>
-                            <div class="filter-opt" data-val="alpha">Alpha</div>
-                        </div>
-                    </div>
                     <a href="{{ route('mahasiswa.absensi') }}" class="btn-outline">View All</a>
                 </div>
             </div>
@@ -939,55 +923,32 @@
                 <table class="ac-table-v2">
                     <thead>
                         <tr>
-                            <th>Mata Kuliah</th>
-                            <th style="text-align:center;">Hadir</th>
+                            <th style="text-align:center;">Sem</th>
                             <th style="text-align:center;">Alpha</th>
-                            <th>Status</th>
+                            <th style="text-align:center;">Izin</th>
+                            <th style="text-align:center;">Sakit</th>
                         </tr>
                     </thead>
-                    <tbody id="absenTableBody">
-                        @forelse($absensis->take(7) as $absen)
-                        @php
-                            $status = 'hadir';
-                            if ($absen->jam_alpha > 0)     $status = 'alpha';
-                            elseif ($absen->jam_izin > 0)  $status = 'izin';
-                            elseif ($absen->jam_sakit > 0) $status = 'sakit';
-                            $totalJam = $absen->jam_hadir + $absen->jam_izin + $absen->jam_sakit + $absen->jam_alpha;
-                            $pct = $totalJam > 0 ? round($absen->jam_hadir / $totalJam * 100) : 0;
-                        @endphp
-                        <tr data-matkul="{{ strtolower($absen->mataKuliah->nama) }}"
-                            data-status="{{ $status }}">
-                            <td>
-                                <div style="font-weight:500;color:var(--text-1);">{{ $absen->mataKuliah->nama }}</div>
-                                <div style="font-size:11px;color:var(--text-3);margin-top:1px;">{{ $absen->mataKuliah->kode }}</div>
-                            </td>
+                    <tbody>
+                        @forelse($allAbsensis->sortByDesc('semester') as $absen)
+                        @php $isAktif = (int)$absen->semester === (int)$semesterAktif; @endphp
+                        <tr>
                             <td style="text-align:center;">
-                                <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
-                                    <span style="font-size:13px;font-weight:700;color:{{ $pct >= 75 ? '#22C55E' : '#EF4444' }};">{{ $pct }}%</span>
-                                    <div style="width:40px;height:3px;background:#F1F5F9;border-radius:2px;overflow:hidden;">
-                                        <div style="height:100%;width:{{ $pct }}%;background:{{ $pct >= 75 ? '#22C55E' : '#EF4444' }};border-radius:2px;"></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td style="text-align:center;">
-                                <span style="font-weight:700;color:{{ $absen->jam_alpha >= 18 ? '#EF4444' : ($absen->jam_alpha >= 14 ? '#F59E0B' : 'var(--text-2)') }};">
-                                    {{ $absen->jam_alpha }}j
-                                    @if($absen->jam_alpha >= 18) ⛔
-                                    @elseif($absen->jam_alpha >= 14) ⚠️
+                                <span style="font-weight:700;color:{{ $isAktif ? 'var(--blue)' : 'var(--text-1)' }};">
+                                    {{ $absen->semester }}
+                                    @if($isAktif)
+                                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#22C55E;vertical-align:middle;margin-left:2px;"></span>
                                     @endif
                                 </span>
                             </td>
-                            <td>
-                                @if($status === 'hadir')
-                                    <span class="badge badge-green">Hadir</span>
-                                @elseif($status === 'izin')
-                                    <span class="badge badge-yellow">Izin</span>
-                                @elseif($status === 'sakit')
-                                    <span class="badge badge-blue">Sakit</span>
-                                @else
-                                    <span class="badge badge-red">Alpha</span>
+                            <td style="text-align:center;font-weight:700;color:{{ $absen->jam_alpha >= 18 ? '#EF4444' : ($absen->jam_alpha >= 14 ? '#F59E0B' : 'var(--text-2)') }};">
+                                {{ $absen->jam_alpha }}
+                                @if($absen->jam_alpha >= 18) ⛔
+                                @elseif($absen->jam_alpha >= 14) ⚠️
                                 @endif
                             </td>
+                            <td style="text-align:center;color:#FBBF24;font-weight:500;">{{ $absen->jam_izin }}</td>
+                            <td style="text-align:center;color:#3B82F6;font-weight:500;">{{ $absen->jam_sakit }}</td>
                         </tr>
                         @empty
                         <tr>
@@ -1002,19 +963,22 @@
             </div>
 
             <div class="tbl-footer">
+                @php $absenAktif = $absensis->first(); @endphp
+                @if($absenAktif)
                 <div class="info-chip" style="background:#F0FDF4;color:#15803D;">
                     <i class="bi bi-person-check-fill"></i>
-                    Hadir: {{ $absensis->sum('jam_hadir') }}j
+                    Hadir Sem {{ $semesterAktif }}: {{ $absenAktif->jam_hadir }}j
                 </div>
-                <div class="info-chip" style="background:#FEF2F2;color:#991B1B;">
+                <div class="info-chip" style="{{ $absenAktif->jam_alpha >= 18 ? 'background:#FEE2E2;color:#991B1B;' : 'background:#F1F5F9;color:var(--text-2);' }}">
                     <i class="bi bi-x-circle-fill"></i>
-                    Alpha: {{ $absensis->sum('jam_alpha') }}j
+                    Alpha: {{ $absenAktif->jam_alpha }}j
                 </div>
-                @if($absensiKritis->count() > 0)
-                <div class="info-chip" style="background:#FEF2F2;color:#991B1B;">
+                @if($absenAktif->jam_alpha >= 18)
+                <div class="info-chip" style="background:#FEE2E2;color:#991B1B;">
                     <i class="bi bi-exclamation-triangle-fill"></i>
-                    {{ $absensiKritis->count() }} MK kritis
+                    Kritis — SP I
                 </div>
+                @endif
                 @endif
             </div>
         </div>
@@ -1175,10 +1139,10 @@ var donutChart = new Chart(donutCtx, {
         labels: ['Alpha','Izin','Sakit','Hadir'],
         datasets: [{
             data: [
-                {{ $absensis->sum('jam_alpha') }},
-                {{ $absensis->sum('jam_izin') }},
-                {{ $absensis->sum('jam_sakit') }},
-                {{ $absensis->sum('jam_hadir') }}
+                {{ $sumAlp }},
+                {{ $sumIzin }},
+                {{ $sumSakit }},
+                {{ $sumHadir }}
             ],
             backgroundColor: ['#EF4444','#FBBF24','#3B82F6','#22C55E'],
             borderWidth: 3,
@@ -1242,15 +1206,6 @@ document.getElementById('filterAbsensiDonutBtn').addEventListener('filterChange'
     document.getElementById('legendAlphaBar').style.width  = pA + '%';
 });
 
-// ── FILTER ABSENSI ─────────────────────────────────
-document.getElementById('filterAbsenBtn').addEventListener('filterChange', function(e) {
-    var val = e.detail.value;
-    document.querySelectorAll('#absenTableBody tr').forEach(function(r) {
-        if (!val) { r.style.display=''; return; }
-        r.style.display = r.dataset.status===val ? '' : 'none';
-    });
-});
-
 // ── FILTER TABEL NILAI (dashboard) ──────────────────
 document.getElementById('filterNilaiTblBtn').addEventListener('filterChange', function(e) {
     var val = e.detail.value;
@@ -1264,12 +1219,6 @@ document.getElementById('filterNilaiTblBtn').addEventListener('filterChange', fu
 document.getElementById('searchNilai').addEventListener('input', function() {
     var q = this.value.toLowerCase();
     document.querySelectorAll('#nilaiTableBody tr').forEach(function(r) {
-        r.style.display = (r.dataset.matkul||'').includes(q) ? '' : 'none';
-    });
-});
-document.getElementById('searchAbsensi').addEventListener('input', function() {
-    var q = this.value.toLowerCase();
-    document.querySelectorAll('#absenTableBody tr').forEach(function(r) {
         r.style.display = (r.dataset.matkul||'').includes(q) ? '' : 'none';
     });
 });

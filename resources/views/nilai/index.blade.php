@@ -25,7 +25,7 @@
             <div class="section-header">
                 <div>
                     <div class="section-title">Nilai Semester {{ $semester }}</div>
-                    <div class="section-subtitle">Bobot: Tugas 30% · UTS 30% · UAS 40%</div>
+                    <div class="section-subtitle">Nilai akhir dan grade per mata kuliah</div>
                 </div>
                 <span style="background:var(--navy);color:var(--accent);padding:5px 16px;border-radius:20px;font-size:12px;font-weight:700;font-family:'Space Mono',monospace;">
                     IP: {{ number_format($ip, 2) }}
@@ -37,9 +37,6 @@
                     <tr>
                         <th>Mata Kuliah</th>
                         <th class="text-center">SKS</th>
-                        <th class="text-center">Tugas</th>
-                        <th class="text-center">UTS</th>
-                        <th class="text-center">UAS</th>
                         <th class="text-center">Nilai Akhir</th>
                         <th class="text-center">Grade</th>
                     </tr>
@@ -49,12 +46,9 @@
                     <tr class="{{ in_array($nilai->grade, ['D','E']) ? 'warn-row' : '' }}">
                         <td>
                             <div class="matkul-name">{{ $nilai->mataKuliah->nama }}</div>
-                            <div class="matkul-sub">{{ $nilai->mataKuliah->kode }} · {{ $nilai->mataKuliah->dosen->nama ?? '-' }}</div>
+                            <div class="matkul-sub">{{ $nilai->mataKuliah->kode }}</div>
                         </td>
                         <td class="text-center"><span class="score-pill">{{ $nilai->mataKuliah->sks }}</span></td>
-                        <td class="text-center"><span class="score-pill">{{ $nilai->nilai_tugas }}</span></td>
-                        <td class="text-center"><span class="score-pill">{{ $nilai->nilai_uts }}</span></td>
-                        <td class="text-center"><span class="score-pill">{{ $nilai->nilai_uas }}</span></td>
                         <td class="text-center">
                             <span class="score-pill fw-bold" style="{{ in_array($nilai->grade,['D','E']) ? 'color:var(--danger-red)' : '' }}">
                                 {{ number_format($nilai->nilai_akhir, 2) }}
@@ -67,7 +61,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-4" style="color:#8da3c0;">
+                        <td colspan="4" class="text-center py-4" style="color:#8da3c0;">
                             <i class="bi bi-inbox fs-3 d-block mb-2"></i>
                             Belum ada data nilai untuk semester ini.
                         </td>

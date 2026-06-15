@@ -6,6 +6,7 @@ use App\Models\Mahasiswa;
 use App\Models\Kelas;
 use App\Models\Dosen;
 use App\Models\User;
+use App\Models\KelasMahasiswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +28,7 @@ class MahasiswaController extends Controller
             $query->where('kelas_id', $request->kelas);
         }
 
-        $mahasiswas = $query->orderBy('nim')->paginate(15);
+        $mahasiswas = $query->orderBy('nama')->paginate(15);
         $kelasList  = Kelas::orderBy('nama')->get();
 
         return view('admin.mahasiswa.index', compact('mahasiswas', 'kelasList'));
@@ -60,8 +61,8 @@ class MahasiswaController extends Controller
                 'password' => Hash::make($request->password),
             ]);
             $user->assignRole('mahasiswa');
- 
-            Mahasiswa::create([
+
+            $mhs = Mahasiswa::create([
                 'user_id'     => $user->id,
                 'nim'         => $request->nim,
                 'nama'        => $request->nama,
@@ -70,6 +71,17 @@ class MahasiswaController extends Controller
                 'angkatan'    => $request->angkatan,
                 'status'      => $request->status,
             ]);
+
+            // Buat entri pivot kelasMahasiswas agar mahasiswa muncul di filter semester
+            $kelas = Kelas::find($request->kelas_id);
+            if ($kelas) {
+                KelasMahasiswa::create([
+                    'mahasiswa_id'   => $mhs->id,
+                    'kelas_id'       => $kelas->id,
+                    'semester'       => $kelas->semester,
+                    'tahun_akademik' => $kelas->tahun_akademik,
+                ]);
+            }
         });
  
         return redirect()->route('admin.mahasiswa.index')
@@ -78,7 +90,7 @@ class MahasiswaController extends Controller
  
     public function show(Mahasiswa $mahasiswa)
     {
-        $mahasiswa->load(['kelas', 'dosenPa', 'user', 'nilais.mataKuliah', 'absensis.mataKuliah', 'kompensasis']);
+        $mahasiswa->load(['kelas', 'dosenPa', 'user', 'nilais.mataKuliah', 'absensis', 'kompensasis']);
 
         $semesterAktif = request('semester')
             ? (int) request('semester')

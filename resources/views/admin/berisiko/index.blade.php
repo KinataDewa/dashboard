@@ -234,7 +234,14 @@
 {{-- ══ FILTER BAR ══ --}}
 <form method="GET" action="{{ route('admin.berisiko.index') }}" id="filterForm">
 <div class="filter-bar no-print">
-    <span class="filter-label">Filter Kelas:</span>
+    <span class="filter-label">Semester:</span>
+    <select name="semester" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+        @foreach($semesterList as $sem)
+        <option value="{{ $sem }}" {{ $sem == $semesterAktif ? 'selected' : '' }}>Semester {{ $sem }}</option>
+        @endforeach
+    </select>
+
+    <span class="filter-label" style="margin-left:4px;">Kelas:</span>
     <select name="kelas_id" class="filter-select" onchange="document.getElementById('filterForm').submit()">
         <option value="">Semua Kelas</option>
         @foreach($kelasList as $kelas)

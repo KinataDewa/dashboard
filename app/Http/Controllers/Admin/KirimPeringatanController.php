@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Mahasiswa;
 use App\Models\Kelas;
+use App\Models\KelasMahasiswa;
 use App\Models\EmailLog;
 use App\Mail\MahasiswaBerisiko;
 use App\Services\BerisikoService;
@@ -19,16 +20,25 @@ class KirimPeringatanController extends Controller
         $filterJenis = $request->get('jenis', 'semua');
         $kelasList   = Kelas::orderBy('nama')->get();
 
+        $semesterList  = KelasMahasiswa::distinct()->orderBy('semester')->pluck('semester');
+        $semesterAktif = (int) $request->get('semester', $semesterList->max() ?? 1);
+
         $query = Mahasiswa::with([
-            'user', 'kelas', 'dosen', 'nilais.mataKuliah', 'absensis', 'kompensasis',
+            'user', 'kelas', 'dosenPa', 'nilais.mataKuliah', 'absensis', 'kompensasis',
         ])->where('status', 'aktif');
 
         if ($kelasId) {
-            $query->where('kelas_id', $kelasId);
+            $query->whereHas('kelasMahasiswas', fn($q) =>
+                $q->where('kelas_id', $kelasId)->where('semester', $semesterAktif)
+            );
+        } else {
+            $query->whereHas('kelasMahasiswas', fn($q) =>
+                $q->where('semester', $semesterAktif)
+            );
         }
 
-        $semuaMahasiswa    = $query->get();
-        $mahasiswaBerisiko = BerisikoService::filterAndMap($semuaMahasiswa, $filterJenis);
+        $semuaMahasiswa    = $query->orderBy('nama')->get();
+        $mahasiswaBerisiko = BerisikoService::filterAndMap($semuaMahasiswa, $filterJenis, $semesterAktif);
 
         // Summary per kategori sesuai Pedoman Akademik D4 TI Polinema
         $summary = [
@@ -52,7 +62,8 @@ class KirimPeringatanController extends Controller
         ];
 
         return view('admin.kirim-peringatan.index', compact(
-            'mahasiswaBerisiko', 'summary', 'kelasList', 'kelasId', 'filterJenis'
+            'mahasiswaBerisiko', 'summary', 'kelasList', 'kelasId', 'filterJenis',
+            'semesterList', 'semesterAktif'
         ));
     }
 
@@ -103,15 +114,13 @@ class KirimPeringatanController extends Controller
             'user', 'nilais.mataKuliah', 'absensis', 'kelas', 'kompensasis',
         ])->findOrFail($mahasiswaId);
 
-        // Gunakan getKategoriRisiko() sesuai Pedoman Akademik D4 TI Polinema
         $kategori   = $mahasiswa->getKategoriRisiko();
-        $semNilai   = $mahasiswa->nilais->max('semester') ?? 0;
-        $nilaiDE    = $semNilai > 0
-            ? $mahasiswa->nilais->where('semester', $semNilai)->whereIn('grade', ['D', 'E'])
+        $semRef     = max($mahasiswa->nilais->max('semester') ?? 0, $mahasiswa->absensis->max('semester') ?? 0);
+        $nilaiDE    = $semRef > 0
+            ? $mahasiswa->nilais->where('semester', $semRef)->whereIn('grade', ['D', 'E'])
             : collect();
-        $semAlpha   = $mahasiswa->absensis->max('semester') ?? 0;
-        $totalAlpha = $semAlpha > 0
-            ? $mahasiswa->absensis->where('semester', $semAlpha)->sum('jam_alpha')
+        $totalAlpha = $semRef > 0
+            ? $mahasiswa->absensis->where('semester', $semRef)->sum('jam_alpha')
             : 0;
 
         try {
@@ -162,24 +171,26 @@ class KirimPeringatanController extends Controller
         $gagal      = 0;
         $pesanGagal = [];
 
+        // Batch-load semua mahasiswa sekaligus untuk menghindari N+1 query
+        $mahasiswas = Mahasiswa::with([
+            'user', 'nilais.mataKuliah', 'absensis', 'kelas', 'kompensasis',
+        ])->whereIn('id', $ids)->get()->keyBy('id');
+
         foreach ($ids as $id) {
-            $mahasiswa = Mahasiswa::with([
-                'user', 'nilais.mataKuliah', 'absensis', 'kelas', 'kompensasis',
-            ])->find($id);
+            $mahasiswa = $mahasiswas[$id] ?? null;
             if (!$mahasiswa) continue;
 
             $kategori   = $mahasiswa->getKategoriRisiko();
-            $semNilai   = $mahasiswa->nilais->max('semester') ?? 0;
-            $nilaiDE    = $semNilai > 0
-                ? $mahasiswa->nilais->where('semester', $semNilai)->whereIn('grade', ['D', 'E'])
+            $semRef     = max($mahasiswa->nilais->max('semester') ?? 0, $mahasiswa->absensis->max('semester') ?? 0);
+            $nilaiDE    = $semRef > 0
+                ? $mahasiswa->nilais->where('semester', $semRef)->whereIn('grade', ['D', 'E'])
                 : collect();
-            $semAlpha   = $mahasiswa->absensis->max('semester') ?? 0;
-            $totalAlpha = $semAlpha > 0
-                ? $mahasiswa->absensis->where('semester', $semAlpha)->sum('jam_alpha')
+            $totalAlpha = $semRef > 0
+                ? $mahasiswa->absensis->where('semester', $semRef)->sum('jam_alpha')
                 : 0;
 
             try {
-                Mail::to($mahasiswa->user->email)->send(new MahasiswaBerisiko($mahasiswa));
+                Mail::to($mahasiswa->user->email)->queue(new MahasiswaBerisiko($mahasiswa));
                 EmailLog::create([
                     'mahasiswa_id'    => $mahasiswa->id,
                     'email_tujuan'    => $mahasiswa->user->email,

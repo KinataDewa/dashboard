@@ -22,6 +22,23 @@ class Kelas extends Model
         return $this->hasMany(Mahasiswa::class);
     }
 
+    public function kelasMahasiswas()
+    {
+        return $this->hasMany(KelasMahasiswa::class);
+    }
+
+    public function mahasiswasViaPivot()
+    {
+        return $this->hasManyThrough(
+            Mahasiswa::class,
+            KelasMahasiswa::class,
+            'kelas_id',
+            'id',
+            'id',
+            'mahasiswa_id'
+        );
+    }
+
     public function mataKuliahs()
     {
         return $this->hasMany(MataKuliah::class);

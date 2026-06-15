@@ -8,17 +8,7 @@ class MataKuliah extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['kode', 'nama', 'sks', 'semester', 'kelas_id', 'dosen_id'];
-
-    public function kelas()
-    {
-        return $this->belongsTo(Kelas::class);
-    }
-
-    public function dosen()
-    {
-        return $this->belongsTo(Dosen::class);
-    }
+    protected $fillable = ['kode', 'nama', 'sks'];
 
     public function nilais()
     {

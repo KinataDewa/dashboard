@@ -140,20 +140,18 @@
             <div class="tbl-head-v2">
                 <div>
                     <div class="tbl-title-v2">Nilai Semester {{ $semesterAktif }}</div>
-                    <div class="tbl-sub-v2">Bobot: Tugas 30% · UTS 30% · UAS 40%</div>
+                    <div class="tbl-sub-v2">Nilai akhir dan grade per mata kuliah</div>
                 </div>
                 <span style="background:#EFF6FF;color:var(--blue);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;font-family:monospace;white-space:nowrap;">
                     IP: {{ number_format($ip, 2) }}
                 </span>
             </div>
             <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-                <table class="ac-table-v2" style="min-width:360px;">
+                <table class="ac-table-v2" style="min-width:320px;">
                     <thead>
                         <tr>
                             <th>Mata Kuliah</th>
-                            <th class="hide-sm" style="text-align:center;">Tugas</th>
-                            <th class="hide-sm" style="text-align:center;">UTS</th>
-                            <th class="hide-sm" style="text-align:center;">UAS</th>
+                            <th style="text-align:center;">SKS</th>
                             <th style="text-align:center;">Nilai</th>
                             <th style="text-align:center;">Grade</th>
                         </tr>
@@ -166,9 +164,7 @@
                                 <div style="font-weight:500;font-size:13px;">{{ $nilai->mataKuliah->nama }}</div>
                                 <div style="font-size:11px;color:var(--text-3);font-family:monospace;">{{ $nilai->mataKuliah->kode }}</div>
                             </td>
-                            <td class="hide-sm" style="text-align:center;color:var(--text-2);">{{ $nilai->nilai_tugas }}</td>
-                            <td class="hide-sm" style="text-align:center;color:var(--text-2);">{{ $nilai->nilai_uts }}</td>
-                            <td class="hide-sm" style="text-align:center;color:var(--text-2);">{{ $nilai->nilai_uas }}</td>
+                            <td style="text-align:center;color:var(--text-2);">{{ $nilai->mataKuliah->sks }}</td>
                             <td style="text-align:center;">
                                 <span style="font-weight:700;color:{{ $isDE ? '#EF4444' : 'var(--text-1)' }};">
                                     {{ number_format($nilai->nilai_akhir, 1) }}
@@ -183,7 +179,7 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="6" style="text-align:center;padding:28px;color:var(--text-3);">
+                        <tr><td colspan="4" style="text-align:center;padding:28px;color:var(--text-3);">
                             <i class="bi bi-journal-x" style="font-size:28px;display:block;margin-bottom:8px;opacity:.4;"></i>
                             Belum ada data nilai untuk semester {{ $semesterAktif }}.
                         </td></tr>
@@ -198,69 +194,53 @@
             <div class="tbl-head-v2">
                 <div>
                     <div class="tbl-title-v2">Absensi Semester {{ $semesterAktif }}</div>
-                    <div class="tbl-sub-v2">Batas alpha: 18 jam per mata kuliah</div>
+                    <div class="tbl-sub-v2">Total jam kehadiran per semester · Batas alpha SP I: 18 jam</div>
                 </div>
             </div>
+            @php $absenSem = $absensis->first(); @endphp
+            @if($absenSem)
+            @php
+                $totalSem = $absenSem->jam_hadir + $absenSem->jam_izin + $absenSem->jam_sakit + $absenSem->jam_alpha;
+                $pctSem   = $totalSem > 0 ? round($absenSem->jam_hadir / $totalSem * 100) : 0;
+                $kritis   = $absenSem->jam_alpha >= 18;
+                $waspada  = $absenSem->jam_alpha >= 14 && !$kritis;
+            @endphp
             <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
                 <table class="ac-table-v2" style="min-width:360px;">
                     <thead>
                         <tr>
-                            <th>Mata Kuliah</th>
-                            <th style="text-align:center;">Hadir</th>
-                            <th class="hide-sm" style="text-align:center;">Izin</th>
-                            <th class="hide-sm" style="text-align:center;">Sakit</th>
-                            <th style="text-align:center;">Alpha</th>
-                            <th class="hide-mobile" style="text-align:center;">% Hadir</th>
+                            <th style="text-align:center;">Jam Alpha</th>
+                            <th style="text-align:center;">Jam Izin</th>
+                            <th style="text-align:center;">Jam Sakit</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($absensis as $absen)
-                        @php
-                            $total   = $absen->jam_hadir + $absen->jam_izin + $absen->jam_sakit + $absen->jam_alpha;
-                            $pct     = $total > 0 ? round($absen->jam_hadir / $total * 100) : 0;
-                            $kritis  = $absen->jam_alpha >= 18;
-                            $waspada = $absen->jam_alpha >= 14 && !$kritis;
-                        @endphp
                         <tr style="{{ $kritis ? 'background:rgba(239,68,68,.03);' : '' }}">
-                            <td style="{{ $kritis ? 'border-left:3px solid #EF4444;' : '' }}">
-                                <div style="font-weight:500;font-size:13px;">{{ $absen->mataKuliah->nama }}</div>
-                                <div style="font-size:11px;color:var(--text-3);font-family:monospace;">{{ $absen->mataKuliah->kode }}</div>
+                            <td style="text-align:center;font-weight:700;{{ $kritis ? 'border-left:3px solid #EF4444;' : '' }}color:{{ $kritis ? '#EF4444' : ($waspada ? '#F59E0B' : 'var(--text-2)') }};">
+                                {{ $absenSem->jam_alpha }}j @if($kritis) ⛔ @elseif($waspada) ⚠️ @endif
                             </td>
-                            <td style="text-align:center;font-weight:600;color:#22C55E;">{{ $absen->jam_hadir }}</td>
-                            <td class="hide-sm" style="text-align:center;font-weight:600;color:#FBBF24;">{{ $absen->jam_izin }}</td>
-                            <td class="hide-sm" style="text-align:center;font-weight:600;color:#3B82F6;">{{ $absen->jam_sakit }}</td>
-                            <td style="text-align:center;font-weight:700;color:{{ $kritis ? '#EF4444' : ($waspada ? '#F59E0B' : 'var(--text-2)') }};">
-                                {{ $absen->jam_alpha }}j
-                                @if($kritis) ⛔ @elseif($waspada) ⚠️ @endif
-                            </td>
-                            <td class="hide-mobile" style="text-align:center;">
-                                <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
-                                    <div style="width:44px;height:4px;background:#F1F5F9;border-radius:2px;overflow:hidden;">
-                                        <div style="height:100%;width:{{ $pct }}%;background:{{ $pct>=75 ? '#22C55E' : '#EF4444' }};border-radius:2px;"></div>
-                                    </div>
-                                    <span style="font-size:12px;font-weight:700;color:{{ $pct>=75 ? '#22C55E' : '#EF4444' }};">{{ $pct }}%</span>
-                                </div>
-                            </td>
+                            <td style="text-align:center;font-weight:600;color:#FBBF24;">{{ $absenSem->jam_izin }}j</td>
+                            <td style="text-align:center;font-weight:600;color:#3B82F6;">{{ $absenSem->jam_sakit }}j</td>
                             <td>
                                 @if($kritis)
-                                    <span class="badge badge-red" style="white-space:nowrap;font-size:11px;">Kritis</span>
+                                    <span class="badge badge-red" style="white-space:nowrap;font-size:11px;">⛔ Kritis</span>
                                 @elseif($waspada)
-                                    <span class="badge" style="background:#FEF3C7;color:#92400E;white-space:nowrap;font-size:11px;">Waspada</span>
+                                    <span class="badge" style="background:#FEF3C7;color:#92400E;white-space:nowrap;font-size:11px;">⚠ Waspada</span>
                                 @else
-                                    <span class="badge badge-green" style="white-space:nowrap;font-size:11px;">Aman</span>
+                                    <span class="badge badge-green" style="white-space:nowrap;font-size:11px;">✓ Aman</span>
                                 @endif
                             </td>
                         </tr>
-                        @empty
-                        <tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text-3);">
-                            <i class="bi bi-calendar-x" style="font-size:28px;display:block;margin-bottom:8px;opacity:.4;"></i>
-                            Belum ada data absensi untuk semester {{ $semesterAktif }}.
-                        </td></tr>
-                        @endforelse
                     </tbody>
                 </table>
             </div>
+            @else
+            <div style="text-align:center;padding:28px;color:var(--text-3);">
+                <i class="bi bi-calendar-x" style="font-size:28px;display:block;margin-bottom:8px;opacity:.4;"></i>
+                Belum ada data absensi untuk semester {{ $semesterAktif }}.
+            </div>
+            @endif
         </div>
 
         {{-- Chart Trend (khusus admin) --}}

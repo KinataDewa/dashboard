@@ -19,13 +19,12 @@ class AbsensiController extends Controller
             ->sort()
             ->values();
  
-        // Default = semester terbaru, bisa di-override via ?semester=X
-        $semesterAktif = $mahasiswa->kelas->semester ?? 6;
+        // Default = semester terbaru dari pivot, bisa di-override via ?semester=X
+        $semesterAktif = $mahasiswa->kelasMahasiswas()->max('semester') ?? ($mahasiswa->kelas->semester ?? 1);
         $semester = (int) request('semester', $semesterList->last() ?? $semesterAktif);
  
         $absensis = $mahasiswa->absensis()
             ->where('semester', $semester)
-            ->with('mataKuliah')
             ->get();
  
         $sumHadir = $absensis->sum('jam_hadir');

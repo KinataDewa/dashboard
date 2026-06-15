@@ -12,7 +12,9 @@ class KompensasiController extends Controller
     public function index(Request $request)
     {
         $query = Kompensasi::with(['mahasiswa.kelas', 'mahasiswa.dosenPa'])
-            ->latest();
+            ->join('mahasiswas', 'kompensasis.mahasiswa_id', '=', 'mahasiswas.id')
+            ->orderBy('mahasiswas.nama')
+            ->select('kompensasis.*');
  
         // Filter status
         if ($request->filled('status')) {
@@ -59,8 +61,10 @@ class KompensasiController extends Controller
             ? Mahasiswa::with(['kelas', 'absensis'])->findOrFail($mahasiswaId)
             : null;
  
-        // Jika dari mahasiswa tertentu, hitung alpha semester aktif
-        $semesterAktif = $mahasiswa?->kelas->semester ?? 6;
+        // Gunakan semester terbaru dari pivot agar akurat untuk mahasiswa yang pindah kelas
+        $semesterAktif = $mahasiswaId
+            ? (\App\Models\KelasMahasiswa::where('mahasiswa_id', $mahasiswaId)->max('semester') ?? ($mahasiswa?->kelas?->semester ?? 1))
+            : 1;
         $tahunAkademik = $mahasiswa?->kelas->tahun_akademik ?? '2024/2025';
         $jamAlpha      = $mahasiswa
             ? $mahasiswa->absensis->where('semester', $semesterAktif)->sum('jam_alpha')

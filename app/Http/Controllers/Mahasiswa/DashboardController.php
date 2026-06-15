@@ -12,10 +12,10 @@ class DashboardController extends Controller
     {
         $user      = auth()->user();
         $mahasiswa = Mahasiswa::where('user_id', $user->id)
-            ->with(['kelas', 'dosenPa', 'kompensasis', 'nilais.mataKuliah', 'absensis.mataKuliah'])
+            ->with(['kelas', 'dosenPa', 'kompensasis', 'nilais.mataKuliah', 'absensis'])
             ->firstOrFail();
 
-        $semesterAktif = $mahasiswa->kelas->semester ?? 6;
+        $semesterAktif = $mahasiswa->kelasMahasiswas()->max('semester') ?? ($mahasiswa->kelas->semester ?? 1);
         $tahunAkademik = $mahasiswa->kelas->tahun_akademik ?? '2024/2025';
 
         // Nilai semester aktif (dari relation yang sudah di-load)
@@ -55,17 +55,17 @@ class DashboardController extends Controller
         // Nilai D/E semester aktif (untuk stat card)
         $nilaiDE = $nilais->whereIn('grade', ['D', 'E']);
 
-        // Absensi kritis: alpha >= 18 jam (batas SP I)
+        // Absensi kritis: semester aktif dengan alpha >= 18 jam (batas SP I)
         $absensiKritis = $absensis->where('jam_alpha', '>=', 18);
 
-        // Rata-rata nilai per matkul di kelas
-        $mataKuliahs = MataKuliah::where('kelas_id', $mahasiswa->kelas_id)
-            ->where('semester', $semesterAktif)
-            ->get();
-
+        // Rata-rata nilai per matkul (dari nilai mahasiswa semester aktif)
+        $matkulIds = $nilais->pluck('mata_kuliah_id')->unique();
         $rataRataKelas = [];
-        foreach ($mataKuliahs as $mk) {
-            $rataRataKelas[$mk->id] = $mk->getRataRataNilai();
+        foreach ($matkulIds as $mkId) {
+            $rataRataKelas[$mkId] = round(
+                \App\Models\Nilai::where('mata_kuliah_id', $mkId)->avg('nilai_akhir') ?? 0,
+                2
+            );
         }
 
         $kompenAktif = $mahasiswa->getKompensasiSemester($semesterAktif);
@@ -73,7 +73,7 @@ class DashboardController extends Controller
         $kompensasis = $mahasiswa->kompensasis()->orderBy('semester', 'desc')->get();
 
         return view('mahasiswa.dashboard', compact(
-            'mahasiswa', 'nilais', 'absensis',
+            'mahasiswa', 'nilais', 'absensis', 'allAbsensis',
             'ipSemester', 'ipk', 'nilaiDE', 'absensiKritis',
             'semesterAktif', 'tahunAkademik', 'rataRataKelas',
             'kompenAktif', 'absensiPerSemester', 'semesterListAbsensi',

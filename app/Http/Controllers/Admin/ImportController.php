@@ -8,6 +8,7 @@ use App\Imports\AbsensiImport;
 use App\Imports\MahasiswaImport;
 use App\Imports\DosenImport;
 use App\Imports\MatkulImport;
+use App\Imports\RaporImport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Log;
@@ -144,6 +145,62 @@ class ImportController extends Controller
         }
     }
 
+    // ── RAPOR ────────────────────────────────────────
+    public function rapor(Request $request)
+    {
+        $request->validate([
+            'files'    => 'required|array|min:1',
+            'files.*'  => 'file|mimes:xlsx,xls|max:10240',
+            'angkatan' => 'required|digits:4|integer|min:2000|max:' . date('Y'),
+        ]);
+
+        $files          = $request->file('files');
+        $angkatan       = (string) $request->input('angkatan');
+        $totalMahasiswa = 0;
+        $totalCreated   = 0;
+        $totalNilai     = 0;
+        $totalAbsensi   = 0;
+        $totalSkipped   = 0;
+        $errors         = [];
+
+        foreach ($files as $file) {
+            try {
+                $import = new RaporImport();
+                $import->angkatan = $angkatan;
+                $import->import($file->getRealPath());
+
+                $totalMahasiswa += $import->getImportedMahasiswaCount();
+                $totalCreated   += $import->getCreatedMahasiswaCount();
+                $totalNilai     += $import->getImportedNilaiCount();
+                $totalAbsensi   += $import->getImportedAbsensiCount();
+                $totalSkipped   += $import->getSkippedCount();
+
+            } catch (\Exception $e) {
+                Log::error('Import rapor error [' . $file->getClientOriginalName() . ']: ' . $e->getMessage());
+                $errors[] = $file->getClientOriginalName() . ': ' . $e->getMessage();
+            }
+        }
+
+        if (!empty($errors)) {
+            return back()->with('error', 'Gagal import beberapa file: ' . implode('; ', $errors));
+        }
+
+        $msg = sprintf(
+            'Berhasil import %d file: total %d mahasiswa (%d baru), %d nilai, %d absensi diimport.',
+            count($files),
+            $totalMahasiswa,
+            $totalCreated,
+            $totalNilai,
+            $totalAbsensi
+        );
+
+        if ($totalSkipped > 0) {
+            $msg .= ' ' . $totalSkipped . ' baris dilewati (lihat log).';
+        }
+
+        return back()->with('success', $msg);
+    }
+
     // ── JADWAL (placeholder) ─────────────────────────
     public function jadwal(Request $request)
     {
@@ -175,8 +232,8 @@ class ImportController extends Controller
             ],
             'absensi' => [
                 'filename' => 'template_absensi.xlsx',
-                'headers'  => ['nim','kode_matkul','semester','tahun_akademik','tanggal','pertemuan_ke','jam_hadir','jam_izin','jam_sakit','jam_alpha'],
-                'sample'   => ['2341720099','TI601','6','2024/2025','2025-05-20','14','38','2','2','0'],
+                'headers'  => ['nim','semester','jam_hadir','jam_izin','jam_sakit','jam_alpha'],
+                'sample'   => ['2341720099','6','52','0','2','3'],
             ],
             'mahasiswa' => [
                 'filename' => 'template_mahasiswa.xlsx',

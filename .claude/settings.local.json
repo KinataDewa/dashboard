@@ -9,7 +9,12 @@
       "Bash(php -l app/Http/Controllers/Mahasiswa/DashboardController.php)",
       "Bash(php -l app/Mail/MahasiswaBerisiko.php)",
       "Bash(php -l app/Http/Controllers/Admin/DashboardController.php)",
-      "Bash(php -l app/Http/Controllers/Admin/KirimPeringatanController.php)"
+      "Bash(php -l app/Http/Controllers/Admin/KirimPeringatanController.php)",
+      "Bash(Get-ChildItem -Path . -Directory)",
+      "Bash(Select-Object -First 20)",
+      "Bash(php -r \"require 'vendor/autoload.php'; echo 'PHP OK';\")",
+      "Bash(php -l app/Imports/RaporImport.php)",
+      "Bash(php -l app/Http/Controllers/Admin/ImportController.php)"
     ]
   }
 }

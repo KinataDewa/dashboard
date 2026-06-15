@@ -212,6 +212,40 @@
 }
 .tpl-btn:hover { background: var(--blue-light); color: var(--blue); border-color: var(--blue); }
 
+/* File progress list (multi-upload) */
+.file-progress-list {
+    display: none;
+    margin-top: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2px;
+}
+.file-progress-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--white);
+}
+.file-progress-item:last-child { border-bottom: none; }
+.file-progress-name {
+    color: var(--text-1);
+    font-weight: 500;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 8px;
+}
+.file-progress-status {
+    color: var(--text-2);
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
 /* Progress bar upload */
 .upload-progress {
     height: 3px; border-radius: 2px;
@@ -352,7 +386,7 @@
         </div>
     </div>
     <div class="import-intro-badge">
-        <div class="import-intro-badge-num">7</div>
+        <div class="import-intro-badge-num">8</div>
         <div class="import-intro-badge-label">Jenis Import<br>Tersedia</div>
     </div>
 </div>
@@ -377,82 +411,96 @@
 
 @php
 $imports = [
+    // [
+    //     'route'  => 'admin.import.nilai',
+    //     'tpl'    => 'nilai',
+    //     'icon'   => 'bi-bar-chart-line-fill',
+    //     'title'  => 'Nilai Akademik',
+    //     'desc'   => 'Nilai tugas, UTS, UAS per mata kuliah dan kelas',
+    //     'accent' => 'linear-gradient(135deg,#22C55E,#16A34A)',
+    //     'ibg'    => '#F0FDF4',
+    //     'ic'     => '#16A34A',
+    //     'top'    => '#22C55E',
+    // ],
+    // [
+    //     'route'  => 'admin.import.absensi',
+    //     'tpl'    => 'absensi',
+    //     'icon'   => 'bi-calendar2-check-fill',
+    //     'title'  => 'Absensi',
+    //     'desc'   => 'Hadir, izin, sakit, alpha + tanggal pertemuan',
+    //     'accent' => 'linear-gradient(135deg,#F59E0B,#D97706)',
+    //     'ibg'    => '#FFFBEB',
+    //     'ic'     => '#D97706',
+    //     'top'    => '#F59E0B',
+    // ],
+    // [
+    //     'route'  => 'admin.import.mahasiswa',
+    //     'tpl'    => 'mahasiswa',
+    //     'icon'   => 'bi-people-fill',
+    //     'title'  => 'Mahasiswa',
+    //     'desc'   => 'Data biodata dan akun mahasiswa aktif',
+    //     'accent' => 'linear-gradient(135deg,#2563EB,#1D4ED8)',
+    //     'ibg'    => '#EFF6FF',
+    //     'ic'     => '#1D4ED8',
+    //     'top'    => '#2563EB',
+    // ],
+    // [
+    //     'route'  => 'admin.import.dosen',
+    //     'tpl'    => 'dosen',
+    //     'icon'   => 'bi-person-badge-fill',
+    //     'title'  => 'Dosen',
+    //     'desc'   => 'Data dosen pengampu dan DPA per kelas',
+    //     'accent' => 'linear-gradient(135deg,#7C3AED,#6D28D9)',
+    //     'ibg'    => '#F5F3FF',
+    //     'ic'     => '#6D28D9',
+    //     'top'    => '#7C3AED',
+    // ],
+    // [
+    //     'route'  => 'admin.import.matkul',
+    //     'tpl'    => 'matkul',
+    //     'icon'   => 'bi-book-fill',
+    //     'title'  => 'Mata Kuliah',
+    //     'desc'   => 'Kurikulum dan mata kuliah per semester',
+    //     'accent' => 'linear-gradient(135deg,#0891B2,#0E7490)',
+    //     'ibg'    => '#ECFEFF',
+    //     'ic'     => '#0E7490',
+    //     'top'    => '#0891B2',
+    // ],
+    // [
+    //     'route'  => 'admin.import.jadwal',
+    //     'tpl'    => 'jadwal',
+    //     'icon'   => 'bi-clock-fill',
+    //     'title'  => 'Jadwal Kuliah',
+    //     'desc'   => 'Jadwal kuliah semua kelas dan ruangan',
+    //     'accent' => 'linear-gradient(135deg,#DB2777,#BE185D)',
+    //     'ibg'    => '#FDF2F8',
+    //     'ic'     => '#BE185D',
+    //     'top'    => '#DB2777',
+    // ],
+    // [
+    //     'route'  => 'admin.import.kelas',
+    //     'tpl'    => 'kelas',
+    //     'icon'   => 'bi-grid-3x3-gap-fill',
+    //     'title'  => 'Kelas',
+    //     'desc'   => 'Data kelas dan penugasan dosen PA',
+    //     'accent' => 'linear-gradient(135deg,#EA580C,#C2410C)',
+    //     'ibg'    => '#FFF7ED',
+    //     'ic'     => '#C2410C',
+    //     'top'    => '#EA580C',
+    // ],
     [
-        'route'  => 'admin.import.nilai',
-        'tpl'    => 'nilai',
-        'icon'   => 'bi-bar-chart-line-fill',
-        'title'  => 'Nilai Akademik',
-        'desc'   => 'Nilai tugas, UTS, UAS per mata kuliah dan kelas',
-        'accent' => 'linear-gradient(135deg,#22C55E,#16A34A)',
-        'ibg'    => '#F0FDF4',
-        'ic'     => '#16A34A',
-        'top'    => '#22C55E',
-    ],
-    [
-        'route'  => 'admin.import.absensi',
-        'tpl'    => 'absensi',
-        'icon'   => 'bi-calendar2-check-fill',
-        'title'  => 'Absensi',
-        'desc'   => 'Hadir, izin, sakit, alpha + tanggal pertemuan',
-        'accent' => 'linear-gradient(135deg,#F59E0B,#D97706)',
-        'ibg'    => '#FFFBEB',
-        'ic'     => '#D97706',
-        'top'    => '#F59E0B',
-    ],
-    [
-        'route'  => 'admin.import.mahasiswa',
-        'tpl'    => 'mahasiswa',
-        'icon'   => 'bi-people-fill',
-        'title'  => 'Mahasiswa',
-        'desc'   => 'Data biodata dan akun mahasiswa aktif',
-        'accent' => 'linear-gradient(135deg,#2563EB,#1D4ED8)',
-        'ibg'    => '#EFF6FF',
-        'ic'     => '#1D4ED8',
-        'top'    => '#2563EB',
-    ],
-    [
-        'route'  => 'admin.import.dosen',
-        'tpl'    => 'dosen',
-        'icon'   => 'bi-person-badge-fill',
-        'title'  => 'Dosen',
-        'desc'   => 'Data dosen pengampu dan DPA per kelas',
-        'accent' => 'linear-gradient(135deg,#7C3AED,#6D28D9)',
-        'ibg'    => '#F5F3FF',
-        'ic'     => '#6D28D9',
-        'top'    => '#7C3AED',
-    ],
-    [
-        'route'  => 'admin.import.matkul',
-        'tpl'    => 'matkul',
-        'icon'   => 'bi-book-fill',
-        'title'  => 'Mata Kuliah',
-        'desc'   => 'Kurikulum dan mata kuliah per semester',
-        'accent' => 'linear-gradient(135deg,#0891B2,#0E7490)',
-        'ibg'    => '#ECFEFF',
-        'ic'     => '#0E7490',
-        'top'    => '#0891B2',
-    ],
-    [
-        'route'  => 'admin.import.jadwal',
-        'tpl'    => 'jadwal',
-        'icon'   => 'bi-clock-fill',
-        'title'  => 'Jadwal Kuliah',
-        'desc'   => 'Jadwal kuliah semua kelas dan ruangan',
-        'accent' => 'linear-gradient(135deg,#DB2777,#BE185D)',
-        'ibg'    => '#FDF2F8',
-        'ic'     => '#BE185D',
-        'top'    => '#DB2777',
-    ],
-    [
-        'route'  => 'admin.import.kelas',
-        'tpl'    => 'kelas',
-        'icon'   => 'bi-grid-3x3-gap-fill',
-        'title'  => 'Kelas',
-        'desc'   => 'Data kelas dan penugasan dosen PA',
-        'accent' => 'linear-gradient(135deg,#EA580C,#C2410C)',
-        'ibg'    => '#FFF7ED',
-        'ic'     => '#C2410C',
-        'top'    => '#EA580C',
+        'route'    => 'admin.import.rapor',
+        'tpl'      => null,
+        'petunjuk' => true,
+        'multiple' => true,
+        'angkatan' => true,
+        'icon'     => 'bi-file-earmark-spreadsheet-fill',
+        'title'    => 'Rapor Polinema',
+        'desc'     => 'Upload <strong>banyak file</strong> <code>_CONVERTED.xlsx</code> sekaligus',
+        'accent'   => 'linear-gradient(135deg,#0F766E,#0D9488)',
+        'ibg'      => '#F0FDFA',
+        'ic'       => '#0D9488',
+        'top'      => '#0F766E',
     ],
 ];
 @endphp
@@ -467,7 +515,7 @@ $imports = [
             </div>
             <div>
                 <div class="import-card-title">{{ $imp['title'] }}</div>
-                <div class="import-card-desc">{{ $imp['desc'] }}</div>
+                <div class="import-card-desc">{!! $imp['desc'] !!}</div>
             </div>
         </div>
 
@@ -480,21 +528,51 @@ $imports = [
                  ondragover="handleDragOver(event, {{ $idx }})"
                  ondragleave="handleDragLeave(event, {{ $idx }})"
                  ondrop="handleDrop(event, {{ $idx }})">
+                @if(!empty($imp['multiple']))
+                <input type="file" name="files[]" accept=".xlsx" multiple
+                       id="file-{{ $idx }}"
+                       onchange="handleFileSelect(this, {{ $idx }})">
+                @else
                 <input type="file" name="file" accept=".xlsx,.xls,.csv"
                        id="file-{{ $idx }}"
                        onchange="handleFileSelect(this, {{ $idx }})">
+                @endif
                 <div class="dropzone-icon" id="dz-icon-{{ $idx }}">📂</div>
                 <div class="dropzone-label" id="dz-label-{{ $idx }}">
                     <strong>Klik atau drag & drop</strong> file di sini<br>
                 </div>
-                <div class="dropzone-hint">.xlsx, .xls, .csv · Max 5MB</div>
+                <div class="dropzone-hint">
+                    @if(!empty($imp['multiple']))<span style="color:#0D9488;font-weight:600;">Multi-file</span> · @endif.xlsx · Max 10MB per file
+                </div>
                 <div class="dropzone-filename" id="dz-filename-{{ $idx }}"></div>
             </div>
+
+            @if(!empty($imp['multiple']))
+            <div class="file-progress-list" id="file-list-{{ $idx }}"></div>
+            @endif
 
             {{-- Progress --}}
             <div class="upload-progress" id="progress-{{ $idx }}">
                 <div class="upload-progress-fill" id="progress-fill-{{ $idx }}"></div>
             </div>
+
+            {{-- Angkatan (khusus Import Rapor) --}}
+            @if(!empty($imp['angkatan']))
+            <div style="margin-bottom:12px;">
+                <label style="display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:6px;">
+                    <i class="bi bi-calendar-event" style="color:#0D9488;margin-right:4px;"></i>
+                    Angkatan Mahasiswa <span style="color:#DC2626;">*</span>
+                </label>
+                <select name="angkatan" required
+                        style="width:100%;padding:9px 12px;border:1.5px solid #D1FAE5;border-radius:8px;font-size:13px;color:#111827;background:#fff;outline:none;cursor:pointer;transition:border-color .2s;"
+                        onfocus="this.style.borderColor='#0D9488'" onblur="this.style.borderColor='#D1FAE5'">
+                    <option value="">-- Pilih Angkatan --</option>
+                    @foreach(range(date('Y'), 2018, -1) as $thn)
+                    <option value="{{ $thn }}">{{ $thn }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
 
             {{-- Buttons --}}
             <button type="submit" class="upload-btn"
@@ -504,9 +582,16 @@ $imports = [
             </button>
         </form>
 
+        @if($imp['tpl'])
         <a href="{{ route('admin.import.template', $imp['tpl']) }}" class="tpl-btn">
             <i class="bi bi-download"></i> Download Template
         </a>
+        @elseif(!empty($imp['petunjuk']))
+        <div style="margin-top:8px;background:#F0FDFA;border:1px solid #99F6E4;border-radius:8px;padding:10px 12px;font-size:11.5px;color:#134E4A;line-height:1.6;">
+            <strong style="color:#0F766E;">📋 Format file:</strong> 4 sheet — <code>MAHASISWA</code>, <code>NILAI</code>, <code>ABSENSI</code>, <code>MATA_KULIAH</code><br>
+            Nama file harus diakhiri <code>_CONVERTED.xlsx</code> (hasil konversi script Python Polinema)
+        </div>
+        @endif
     </div>
 </div>
 @endforeach
@@ -522,11 +607,11 @@ $imports = [
         Panduan Format Kolom Excel
     </div>
 
-    <div class="format-grid">
+    {{-- <div class="format-grid">
         @php
         $formats = [
             ['icon'=>'bi-bar-chart-line-fill','color'=>'#16A34A','title'=>'Nilai','cols'=>['nim','kode_matkul','semester','tahun_akademik','nilai_tugas','nilai_uts','nilai_uas']],
-            ['icon'=>'bi-calendar2-check-fill','color'=>'#D97706','title'=>'Absensi','cols'=>['nim','kode_matkul','semester','tahun_akademik','tanggal','pertemuan_ke','jam_hadir','jam_izin','jam_sakit','jam_alpha']],
+            ['icon'=>'bi-calendar2-check-fill','color'=>'#D97706','title'=>'Absensi','cols'=>['nim','semester','jam_hadir','jam_izin','jam_sakit','jam_alpha']],
             ['icon'=>'bi-people-fill','color'=>'#1D4ED8','title'=>'Mahasiswa','cols'=>['nim','nama','email','kelas','angkatan','nip_dosen_pa']],
             ['icon'=>'bi-person-badge-fill','color'=>'#6D28D9','title'=>'Dosen','cols'=>['nip','nama','email','no_hp']],
             ['icon'=>'bi-book-fill','color'=>'#0E7490','title'=>'Mata Kuliah','cols'=>['kode','nama','sks','semester','kelas','nip_dosen']],
@@ -546,7 +631,7 @@ $imports = [
             </div>
         </div>
         @endforeach
-    </div>
+    </div> --}}
 
     <div class="warning-box">
         <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#92400E;margin-bottom:4px;">
@@ -554,10 +639,10 @@ $imports = [
         </div>
         <ul>
             <li>Header baris pertama harus <strong>persis sama</strong> dengan nama kolom di atas (huruf kecil, underscore)</li>
-            <li>Format <code>tahun_akademik</code>: <strong>2024/2025</strong></li>
-            <li>Format <code>tanggal</code>: <strong>YYYY-MM-DD</strong> (contoh: 2025-05-20)</li>
-            <li>Kelas, NIM, dan NIP harus sudah terdaftar di database sebelum import nilai/absensi</li>
+            <li>Absensi disimpan <strong>per semester</strong> (total jam), bukan per mata kuliah</li>
+            <li>NIM, NIP, dan kode matkul harus sudah terdaftar di database sebelum import nilai/absensi</li>
             <li>Import menggunakan <strong>updateOrCreate</strong> — data lama akan diperbarui jika sudah ada</li>
+            <li>Untuk <strong>Import Rapor Polinema</strong>: upload file <code>_CONVERTED.xlsx</code> hasil konversi script Python — file memiliki 4 sheet: MAHASISWA, NILAI, ABSENSI, MATA_KULIAH</li>
         </ul>
     </div>
 </div>
@@ -571,8 +656,8 @@ $imports = [
 <script>
 // ── File Select Handler ──────────────────────────────
 function handleFileSelect(input, idx) {
-    var file = input.files[0];
-    if (!file) return;
+    var files = input.files;
+    if (!files.length) return;
 
     var dz       = document.getElementById('dropzone-' + idx);
     var icon     = document.getElementById('dz-icon-' + idx);
@@ -581,8 +666,16 @@ function handleFileSelect(input, idx) {
 
     dz.classList.add('has-file');
     icon.textContent = '✅';
-    label.innerHTML  = '<strong>File dipilih:</strong>';
-    filename.textContent = file.name + ' (' + formatBytes(file.size) + ')';
+
+    if (files.length === 1) {
+        label.innerHTML  = '<strong>File dipilih:</strong>';
+        filename.textContent = files[0].name + ' (' + formatBytes(files[0].size) + ')';
+    } else {
+        label.innerHTML = '<strong>' + files.length + ' file dipilih:</strong>';
+        filename.innerHTML = Array.from(files).map(function(f) {
+            return '📄 ' + f.name + ' <span style="color:var(--text-3);">(' + formatBytes(f.size) + ')</span>';
+        }).join('<br>');
+    }
     filename.classList.add('show');
 }
 
@@ -607,16 +700,19 @@ function handleDragLeave(e, idx) {
 
 function handleDrop(e, idx) {
     e.preventDefault();
-    var dz    = document.getElementById('dropzone-' + idx);
-    var input = document.getElementById('file-' + idx);
+    var dz      = document.getElementById('dropzone-' + idx);
+    var input   = document.getElementById('file-' + idx);
+    var dropped = e.dataTransfer.files;
     dz.classList.remove('dragover');
 
-    var file = e.dataTransfer.files[0];
-    if (!file) return;
+    if (!dropped.length) return;
 
-    // Inject file into input
     var dt = new DataTransfer();
-    dt.items.add(file);
+    if (input.multiple) {
+        Array.from(dropped).forEach(function(f) { dt.items.add(f); });
+    } else {
+        dt.items.add(dropped[0]);
+    }
     input.files = dt.files;
     handleFileSelect(input, idx);
 }
@@ -624,7 +720,7 @@ function handleDrop(e, idx) {
 // ── Form Submit dengan Progress ──────────────────────
 document.querySelectorAll('.import-form').forEach(function(form) {
     form.addEventListener('submit', function(e) {
-        var idx      = this.dataset.idx;
+        var idx       = this.dataset.idx;
         var fileInput = document.getElementById('file-' + idx);
 
         if (!fileInput.files.length) {
@@ -633,24 +729,33 @@ document.querySelectorAll('.import-form').forEach(function(form) {
             return;
         }
 
-        // Show progress animation
-        var progress = document.getElementById('progress-' + idx);
-        var fill     = document.getElementById('progress-fill-' + idx);
-        var btn      = document.getElementById('upload-btn-' + idx);
+        var progress  = document.getElementById('progress-' + idx);
+        var fill      = document.getElementById('progress-fill-' + idx);
+        var btn       = document.getElementById('upload-btn-' + idx);
+        var fileCount = fileInput.files.length;
+
+        // Show per-file processing list for multi-file input
+        var fileListEl = document.getElementById('file-list-' + idx);
+        if (fileListEl && fileCount > 0) {
+            fileListEl.innerHTML = Array.from(fileInput.files).map(function(f) {
+                return '<div class="file-progress-item">' +
+                    '<span class="file-progress-name">📄 ' + f.name + '</span>' +
+                    '<span class="file-progress-status"><i class="bi bi-arrow-repeat" style="animation:spin .8s linear infinite;display:inline-block;"></i> Memproses...</span>' +
+                    '</div>';
+            }).join('');
+            fileListEl.style.display = 'block';
+        }
 
         progress.classList.add('show');
-        btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation:spin .8s linear infinite;"></i> Mengupload...';
+        btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation:spin .8s linear infinite;"></i> Mengupload ' + fileCount + ' file...';
         btn.style.opacity = '.7';
         btn.disabled = true;
 
-        // Animate progress
         var w = 0;
-        var timer = setInterval(function() {
+        setInterval(function() {
             w = Math.min(w + Math.random() * 15, 85);
             fill.style.width = w + '%';
         }, 200);
-
-        // Let form submit naturally
     });
 });
 

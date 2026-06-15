@@ -346,13 +346,29 @@
 </div>
 @endif
 
+{{-- ══ SEMESTER PILLS ══ --}}
+@if($semesterList->count() > 1)
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+    <span style="font-size:12px;font-weight:700;color:var(--text-2);">Semester:</span>
+    @foreach($semesterList as $sem)
+    <a href="{{ route('dosen.dashboard', ['semester' => $sem]) }}"
+       style="padding:5px 14px;border-radius:20px;font-size:12.5px;font-weight:700;text-decoration:none;transition:all .15s;
+              {{ $sem == $semesterAktif
+                  ? 'background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3);'
+                  : 'background:#F1F5F9;color:var(--text-2);border:1px solid var(--border);' }}">
+        Semester {{ $sem }}
+    </a>
+    @endforeach
+</div>
+@endif
+
 {{-- ══ TABEL MAHASISWA (NEW) ══ --}}
 <div class="section-label">Data Mahasiswa Bimbingan</div>
 <div class="card-white tbl-card-v2">
     <div class="tbl-head-v2">
         <div>
             <div class="tbl-title-v2">Performa Mahasiswa</div>
-            <div class="tbl-sub-v2">{{ $kelas->first()->nama ?? '' }} · Semester {{ $kelas->first()->semester ?? '' }}</div>
+            <div class="tbl-sub-v2">{{ $kelas->first()->nama ?? '' }} · Semester {{ $semesterAktif }}</div>
         </div>
         <div class="tbl-actions">
             <div class="search-wrap">
