@@ -59,10 +59,9 @@ class DashboardController extends Controller
             }
         }
 
-        $totalH = $totalI = $totalS = $totalA = 0;
+        $totalI = $totalS = $totalA = 0;
         foreach ($mahasiswas as $mhs) {
             foreach ($mhs->absensis->where('semester', $semesterAktif) as $abs) {
-                $totalH += (int) $abs->jam_hadir;
                 $totalI += (int) $abs->jam_izin;
                 $totalS += (int) $abs->jam_sakit;
                 $totalA += (int) $abs->jam_alpha;
@@ -76,7 +75,7 @@ class DashboardController extends Controller
         return view('dosen.dashboard', compact(
             'dosen', 'kelas', 'mahasiswas', 'mahasiswaBerisiko',
             'totalMahasiswa', 'totalBerisiko', 'rataRataIpk', 'totalNilaiDE',
-            'totalH', 'totalI', 'totalS', 'totalA',
+            'totalI', 'totalS', 'totalA',
             'gradeDistribusi', 'kompensasiPending',
             'semesterList', 'semesterAktif'
         ));

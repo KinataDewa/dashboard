@@ -51,9 +51,9 @@
 
 @php
     $totalWajibKompen     = $dataMahasiswa->count();
-    $totalSisaKeseluruhan = $dataMahasiswa->sum('total_sisa');
-    $totalLunas           = $dataMahasiswa->filter(fn($m) => $m->semua_lunas)->count();
-    $totalMasihSisa       = $dataMahasiswa->filter(fn($m) => !$m->semua_lunas)->count();
+    $totalSisaKeseluruhan = $dataMahasiswa->sum('jam_sisa');
+    $totalLunas           = $dataMahasiswa->filter(fn($m) => $m->status === 'lunas')->count();
+    $totalMasihSisa       = $dataMahasiswa->filter(fn($m) => $m->status !== 'lunas')->count();
 @endphp
 
 {{-- ══ BANNER ══ --}}
@@ -61,7 +61,7 @@
     'gradient'     => 'linear-gradient(135deg, #065F46 0%, #059669 50%, #34D399 100%)',
     'icon'         => 'bi-clipboard2-check-fill',
     'title'        => 'Kompensasi Mahasiswa Bimbingan',
-    'sub'          => ($dosen->nama ?? auth()->user()->name) . ' · ' . now()->format('d F Y'),
+    'sub'          => ($dosen->nama ?? auth()->user()->name) . ' · Semester ' . $semesterAktif . ' · ' . now()->format('d F Y'),
     'chips'        => [
         ['icon' => 'bi-people-fill',     'label' => $totalWajibKompen . ' Mahasiswa Wajib Kompen'],
         ['icon' => 'bi-hourglass-split', 'label' => $totalSisaKeseluruhan . ' Jam Sisa Kompen Total'],
@@ -71,6 +71,22 @@
     'badge2_num'   => $totalSisaKeseluruhan,
     'badge2_label' => "Jam\nSisa",
 ])
+
+{{-- ══ FILTER SEMESTER ══
+@if($semesterList->count() > 1) --}}
+{{-- <form method="GET" action="{{ route('kompensasi.index') }}" style="margin-bottom:16px;"> --}}
+    {{-- <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:12px;font-weight:700;color:var(--text-2);">Semester:</span>
+        <select name="semester" onchange="this.form.submit()"
+                style="padding:5px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);cursor:pointer;">
+            @foreach($semesterList as $sem)
+            <option value="{{ $sem }}" {{ $sem == $semesterAktif ? 'selected' : '' }}>Semester {{ $sem }}</option>
+            @endforeach
+        </select>
+        <span style="font-size:12px;color:var(--text-3);">Menampilkan data kompensasi semester {{ $semesterAktif }}</span>
+    </div>
+</form>
+@endif --}}
 
 {{-- ══ SUMMARY CARDS ══ --}}
 <div class="sum-cards">
@@ -146,75 +162,76 @@
                     <th style="width:40px;">#</th>
                     <th>Mahasiswa</th>
                     <th style="text-align:center;" class="hide-mobile">Semester</th>
-                    <th style="text-align:center;">Total Jam Alpha</th>
+                    <th style="text-align:center;">Jam Alpha</th>
                     <th style="text-align:center;" class="hide-mobile">Wajib Kompen</th>
-                    <th style="text-align:center;" class="hide-mobile">Sudah Diselesaikan</th>
-                    <th style="text-align:center;">Sisa Kompen</th>
+                    <th style="text-align:center;" class="hide-mobile">Sudah</th>
+                    <th style="text-align:center;">Sisa</th>
                     <th style="text-align:center;">Status</th>
+                    <th style="text-align:center;" class="hide-mobile">TTD Admin</th>
+                    <th style="text-align:center;" class="hide-mobile">TTD Kajur</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($dataMahasiswa as $i => $item)
                 @php
                     $mhs       = $item->mahasiswa;
-                    $semesters = $item->semesters;
-                    $rowspan   = $semesters->count();
                     $colors    = ['#2563EB','#EF4444','#8B5CF6','#F59E0B','#0891B2','#DB2777','#16A34A'];
                     $aColor    = $colors[$i % count($colors)];
                     $searchKey = strtolower($mhs->nama . ' ' . $mhs->nim);
+                    $isLunas   = $item->status === 'lunas';
                 @endphp
-                @foreach($semesters as $j => $sem)
-                <tr class="{{ $j === 0 ? 'row-first' : '' }}"
+                <tr class="row-first"
                     data-mhs-id="{{ $mhs->id }}"
-                    data-search="{{ $searchKey }}">
-                    @if($j === 0)
-                    <td rowspan="{{ $rowspan }}" style="text-align:center;vertical-align:middle;">
-                        <div class="no-circle">{{ $i + 1 }}</div>
+                    data-search="{{ $searchKey }}"
+                    style="{{ !$isLunas ? 'background:rgba(239,68,68,.02);' : '' }}">
+                    <td style="text-align:center;vertical-align:middle;">
+                        <div class="no-circle" style="{{ !$isLunas ? 'background:#FEE2E2;color:#991B1B;' : '' }}">
+                            {{ $i + 1 }}
+                        </div>
                     </td>
-                    <td rowspan="{{ $rowspan }}" style="vertical-align:middle;">
+                    <td style="vertical-align:middle;">
                         <div style="display:flex;align-items:center;gap:10px;">
                             <div class="avatar" style="background:{{ $aColor }};">
                                 {{ strtoupper(substr($mhs->nama, 0, 1)) }}
                             </div>
                             <div>
                                 <div style="font-weight:700;font-size:13.5px;">{{ $mhs->nama }}</div>
-                                <div style="font-size:11.5px;color:var(--text-2);">{{ $mhs->nim }}</div>
-                                @if($item->semua_lunas)
+                                <div style="font-size:11.5px;color:var(--text-2);font-family:monospace;">{{ $mhs->nim }}</div>
+                                @if($isLunas)
                                 <span style="display:inline-flex;align-items:center;gap:3px;background:#DCFCE7;color:#166534;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:700;margin-top:3px;">
-                                    <i class="bi bi-check-circle-fill"></i> Lunas Semua
+                                    <i class="bi bi-check-circle-fill"></i> Lunas
                                 </span>
                                 @else
                                 <span style="display:inline-flex;align-items:center;gap:3px;background:#FEF3C7;color:#92400E;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:700;margin-top:3px;">
-                                    <i class="bi bi-hourglass-split"></i> {{ $item->total_sisa }} jam sisa
+                                    <i class="bi bi-hourglass-split"></i> {{ $item->jam_sisa }} jam sisa
                                 </span>
                                 @endif
                             </div>
                         </div>
                     </td>
-                    @endif
                     <td style="text-align:center;" class="hide-mobile">
                         <span style="background:#F1F5F9;color:var(--text-2);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;">
-                            Sem {{ $sem->semester }}
+                            Sem {{ $item->semester }}
                         </span>
                     </td>
                     <td style="text-align:center;font-weight:700;color:#EF4444;">
-                        {{ $sem->jam_alpha }} jam
+                        {{ $item->jam_alpha }} jam
                     </td>
                     <td style="text-align:center;font-weight:600;" class="hide-mobile">
-                        {{ $sem->jam_kompen_wajib }} jam
+                        {{ $item->jam_kompen_wajib }} jam
                     </td>
                     <td style="text-align:center;" class="hide-mobile">
-                        <span style="color:#16A34A;font-weight:600;">{{ $sem->jam_kompen_selesai }} jam</span>
+                        <span style="color:#16A34A;font-weight:600;">{{ $item->jam_kompen_selesai }} jam</span>
                     </td>
                     <td style="text-align:center;">
-                        @if($sem->jam_sisa > 0)
-                        <span style="color:#EF4444;font-weight:800;">{{ $sem->jam_sisa }} jam</span>
+                        @if($item->jam_sisa > 0)
+                        <span style="color:#EF4444;font-weight:800;">{{ $item->jam_sisa }} jam</span>
                         @else
                         <span style="color:#16A34A;font-weight:800;">0 jam</span>
                         @endif
                     </td>
                     <td style="text-align:center;">
-                        @if($sem->status === 'lunas')
+                        @if($isLunas)
                         <span class="badge badge-green">
                             <i class="bi bi-check-circle-fill" style="font-size:10px;margin-right:3px;"></i> Lunas
                         </span>
@@ -224,18 +241,23 @@
                         </span>
                         @endif
                     </td>
+                    <td style="text-align:center;font-size:16px;" class="hide-mobile">
+                        {{ $item->ttd_admin ? '✅' : '⏳' }}
+                    </td>
+                    <td style="text-align:center;font-size:16px;" class="hide-mobile">
+                        {{ $item->ttd_kajur ? '✅' : '⏳' }}
+                    </td>
                 </tr>
-                @endforeach
                 @endforeach
             </tbody>
         </table>
     </div>
 
     <div class="tbl-footer">
-        <span class="info-chip"><i class="bi bi-people-fill"></i> {{ $totalWajibKompen }} Mahasiswa</span>
+        <span class="info-chip"><i class="bi bi-people-fill"></i> {{ $totalWajibKompen }} Mahasiswa · Sem {{ $semesterAktif }}</span>
         <span class="info-chip"><i class="bi bi-check-circle-fill" style="color:#16A34A;"></i> {{ $totalLunas }} Lunas</span>
         <span class="info-chip"><i class="bi bi-exclamation-circle-fill" style="color:#EF4444;"></i> {{ $totalMasihSisa }} Belum Lunas</span>
-        <span class="info-chip"><i class="bi bi-hourglass-split"></i> {{ $totalSisaKeseluruhan }} Jam Sisa Total</span>
+        <span class="info-chip"><i class="bi bi-hourglass-split"></i> {{ $totalSisaKeseluruhan }} Jam Sisa</span>
     </div>
     @endif
 </div>
@@ -251,21 +273,9 @@
     input.addEventListener('input', function () {
         var q = this.value.toLowerCase().trim();
 
-        // Kumpulkan semua baris per mahasiswa id
-        var groups = {};
         document.querySelectorAll('tr[data-mhs-id]').forEach(function (tr) {
-            var id     = tr.dataset.mhsId;
             var search = (tr.dataset.search || '').toLowerCase();
-            if (!groups[id]) groups[id] = { rows: [], match: false };
-            groups[id].rows.push(tr);
-            if (!q || search.includes(q)) groups[id].match = true;
-        });
-
-        // Tampilkan / sembunyikan seluruh grup sekaligus agar rowspan tidak rusak
-        Object.values(groups).forEach(function (g) {
-            g.rows.forEach(function (tr) {
-                tr.style.display = g.match ? '' : 'none';
-            });
+            tr.style.display = (!q || search.includes(q)) ? '' : 'none';
         });
     });
 })();

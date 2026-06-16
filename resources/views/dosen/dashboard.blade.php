@@ -68,6 +68,25 @@
     .donut-wrap-v2{flex-direction:column;align-items:center;}
     .legend-v2{width:100%;}
 }
+
+/* ── Mini Summary Cards (Berisiko Dashboard) ─── */
+.mini-sum-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.mini-sum-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.mini-sum-card-bar { height: 3px; }
+.mini-sum-card-body { padding: 12px 16px; }
+.mini-sum-card-val { font-size: 26px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
+.mini-sum-card-lbl { font-size: 11.5px; color: var(--text-2); margin-top: 4px; font-weight: 500; }
+
+/* ── Risk Table ──────────────────────────────── */
+.risk-table { width: 100%; border-collapse: collapse; }
+.risk-table thead th { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .6px; padding: 10px 14px; border-bottom: 1.5px solid var(--border); background: #FAFBFF; white-space: nowrap; }
+.risk-table tbody tr { border-bottom: 1px solid #F8FAFC; transition: background .1s; }
+.risk-table tbody tr:last-child { border-bottom: none; }
+.risk-table tbody tr:hover { background: #FAFBFF; }
+.risk-table tbody td { padding: 12px 14px; vertical-align: middle; font-size: 13px; }
+.badge-risiko { display: inline-flex; align-items: center; gap: 2px; border-radius: 99px; padding: 2px 7px; font-size: 10.5px; font-weight: 700; white-space: nowrap; margin: 1px; }
+.no-circle { width: 28px; height: 28px; border-radius: 50%; background: #F1F5F9; color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.risk-empty-state { text-align: center; padding: 52px 20px; }
 </style>
 @endpush
 
@@ -286,13 +305,11 @@
             <div class="chart-head-v2">
                 <div>
                     <div class="chart-title-v2">Rekap Absensi Kelas</div>
-                    <div class="chart-sub-v2">Total jam kehadiran · Semester terakhir</div>
+                    <div class="chart-sub-v2">Jam alpha, izin &amp; sakit · Semester terakhir</div>
                 </div>
             </div>
             @php
-                // $totalH/I/S/A sudah dihitung di controller dari semester terakhir — jangan timpa
-                $totalAll = $totalH + $totalI + $totalS + $totalA;
-                $pctH = $totalAll > 0 ? round($totalH / $totalAll * 100) : 0;
+                $totalAll = $totalI + $totalS + $totalA;
                 $pctI = $totalAll > 0 ? round($totalI / $totalAll * 100) : 0;
                 $pctS = $totalAll > 0 ? round($totalS / $totalAll * 100) : 0;
                 $pctA = $totalAll > 0 ? round($totalA / $totalAll * 100) : 0;
@@ -301,12 +318,12 @@
                 <div class="donut-canvas-box">
                     <canvas id="absensiChart" width="140" height="140"></canvas>
                     <div class="donut-center">
-                        <div class="donut-center-num">{{ $pctH }}%</div>
-                        <div class="donut-center-sub">Hadir</div>
+                        <div class="donut-center-num">{{ $totalA }}j</div>
+                        <div class="donut-center-sub">Alpha</div>
                     </div>
                 </div>
                 <div class="legend-v2">
-                    @foreach([['#22C55E','Hadir',$totalH,$pctH],['#FBBF24','Izin',$totalI,$pctI],['#3B82F6','Sakit',$totalS,$pctS],['#EF4444','Alpha',$totalA,$pctA]] as [$color,$label,$val,$pct])
+                    @foreach([['#EF4444','Alpha',$totalA,$pctA],['#FBBF24','Izin',$totalI,$pctI],['#3B82F6','Sakit',$totalS,$pctS]] as [$color,$label,$val,$pct])
                     <div>
                         <div class="legend-v2-row">
                             <div class="legend-v2-left">
@@ -346,7 +363,7 @@
 </div>
 @endif
 
-{{-- ══ SEMESTER PILLS ══ --}}
+{{-- ══ SEMESTER PILLS ══
 @if($semesterList->count() > 1)
 <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
     <span style="font-size:12px;font-weight:700;color:var(--text-2);">Semester:</span>
@@ -360,130 +377,150 @@
     </a>
     @endforeach
 </div>
-@endif
+@endif --}}
 
-{{-- ══ TABEL MAHASISWA (NEW) ══ --}}
+{{-- ══ TABEL MAHASISWA BERISIKO ══ --}}
 <div class="section-label">Data Mahasiswa Bimbingan</div>
+
+{{-- Mini Summary Cards
+<div class="mini-sum-cards">
+    <div class="mini-sum-card">
+        <div class="mini-sum-card-bar" style="background:linear-gradient(90deg,#2563EB,#60A5FA);"></div>
+        <div class="mini-sum-card-body">
+            <div class="mini-sum-card-val" style="color:#2563EB;">{{ $totalMahasiswa }}</div>
+            <div class="mini-sum-card-lbl">Total Mahasiswa</div>
+        </div>
+    </div>
+    <div class="mini-sum-card">
+        <div class="mini-sum-card-bar" style="background:{{ $totalBerisiko > 0 ? 'linear-gradient(90deg,#EF4444,#FCA5A5)' : 'linear-gradient(90deg,#22C55E,#86EFAC)' }};"></div>
+        <div class="mini-sum-card-body">
+            <div class="mini-sum-card-val" style="color:{{ $totalBerisiko > 0 ? '#EF4444' : '#22C55E' }};">{{ $totalBerisiko }}</div>
+            <div class="mini-sum-card-lbl">Berisiko</div>
+        </div>
+    </div>
+    <div class="mini-sum-card">
+        <div class="mini-sum-card-bar" style="background:linear-gradient(90deg,#F59E0B,#FCD34D);"></div>
+        <div class="mini-sum-card-body">
+            <div class="mini-sum-card-val" style="color:#F59E0B;">{{ number_format($rataRataIpk, 2) }}</div>
+            <div class="mini-sum-card-lbl">Rata-rata IPK</div>
+        </div>
+    </div>
+</div> --}}
+
 <div class="card-white tbl-card-v2">
     <div class="tbl-head-v2">
         <div>
-            <div class="tbl-title-v2">Performa Mahasiswa</div>
-            <div class="tbl-sub-v2">{{ $kelas->first()->nama ?? '' }} · Semester {{ $semesterAktif }}</div>
-        </div>
-        <div class="tbl-actions">
-            <div class="search-wrap">
-                <i class="bi bi-search"></i>
-                <input type="text" placeholder="Cari mahasiswa..." id="searchMhs">
-            </div>
-            <div class="filter-wrap">
-                <button class="btn-filter" id="filterMhsBtn">
-                    <i class="bi bi-sliders2" style="font-size:12px;"></i> Filter
-                </button>
-                <div class="filter-menu" id="filterMhsMenu">
-                    <div class="filter-menu-label">Filter Status</div>
-                    <div class="filter-opt active" data-val="">Semua</div>
-                    <div class="filter-opt" data-val="berisiko">⚠ Berisiko</div>
-                    <div class="filter-opt" data-val="aman">✓ Aman</div>
-                </div>
+            <div class="tbl-title-v2">Mahasiswa Berisiko</div>
+            <div class="tbl-sub-v2">
+                {{ $totalBerisiko }} dari {{ $totalMahasiswa }} mahasiswa perlu perhatian · Semester {{ $semesterAktif }}
             </div>
         </div>
+        <a href="{{ route('dosen.berisiko.index') }}"
+           style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:700;background:var(--blue);color:#fff;text-decoration:none;white-space:nowrap;flex-shrink:0;">
+            <i class="bi bi-arrow-right-circle-fill" style="font-size:12px;"></i>
+            Lihat Semua
+        </a>
     </div>
 
+    @php
+        $mhsBerisikoTop = $mahasiswaBerisiko->take(10)->values();
+        $badgeMapDash = [
+            'ps'         => ['bg' => '#FEE2E2', 'color' => '#7F1D1D', 'icon' => 'bi-x-octagon-fill',          'label' => 'Putus Studi'],
+            'sp3'        => ['bg' => '#FEE2E2', 'color' => '#DC2626', 'icon' => 'bi-alarm-fill',              'label' => 'SP III'],
+            'sp2'        => ['bg' => '#FEF3C7', 'color' => '#EA580C', 'icon' => 'bi-clock-fill',              'label' => 'SP II'],
+            'sp1'        => ['bg' => '#FEF9C3', 'color' => '#D97706', 'icon' => 'bi-clock-history',           'label' => 'SP I'],
+            'nilai_e'    => ['bg' => '#FEE2E2', 'color' => '#991B1B', 'icon' => 'bi-x-circle-fill',           'label' => 'Nilai E'],
+            'nilai_d'    => ['bg' => '#FEF9C3', 'color' => '#B45309', 'icon' => 'bi-exclamation-circle-fill', 'label' => 'D >3'],
+            'ips_rendah' => ['bg' => '#EDE9FE', 'color' => '#5B21B6', 'icon' => 'bi-graph-down-arrow',        'label' => 'IPS < 2'],
+        ];
+        $colorsDash = ['#2563EB','#EF4444','#8B5CF6','#F59E0B','#0891B2','#DB2777','#16A34A'];
+    @endphp
+
+    @if($mhsBerisikoTop->isEmpty())
+    <div class="risk-empty-state">
+        <i class="bi bi-shield-check-fill" style="font-size:52px;color:#22C55E;display:block;margin-bottom:14px;"></i>
+        <div style="font-size:16px;font-weight:700;color:#166534;margin-bottom:6px;">Semua mahasiswa aman ✅</div>
+        <div style="font-size:13px;color:var(--text-3);">Tidak ada mahasiswa bimbingan yang berisiko pada semester ini.</div>
+    </div>
+    @else
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-        <table class="mhs-table" style="min-width:520px;">
+        <table class="risk-table" style="min-width:560px;">
             <thead>
                 <tr>
-                    <th style="width:36px;">#</th>
+                    <th style="width:40px;">#</th>
                     <th>Mahasiswa</th>
                     <th style="text-align:center;">IPK</th>
-                    <th class="hide-mobile" style="text-align:center;">IP Sem</th>
+                    <th style="text-align:center;" class="hide-mobile">IPS</th>
+                    <th style="text-align:center;" class="hide-mobile">Nilai D/E</th>
                     <th style="text-align:center;">Alpha</th>
-                    <th class="hide-mobile" style="text-align:center;">Kategori Risiko</th>
-                    <th style="text-align:center;">Status</th>
+                    <th style="text-align:center;">Kategori Risiko</th>
                     <th style="width:80px;"></th>
                 </tr>
             </thead>
-            <tbody id="mhsBody">
-                @foreach($mahasiswas->sortByDesc(fn($m) => $m->isBerisiko()) as $i => $mhs)
+            <tbody>
+                @foreach($mhsBerisikoTop as $i => $mhs)
                 @php
-                    $ipkMhs   = $mhs->ipk_val ?? $mhs->ipk;
-                    $semAktif = $mhs->kelas->semester ?? 6;
-                    $ipSem    = $mhs->getIpSemester($semAktif);
-                    $berisiko    = $mhs->is_berisiko ?? $mhs->isBerisiko();
-                    $semAlphaTbl = $mhs->absensis->max('semester') ?? 0;
-                    $totalAlp    = $semAlphaTbl > 0 ? $mhs->absensis->where('semester', $semAlphaTbl)->sum('jam_alpha') : 0;
-                    $kategoriRisiko = $mhs->getKategoriRisiko();
-                    $colors   = ['#2563EB','#16A34A','#7C3AED','#F59E0B','#EF4444','#0891B2','#DB2777'];
-                    $badgeMap = [
-                        'ps'         => ['bg' => '#FEE2E2', 'color' => '#7F1D1D', 'label' => 'Putus Studi'],
-                        'sp3'        => ['bg' => '#FEE2E2', 'color' => '#DC2626', 'label' => 'SP III'],
-                        'sp2'        => ['bg' => '#FEF3C7', 'color' => '#EA580C', 'label' => 'SP II'],
-                        'sp1'        => ['bg' => '#FEF9C3', 'color' => '#D97706', 'label' => 'SP I'],
-                        'nilai_e'    => ['bg' => '#FEE2E2', 'color' => '#991B1B', 'label' => 'Nilai E'],
-                        'nilai_d'    => ['bg' => '#FEF9C3', 'color' => '#B45309', 'label' => 'D >3'],
-                        'ips_rendah' => ['bg' => '#EDE9FE', 'color' => '#5B21B6', 'label' => 'IPS < 2'],
-                    ];
-                    $extraBadge = max(0, count($kategoriRisiko) - 2);
-                    $aColor   = $colors[$i % count($colors)];
-                    $hasKompen = $mhs->kompensasis->where('status','pending')->isNotEmpty();
+                    $aColorD   = $colorsDash[$i % count($colorsDash)];
+                    $ipkD      = $mhs->ipk_val ?? $mhs->ipk;
+                    $ipSemD    = $mhs->getIpSemester($semesterAktif);
+                    $totalAlpD = $mhs->absensis->where('semester', $semesterAktif)->sum('jam_alpha');
+                    $jmlDED    = $mhs->nilais->where('semester', $semesterAktif)->whereIn('grade', ['D','E'])->count();
+                    $katD      = $mhs->getKategoriRisiko();
+                    $isKritisD = in_array('ps', $katD) || in_array('sp3', $katD);
+                    $extraD    = max(0, count($katD) - 2);
                 @endphp
-                <tr class="{{ $berisiko ? 'row-risk' : '' }}"
-                    data-nama="{{ strtolower($mhs->nama) }}"
-                    data-status="{{ $berisiko ? 'berisiko' : 'aman' }}">
-                    <td style="font-size:12px;color:var(--text-3);font-weight:500;">{{ $i+1 }}</td>
+                <tr style="{{ $isKritisD ? 'background:rgba(239,68,68,.025);' : '' }}">
                     <td>
-                        <div style="display:flex;align-items:center;gap:9px;">
-                            <div style="width:34px;height:34px;border-radius:50%;background:{{ $aColor }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">
-                                {{ strtoupper(substr($mhs->nama,0,1)) }}
+                        <div class="no-circle" style="{{ $isKritisD ? 'background:#FEE2E2;color:#991B1B;' : '' }}">
+                            {{ $i + 1 }}
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div style="width:34px;height:34px;border-radius:50%;background:{{ $aColorD }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">
+                                {{ strtoupper(substr($mhs->nama, 0, 1)) }}
                             </div>
-                            <div style="min-width:0;">
-                                <div style="font-weight:600;font-size:13.5px;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;">{{ $mhs->nama }}</div>
+                            <div>
+                                <div style="font-weight:700;font-size:13.5px;color:var(--text-1);">{{ $mhs->nama }}</div>
                                 <div style="font-size:11px;color:var(--text-3);font-family:monospace;">{{ $mhs->nim }}</div>
-                                @if($hasKompen)
-                                <span style="display:inline-flex;align-items:center;gap:2px;background:#FEF3C7;color:#92400E;border-radius:20px;padding:1px 6px;font-size:9.5px;font-weight:700;margin-top:2px;">
-                                    <i class="bi bi-clipboard2-check-fill" style="font-size:8px;"></i> Kompen
-                                </span>
-                                @endif
                             </div>
                         </div>
                     </td>
                     <td style="text-align:center;">
-                        <div style="font-weight:700;font-size:14px;color:{{ $ipkMhs < 2.5 ? '#EF4444' : ($ipkMhs >= 3.5 ? '#22C55E' : 'var(--text-1)') }};">
-                            {{ number_format($ipkMhs, 2) }}
+                        <div style="font-weight:700;font-size:14px;color:{{ $ipkD < 2.5 ? '#EF4444' : 'var(--text-1)' }};">
+                            {{ number_format($ipkD, 2) }}
                         </div>
                         <div style="width:44px;height:4px;background:#F1F5F9;border-radius:2px;overflow:hidden;margin:4px auto 0;">
-                            <div style="height:100%;width:{{ min(($ipkMhs/4)*100,100) }}%;background:{{ $ipkMhs < 2.5 ? '#EF4444' : '#2563EB' }};border-radius:2px;"></div>
+                            <div style="height:100%;width:{{ min(($ipkD/4)*100,100) }}%;background:{{ $ipkD < 2.5 ? '#EF4444' : '#2563EB' }};border-radius:2px;"></div>
                         </div>
                     </td>
-                    <td class="hide-mobile" style="text-align:center;font-size:13px;font-weight:600;color:{{ $ipSem < 2.5 ? '#EF4444' : 'var(--text-1)' }};">
-                        {{ number_format($ipSem, 2) }}
-                    </td>
-                    <td style="text-align:center;font-weight:700;font-size:13px;color:{{ $totalAlp>=18 ? '#EF4444' : ($totalAlp>=14 ? '#F59E0B' : 'var(--text-2)') }};">
-                        {{ $totalAlp }}j {{ $totalAlp>=18 ? '⛔' : ($totalAlp>=14 ? '⚠️' : '') }}
+                    <td class="hide-mobile" style="text-align:center;">
+                        <span style="font-weight:700;font-size:14px;color:{{ $ipSemD < 2.0 ? '#7C3AED' : 'var(--text-1)' }};">
+                            {{ number_format($ipSemD, 2) }}
+                        </span>
                     </td>
                     <td class="hide-mobile" style="text-align:center;">
-                        @if(empty($kategoriRisiko))
-                            <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;background:#DCFCE7;color:#166534;">Aman</span>
+                        @if($jmlDED > 0)
+                        <span style="font-weight:800;font-size:15px;color:#F59E0B;">{{ $jmlDED }}</span>
                         @else
-                            <div style="display:flex;flex-wrap:wrap;gap:3px;justify-content:center;">
-                            @foreach(array_slice($kategoriRisiko, 0, 2) as $kat)
-                                <span style="display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10.5px;font-weight:700;background:{{ $badgeMap[$kat]['bg'] }};color:{{ $badgeMap[$kat]['color'] }};">{{ $badgeMap[$kat]['label'] }}</span>
-                            @endforeach
-                            @if($extraBadge > 0)
-                                <span style="display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10.5px;font-weight:700;background:#F1F5F9;color:#475569;">+{{ $extraBadge }} lagi</span>
-                            @endif
-                            </div>
+                        <span style="color:var(--text-3);font-size:12px;">—</span>
                         @endif
                     </td>
                     <td style="text-align:center;">
-                        @if($berisiko)
-                        <span style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#FEE2E2;color:#991B1B;white-space:nowrap;">
-                            <i class="bi bi-exclamation-circle-fill" style="font-size:10px;"></i> Berisiko
+                        <span style="font-weight:800;font-size:15px;color:{{ $totalAlpD >= 18 ? '#8B5CF6' : 'var(--text-2)' }};">
+                            {{ $totalAlpD }}j
                         </span>
-                        @else
-                        <span style="display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#DCFCE7;color:#166534;white-space:nowrap;">
-                            <i class="bi bi-check-circle-fill" style="font-size:10px;"></i> Aman
+                    </td>
+                    <td style="text-align:center;">
+                        @foreach(array_slice($katD, 0, 2) as $kat)
+                        @php $b = $badgeMapDash[$kat] ?? ['bg'=>'#F1F5F9','color'=>'#64748B','icon'=>'bi-exclamation','label'=>$kat]; @endphp
+                        <span class="badge-risiko" style="background:{{ $b['bg'] }};color:{{ $b['color'] }};">
+                            <i class="bi {{ $b['icon'] }}" style="font-size:9px;"></i>
+                            {{ $b['label'] }}
                         </span>
+                        @endforeach
+                        @if($extraD > 0)
+                        <span class="badge-risiko" style="background:#F1F5F9;color:#64748B;">+{{ $extraD }} lagi</span>
                         @endif
                     </td>
                     <td style="text-align:center;">
@@ -498,70 +535,16 @@
         </table>
     </div>
 
-    <div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;">
-        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:#EFF6FF;color:#1D4ED8;">
-            <i class="bi bi-people-fill"></i> {{ $totalMahasiswa }} mahasiswa
-        </span>
-        @if($totalBerisiko > 0)
-        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:#FEE2E2;color:#991B1B;">
-            <i class="bi bi-exclamation-triangle-fill"></i> {{ $totalBerisiko }} berisiko
-        </span>
-        @endif
-        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:#FFFBEB;color:#92400E;">
-            <i class="bi bi-award"></i> IPK rata-rata {{ number_format($rataRataIpk, 2) }}
-        </span>
-        @if($kompensasiPending->count() > 0)
-        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:#FEF3C7;color:#92400E;">
-            <i class="bi bi-clipboard2-check-fill"></i> {{ $kompensasiPending->count() }} kompen pending
-        </span>
-        @endif
+    @if($totalBerisiko > 10)
+    <div style="text-align:center;padding:10px 14px;margin-top:4px;border-top:1px solid var(--border);">
+        <a href="{{ route('dosen.berisiko.index') }}"
+           style="font-size:12.5px;font-weight:700;color:var(--blue);text-decoration:none;">
+            + {{ $totalBerisiko - 10 }} mahasiswa berisiko lainnya · Lihat Semua →
+        </a>
     </div>
+    @endif
+    @endif
 </div>
-
-{{-- ══ KOMPENSASI PENDING MAHASISWA ══ --}}
-@if($kompensasiPending->count() > 0)
-<div class="section-label" style="margin-top:24px;">Kompensasi Pending Mahasiswa</div>
-<div class="card-white tbl-card-v2">
-    <div class="tbl-head-v2">
-        <div>
-            <div class="tbl-title-v2">Kompensasi Pending Mahasiswa</div>
-            <div class="tbl-sub-v2">{{ $kompensasiPending->count() }} mahasiswa belum lunas kompensasi</div>
-        </div>
-    </div>
-    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-        <table class="mhs-table" style="min-width:600px;">
-            <thead>
-                <tr>
-                    <th>Nama Mahasiswa</th>
-                    <th>NIM</th>
-                    <th style="text-align:center;">Semester</th>
-                    <th style="text-align:center;">Jam Alpha</th>
-                    <th style="text-align:center;">Jam Kompensasi Wajib</th>
-                    <th style="text-align:center;">TTD Admin</th>
-                    <th style="text-align:center;">TTD Kajur</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($kompensasiPending as $mhs)
-                    @foreach($mhs->kompensasis->where('status', 'pending') as $kompen)
-                    <tr>
-                        <td>
-                            <div style="font-weight:600;font-size:13.5px;color:var(--text-1);">{{ $mhs->nama }}</div>
-                        </td>
-                        <td style="font-size:12px;color:var(--text-3);font-family:monospace;">{{ $mhs->nim }}</td>
-                        <td style="text-align:center;font-weight:600;color:var(--text-1);">{{ $kompen->semester }}</td>
-                        <td style="text-align:center;font-weight:700;color:#EF4444;">{{ $kompen->jam_alpha }}j</td>
-                        <td style="text-align:center;font-weight:700;color:var(--text-1);">{{ $kompen->jam_kompen_wajib }}j</td>
-                        <td style="text-align:center;font-size:16px;">{{ $kompen->ttd_admin ? '✅' : '⏳' }}</td>
-                        <td style="text-align:center;font-size:16px;">{{ $kompen->ttd_kajur ? '✅' : '⏳' }}</td>
-                    </tr>
-                    @endforeach
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-</div>
-@endif
 
 @endsection
 
@@ -631,10 +614,10 @@ new Chart(document.getElementById('nilaiChart').getContext('2d'), {
 new Chart(document.getElementById('absensiChart').getContext('2d'), {
     type: 'doughnut',
     data: {
-        labels: ['Hadir', 'Izin', 'Sakit', 'Alpha'],
+        labels: ['Alpha', 'Izin', 'Sakit'],
         datasets: [{
-            data: [{{ $totalH ?? 0 }}, {{ $totalI ?? 0 }}, {{ $totalS ?? 0 }}, {{ $totalA ?? 0 }}],
-            backgroundColor: ['#22C55E', '#FBBF24', '#3B82F6', '#EF4444'],
+            data: [{{ $totalA ?? 0 }}, {{ $totalI ?? 0 }}, {{ $totalS ?? 0 }}],
+            backgroundColor: ['#EF4444', '#FBBF24', '#3B82F6'],
             borderWidth: 3,
             borderColor: '#FFFFFF',
             hoverOffset: 5
@@ -662,20 +645,6 @@ new Chart(document.getElementById('absensiChart').getContext('2d'), {
     }
 });
 
-document.getElementById('searchMhs').addEventListener('input', function() {
-    var q = this.value.toLowerCase();
-    document.querySelectorAll('#mhsBody tr').forEach(r => {
-        r.style.display = (r.dataset.nama||'').includes(q) ? '' : 'none';
-    });
-});
-
-document.getElementById('filterMhsBtn').addEventListener('filterChange', function(e) {
-    var val = e.detail.value;
-    document.querySelectorAll('#mhsBody tr').forEach(r => {
-        if (!val) { r.style.display=''; return; }
-        r.style.display = r.dataset.status===val ? '' : 'none';
-    });
-});
 
 (function() {
     var el   = document.getElementById('riskAlertDosen');

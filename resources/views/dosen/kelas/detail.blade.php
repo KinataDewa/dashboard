@@ -119,14 +119,14 @@
                     <div class="tbl-sub-v2">Total jam kehadiran per semester · Batas alpha SP I: 18 jam</div>
                 </div>
             </div>
-            @php $absenSem = $absensis->first(); @endphp
-            @if($absenSem)
             @php
-                $totalSem = $absenSem->jam_hadir + $absenSem->jam_izin + $absenSem->jam_sakit + $absenSem->jam_alpha;
-                $pctSem   = $totalSem > 0 ? round($absenSem->jam_hadir / $totalSem * 100) : 0;
-                $kritis   = $absenSem->jam_alpha >= 18;
-                $waspada  = $absenSem->jam_alpha >= 14 && !$kritis;
+                $absAlpha = $absensis->where('semester', $semesterAktif)->sum('jam_alpha');
+                $absIzin  = $absensis->where('semester', $semesterAktif)->sum('jam_izin');
+                $absSakit = $absensis->where('semester', $semesterAktif)->sum('jam_sakit');
+                $kritis   = $absAlpha >= 18;
+                $waspada  = $absAlpha >= 14 && !$kritis;
             @endphp
+            @if($absensis->isNotEmpty())
             <div style="overflow-x:auto;">
                 <table class="ac-table-v2">
                     <thead>
@@ -140,10 +140,10 @@
                     <tbody>
                         <tr style="{{ $kritis ? 'background:rgba(239,68,68,.03);' : '' }}">
                             <td style="text-align:center;font-weight:700;{{ $kritis ? 'border-left:3px solid #EF4444;' : '' }}color:{{ $kritis ? '#EF4444' : ($waspada ? '#F59E0B' : 'var(--text-2)') }};">
-                                {{ $absenSem->jam_alpha }}j @if($kritis) ⛔ @elseif($waspada) ⚠️ @endif
+                                {{ $absAlpha }}j @if($kritis) ⛔ @elseif($waspada) ⚠️ @endif
                             </td>
-                            <td style="text-align:center;font-weight:600;color:#FBBF24;">{{ $absenSem->jam_izin }}j</td>
-                            <td style="text-align:center;font-weight:600;color:#3B82F6;">{{ $absenSem->jam_sakit }}j</td>
+                            <td style="text-align:center;font-weight:600;color:#FBBF24;">{{ $absIzin }}j</td>
+                            <td style="text-align:center;font-weight:600;color:#3B82F6;">{{ $absSakit }}j</td>
                             <td>
                                 @if($kritis)
                                     <span class="badge badge-red">⛔ Kritis — SP I</span>
@@ -247,9 +247,8 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">Total Alpha</span>
-                    @php $totAlpha = $absensis->sum('jam_alpha'); @endphp
-                    <span class="info-val" style="color:{{ $totAlpha >= 18 ? '#EF4444' : 'var(--text-1)' }};">
-                        {{ $totAlpha }} jam
+                    <span class="info-val" style="color:{{ $absAlpha >= 18 ? '#EF4444' : 'var(--text-1)' }};">
+                        {{ $absAlpha }} jam
                     </span>
                 </div>
             </div>

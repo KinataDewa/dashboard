@@ -65,8 +65,10 @@ Route::middleware(['auth', 'role.admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/dashboard',         [AdminDashboard::class, 'index'])->name('dashboard');
-        Route::post('/kirim-peringatan', [AdminDashboard::class, 'kirimPeringatan'])->name('kirim.peringatan');
+        Route::get('/dashboard',                  [AdminDashboard::class, 'index'])->name('dashboard');
+        Route::post('/kirim-peringatan',          [AdminDashboard::class, 'kirimPeringatan'])->name('kirim.peringatan');
+        Route::get('/api/distribusi-grade',       [AdminDashboard::class, 'apiDistribusiGrade'])->name('api.distribusi-grade');
+        Route::get('/api/ringkasan-kelas',        [AdminDashboard::class, 'apiRingkasanKelas'])->name('api.ringkasan-kelas');
 
         Route::get('/analitik',            [AnalitikController::class, 'index'])->name('analitik.index');
         Route::get('/analitik/chart-data', [AnalitikController::class, 'chartData'])->name('analitik.chart-data');

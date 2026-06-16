@@ -113,7 +113,7 @@
                 @php
                     $ipkMhs   = $mhs->ipk_val ?? $mhs->ipk;
                     $berisiko = $mhs->is_berisiko ?? $mhs->isBerisiko();
-                    $totalAlp = $mhs->absensis->sum('jam_alpha');
+                    $totalAlp = $mhs->absensis->where('semester', $semesterAktif)->sum('jam_alpha');
                     $kategoriRisiko = $mhs->getKategoriRisiko();
                     $colors = ['#2563EB','#16A34A','#7C3AED','#F59E0B','#EF4444','#0891B2','#DB2777'];
                     $aColor = $colors[$i % count($colors)];
