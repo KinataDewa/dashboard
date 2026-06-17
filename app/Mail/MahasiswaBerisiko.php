@@ -42,16 +42,16 @@ class MahasiswaBerisiko extends Mailable
             : [];
 
         // SEMUA matkul dengan alpha > 0, diurutkan terbesar dulu
-        $this->absensiAlpha = $semAlpha > 0
-            ? $mahasiswa->absensis
-                ->where('semester', $semAlpha)
-                ->where('jam_alpha', '>', 0)
-                ->sortByDesc('jam_alpha')
-                ->map(fn($a) => [
-                    'nama'      => $a->mataKuliah->nama ?? '-',
-                    'jam_alpha' => (int) $a->jam_alpha,
-                ])->values()->toArray()
-            : [];
+        $absensiSem = $semAlpha > 0
+            ? $mahasiswa->absensis->where('semester', $semAlpha)->first()
+            : null;
+
+        $this->absensiAlpha = $absensiSem ? [
+            'jam_hadir' => (int) $absensiSem->jam_hadir,
+            'jam_izin'  => (int) $absensiSem->jam_izin,
+            'jam_sakit' => (int) $absensiSem->jam_sakit,
+            'jam_alpha' => (int) $absensiSem->jam_alpha,
+        ] : [];
 
         // IPK sudah support grade B+ dan C+ via hitungIpDariKoleksi()
         $this->ipk = round((float) ($mahasiswa->ipk ?? 0), 2);

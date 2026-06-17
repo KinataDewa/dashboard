@@ -6,293 +6,405 @@
     <title>Peringatan Akademik — Academia</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #F1F5F9;
-            color: #0F172A;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: #EAECEF;
+            color: #0D1117;
             -webkit-font-smoothing: antialiased;
-        }
-        .wrap {
-            max-width: 600px;
-            margin: 32px auto;
-            background: #fff;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 24px rgba(0,0,0,.08);
+            padding: 28px 16px 48px;
         }
 
-        /* Header */
+        /* ── Shell ── */
+        .wrap {
+            max-width: 580px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 16px rgba(0,0,0,.10), 0 0 0 1px rgba(0,0,0,.06);
+        }
+
+        /* ── Header ── */
         .header {
-            background: linear-gradient(135deg, #1A0A0A 0%, #7F1D1D 50%, #991B1B 100%);
-            padding: 36px 40px 32px;
+            background: #0D1117;
+            padding: 0;
             position: relative;
             overflow: hidden;
         }
-        .header::before {
+
+        /* Severity bar — the signature element */
+        .severity-bar {
+            height: 4px;
+            background: linear-gradient(90deg, #FF4D4D 0%, #FF8C42 60%, #FFCA3A 100%);
+        }
+
+        .header-inner {
+            padding: 28px 36px 30px;
+        }
+
+        /* Subtle dot-grid texture */
+        .header-inner::before {
             content: '';
-            position: absolute; inset: 0;
-            background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px);
-            background-size: 24px 24px;
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
         }
-        .header-brand {
-            font-size: 13px; font-weight: 700;
-            color: rgba(255,255,255,.6);
-            letter-spacing: 1px; text-transform: uppercase;
-            margin-bottom: 20px;
+
+        .brand-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
             position: relative;
         }
-        .header-brand span {
-            color: #FCA5A5; font-weight: 800;
-        }
-        .header-icon {
-            width: 56px; height: 56px;
-            background: rgba(255,255,255,.15);
-            border: 1px solid rgba(255,255,255,.25);
-            border-radius: 14px;
+        .brand-logo {
+            width: 24px; height: 24px;
+            background: linear-gradient(135deg, #FF4D4D, #FF8C42);
+            border-radius: 6px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 28px; margin-bottom: 16px;
+            font-size: 13px; font-weight: 900; color: #fff;
+        }
+        .brand-name {
+            font-size: 13px; font-weight: 700;
+            color: rgba(255,255,255,.5);
+            letter-spacing: .5px;
+        }
+        .brand-name strong { color: rgba(255,255,255,.85); font-weight: 800; }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,77,77,.18);
+            border: 1px solid rgba(255,77,77,.35);
+            border-radius: 20px;
+            padding: 3px 11px;
+            font-size: 11px; font-weight: 700;
+            color: #FF8080;
+            letter-spacing: .4px;
+            margin-bottom: 14px;
             position: relative;
         }
+        .badge-dot {
+            width: 6px; height: 6px;
+            background: #FF4D4D;
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .35; }
+        }
+
         .header-title {
-            font-size: 22px; font-weight: 800;
-            color: #fff; line-height: 1.3;
-            letter-spacing: -.3px; position: relative;
+            font-size: 24px; font-weight: 800;
+            color: #fff;
+            letter-spacing: -.5px;
+            line-height: 1.25;
+            position: relative;
+        }
+        .header-title span {
+            background: linear-gradient(90deg, #FF8080, #FFCA3A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         .header-sub {
-            font-size: 13.5px; color: rgba(255,255,255,.7);
-            margin-top: 6px; position: relative;
+            font-size: 13.5px;
+            color: rgba(255,255,255,.45);
+            margin-top: 6px;
+            line-height: 1.5;
+            position: relative;
         }
 
-        /* Alert tag */
-        .alert-tag {
-            display: inline-block;
-            background: rgba(255,255,255,.15);
-            border: 1px solid rgba(255,255,255,.25);
-            border-radius: 20px; padding: 3px 12px;
-            font-size: 11px; font-weight: 700;
-            color: #FCA5A5; letter-spacing: .5px;
-            margin-bottom: 12px; position: relative;
-        }
-
-        /* Kategori pill di header */
-        .kategori-pills {
+        /* Risk pills in header */
+        .header-pills {
             display: flex; flex-wrap: wrap; gap: 6px;
-            margin-top: 12px; position: relative;
+            margin-top: 18px; position: relative;
         }
-        .kategori-pill {
-            display: inline-block;
-            background: rgba(255,255,255,.18);
-            border: 1px solid rgba(255,255,255,.3);
-            border-radius: 20px; padding: 3px 12px;
-            font-size: 12px; font-weight: 700; color: #fff;
+        .hpill {
+            display: inline-flex; align-items: center; gap: 4px;
+            border-radius: 6px;
+            padding: 4px 11px;
+            font-size: 11.5px; font-weight: 700;
+            letter-spacing: .2px;
         }
-        .kategori-pill.pill-sp {
-            background: rgba(239,68,68,.35);
-            border-color: rgba(239,68,68,.5);
-            color: #FCA5A5;
+        .hpill-danger {
+            background: rgba(255,77,77,.2);
+            border: 1px solid rgba(255,77,77,.35);
+            color: #FF9090;
+        }
+        .hpill-warn {
+            background: rgba(255,202,58,.15);
+            border: 1px solid rgba(255,202,58,.3);
+            color: #FFCA3A;
+        }
+        .hpill-info {
+            background: rgba(167,139,250,.15);
+            border: 1px solid rgba(167,139,250,.3);
+            color: #C4B5FD;
         }
 
-        /* Body */
-        .body { padding: 32px 40px; }
+        /* ── Body ── */
+        .body { padding: 32px 36px; }
 
         .greeting {
-            font-size: 16px; font-weight: 600;
-            color: #0F172A; margin-bottom: 12px;
+            font-size: 15.5px; font-weight: 700;
+            color: #0D1117; margin-bottom: 10px;
         }
         .intro {
-            font-size: 14px; color: #475569;
-            line-height: 1.7; margin-bottom: 28px;
+            font-size: 13.5px; color: #5C6370;
+            line-height: 1.75; margin-bottom: 28px;
         }
+        .intro strong { color: #0D1117; font-weight: 700; }
 
-        /* Info strip */
-        .info-strip {
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 10px;
-            padding: 16px 20px;
+        /* ── Info cards ── */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
             margin-bottom: 24px;
-            display: flex; gap: 20px;
-            flex-wrap: wrap;
         }
-        .info-item { }
-        .info-label {
+        .info-card {
+            background: #F6F8FA;
+            border: 1px solid #E8ECF0;
+            border-radius: 8px;
+            padding: 12px 14px;
+        }
+        .info-card-label {
+            font-size: 10.5px; font-weight: 700;
+            color: #8B949E; text-transform: uppercase;
+            letter-spacing: .8px; margin-bottom: 4px;
+        }
+        .info-card-val {
+            font-size: 15px; font-weight: 800; color: #0D1117;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .val-danger { color: #CF3C3C; }
+        .val-warn   { color: #B45309; }
+
+        /* ── Section label ── */
+        .section-label {
             font-size: 11px; font-weight: 700;
-            color: #94A3B8; text-transform: uppercase;
-            letter-spacing: .7px; margin-bottom: 3px;
+            color: #8B949E; text-transform: uppercase;
+            letter-spacing: .9px;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
         }
-        .info-val {
-            font-size: 15px; font-weight: 700; color: #0F172A;
-        }
-
-        /* Kategori risiko strip */
-        .risiko-strip {
-            background: #FEF2F2;
-            border: 1px solid #FEE2E2;
-            border-left: 4px solid #EF4444;
-            border-radius: 10px;
-            padding: 14px 18px;
-            margin-bottom: 24px;
-        }
-        .risiko-strip-title {
-            font-size: 12px; font-weight: 700;
-            color: #991B1B; text-transform: uppercase;
-            letter-spacing: .7px; margin-bottom: 10px;
-        }
-        .risiko-pills {
-            display: flex; flex-wrap: wrap; gap: 7px;
-        }
-        .risiko-pill {
-            display: inline-block;
-            border-radius: 20px; padding: 4px 13px;
-            font-size: 12.5px; font-weight: 700;
-        }
-        .risiko-pill-sp    { background: #FEE2E2; color: #991B1B; }
-        .risiko-pill-nilai { background: #FEF3C7; color: #92400E; }
-        .risiko-pill-ips   { background: #EDE9FE; color: #6D28D9; }
-
-        /* Alpha info */
-        .alpha-info {
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 10px;
-            padding: 14px 18px;
-            margin-bottom: 8px;
-            display: flex; justify-content: space-between;
-            align-items: center; flex-wrap: wrap; gap: 10px;
-        }
-        .alpha-info-label { font-size: 13px; color: #64748B; font-weight: 600; }
-        .alpha-info-val   { font-size: 18px; font-weight: 800; }
-        .alpha-progress { margin-top: 8px; }
-        .progress-bar {
-            height: 6px; background: #F1F5F9;
-            border-radius: 3px; overflow: hidden;
-        }
-        .progress-fill { height: 100%; border-radius: 3px; }
-        .progress-markers {
-            display: flex; justify-content: space-between;
-            font-size: 10px; color: #94A3B8; margin-top: 3px;
+        .section-label::after {
+            content: '';
+            flex: 1; height: 1px; background: #E8ECF0;
         }
 
-        /* Section title */
-        .section-title {
-            font-size: 13px; font-weight: 700;
-            color: #64748B; text-transform: uppercase;
-            letter-spacing: .8px; margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #E2E8F0;
-        }
-
-        /* Table nilai */
-        .data-table {
-            width: 100%; border-collapse: collapse;
-            margin-bottom: 24px; font-size: 13.5px;
-        }
-        .data-table thead th {
-            background: #F8FAFC;
-            padding: 9px 14px; text-align: left;
-            font-size: 11.5px; font-weight: 600;
-            color: #64748B; border-bottom: 1px solid #E2E8F0;
-        }
-        .data-table tbody td {
-            padding: 11px 14px;
-            border-bottom: 1px solid #F1F5F9;
-            color: #0F172A;
-        }
-        .data-table tbody tr:last-child td { border-bottom: none; }
-
-        /* Grade badge */
-        .grade-badge {
-            display: inline-flex; align-items: center;
-            justify-content: center;
-            min-width: 30px; height: 28px; border-radius: 14px;
-            font-size: 12px; font-weight: 800; padding: 0 6px;
-        }
-        .grade-D { background: #FEE2E2; color: #991B1B; }
-        .grade-E { background: #FEE2E2; color: #7F1D1D; }
-
-        /* Warning box */
-        .warning-box {
-            background: #FFF7ED;
-            border: 1px solid #FED7AA;
-            border-left: 4px solid #F59E0B;
+        /* ── Risiko pills block ── */
+        .risiko-block {
+            background: #FFF8F8;
+            border: 1px solid #FFD7D7;
             border-radius: 10px;
             padding: 16px 18px;
-            margin-bottom: 24px;
+            margin-bottom: 22px;
         }
-        .warning-box-title {
-            font-size: 13.5px; font-weight: 700;
-            color: #92400E; margin-bottom: 6px;
+        .risiko-pills { display: flex; flex-wrap: wrap; gap: 7px; }
+        .rpill {
+            display: inline-flex; align-items: center; gap: 5px;
+            border-radius: 7px; padding: 5px 12px;
+            font-size: 12.5px; font-weight: 700;
         }
-        .warning-box-text {
-            font-size: 13px; color: #78350F; line-height: 1.6;
+        .rpill-danger { background: #FFEBEB; color: #C0392B; border: 1px solid #FFD0D0; }
+        .rpill-warn   { background: #FFF3E0; color: #8B4000; border: 1px solid #FFDDB5; }
+        .rpill-purple { background: #F0EBFF; color: #6D28D9; border: 1px solid #DDD0FF; }
+
+        /* ── Absensi ── */
+        .absensi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 22px;
+        }
+        .abs-card {
+            text-align: center;
+            background: #F6F8FA;
+            border: 1px solid #E8ECF0;
+            border-radius: 8px;
+            padding: 12px 10px;
+        }
+        .abs-card.abs-danger {
+            background: #FFF5F5;
+            border-color: #FFD7D7;
+        }
+        .abs-num {
+            font-size: 22px; font-weight: 900;
+            line-height: 1; margin-bottom: 4px;
+        }
+        .abs-danger .abs-num { color: #CF3C3C; }
+        .abs-safe   .abs-num { color: #0D1117; }
+        .abs-label {
+            font-size: 10.5px; font-weight: 600;
+            color: #8B949E; text-transform: uppercase;
+            letter-spacing: .6px;
         }
 
-        /* CTA Button */
-        .cta-wrap { text-align: center; margin: 28px 0; }
+        /* ── Nilai table ── */
+        .nilai-table {
+            width: 100%; border-collapse: collapse;
+            margin-bottom: 22px; font-size: 13px;
+        }
+        .nilai-table thead th {
+            padding: 9px 12px;
+            text-align: left;
+            font-size: 10.5px; font-weight: 700;
+            color: #8B949E; text-transform: uppercase;
+            letter-spacing: .7px;
+            background: #F6F8FA;
+            border-top: 1px solid #E8ECF0;
+            border-bottom: 1px solid #E8ECF0;
+        }
+        .nilai-table tbody td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #F0F2F5;
+            color: #0D1117; vertical-align: middle;
+        }
+        .nilai-table tbody tr:last-child td { border-bottom: none; }
+        .nilai-table tbody tr:nth-child(even) td { background: #FAFBFC; }
+
+        .mk-name { font-weight: 600; color: #0D1117; }
+        .grade-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 28px; height: 26px; border-radius: 6px;
+            font-size: 12px; font-weight: 800; padding: 0 7px;
+        }
+        .grade-E { background: #FFE0E0; color: #8B0000; }
+        .grade-D { background: #FFF3CD; color: #7B4200; }
+
+        /* ── Action box ── */
+        .action-box {
+            background: #FFFBF0;
+            border: 1px solid #FFE0A0;
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin-bottom: 26px;
+        }
+        .action-title {
+            font-size: 13px; font-weight: 800;
+            color: #7B4F00; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 7px;
+        }
+        .action-list { list-style: none; }
+        .action-list li {
+            font-size: 13px; color: #5C4300;
+            line-height: 1.6;
+            padding: 4px 0 4px 20px;
+            position: relative;
+        }
+        .action-list li::before {
+            content: '→';
+            position: absolute; left: 0;
+            color: #F59E0B; font-weight: 700;
+        }
+        .action-list li strong { color: #3D2C00; }
+        .action-list li + li { border-top: 1px dashed #FFD86F; margin-top: 2px; padding-top: 6px; }
+
+        /* ── CTA ── */
+        .cta-wrap { text-align: center; margin: 26px 0 8px; }
         .cta-btn {
             display: inline-block;
-            background: linear-gradient(135deg, #1E3A8A, #2563EB);
-            color: #fff; text-decoration: none;
-            padding: 14px 32px; border-radius: 10px;
-            font-size: 14px; font-weight: 700;
-            letter-spacing: -.2px;
-            box-shadow: 0 4px 16px rgba(37,99,235,.3);
+            background: #0D1117;
+            color: #fff;
+            text-decoration: none;
+            padding: 13px 30px;
+            border-radius: 8px;
+            font-size: 13.5px; font-weight: 700;
+            letter-spacing: -.1px;
+            transition: background .15s;
         }
 
-        /* Footer */
+        /* ── Divider ── */
+        .divider { height: 1px; background: #E8ECF0; margin: 24px 0; }
+
+        .footer-note {
+            font-size: 12px; color: #8B949E;
+            line-height: 1.7; text-align: center;
+        }
+
+        /* ── Footer ── */
         .footer {
-            background: #F8FAFC;
-            border-top: 1px solid #E2E8F0;
-            padding: 20px 40px;
+            background: #F6F8FA;
+            border-top: 1px solid #E8ECF0;
+            padding: 18px 36px;
             text-align: center;
         }
         .footer-brand {
-            font-size: 15px; font-weight: 800;
-            color: #2563EB; letter-spacing: -.3px;
+            font-size: 15px; font-weight: 900;
+            color: #0D1117; letter-spacing: -.5px;
             margin-bottom: 4px;
         }
+        .footer-brand span {
+            background: linear-gradient(90deg, #FF4D4D, #FF8C42);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
         .footer-text {
-            font-size: 12px; color: #94A3B8; line-height: 1.6;
+            font-size: 11.5px; color: #8B949E; line-height: 1.65;
         }
-        .footer-text a { color: #2563EB; text-decoration: none; }
-
-        /* Divider */
-        .divider {
-            height: 1px; background: #E2E8F0;
-            margin: 24px 0;
-        }
+        .footer-text a { color: #0550AE; text-decoration: none; }
     </style>
 </head>
 <body>
 <div class="wrap">
 
+    {{-- ══ SEVERITY BAR ══ --}}
+    <div class="severity-bar"></div>
+
     {{-- ══ HEADER ══ --}}
     <div class="header">
-        <div class="header-brand">⬛ <span>Academia</span> — SIAKAD Polinema</div>
-        <div class="alert-tag">⚡ Peringatan Akademik</div>
-        <div class="header-icon">⚠️</div>
-        <div class="header-title">Perhatian Diperlukan!</div>
-        <div class="header-sub">Sistem mendeteksi risiko akademik pada akun Anda.</div>
-        @if(!empty($kategoriRisiko))
-        <div class="kategori-pills">
-            @foreach($kategoriRisiko as $k)
-            @php
-                $isSpOrPs = in_array($k, ['ps','sp3','sp2','sp1']);
-                $pillLabel = match($k) {
-                    'ps'         => '⛔ Putus Studi',
-                    'sp3'        => '⛔ SP III',
-                    'sp2'        => '⚠ SP II',
-                    'sp1'        => '⚠ SP I',
-                    'nilai_e'    => '📊 Nilai E',
-                    'nilai_d'    => '📊 D > 3 MK',
-                    'ips_rendah' => '📉 IPS < 2.00',
-                    default      => $k,
-                };
-            @endphp
-            <span class="kategori-pill {{ $isSpOrPs ? 'pill-sp' : '' }}">{{ $pillLabel }}</span>
-            @endforeach
+        <div class="header-inner">
+
+            <div class="brand-row">
+                <div class="brand-logo">A</div>
+                <div class="brand-name"><strong>Academia</strong> · SIAKAD Polinema</div>
+            </div>
+
+            <div class="header-badge">
+                <span class="badge-dot"></span>
+                PERINGATAN AKADEMIK
+            </div>
+
+            <div class="header-title">
+                Perhatian <span>Diperlukan</span>
+            </div>
+            <div class="header-sub">
+                Sistem mendeteksi risiko akademik yang memerlukan tindakan segera.
+            </div>
+
+            @if(!empty($kategoriRisiko))
+            <div class="header-pills">
+                @foreach($kategoriRisiko as $k)
+                @php
+                    $isSpOrPs = in_array($k, ['ps','sp3','sp2','sp1']);
+                    $isNilai  = in_array($k, ['nilai_e','nilai_d']);
+                    $pillClass = $isSpOrPs ? 'hpill-danger' : ($isNilai ? 'hpill-warn' : 'hpill-info');
+                    $pillIcon  = $isSpOrPs ? '⛔' : ($isNilai ? '📊' : '📉');
+                    $pillLabel = match($k) {
+                        'ps'         => 'Putus Studi',
+                        'sp3'        => 'SP III',
+                        'sp2'        => 'SP II',
+                        'sp1'        => 'SP I',
+                        'nilai_e'    => 'Nilai E',
+                        'nilai_d'    => 'D > 3 MK',
+                        'ips_rendah' => 'IPS < 2.00',
+                        default      => $k,
+                    };
+                @endphp
+                <span class="hpill {{ $pillClass }}">{{ $pillIcon }} {{ $pillLabel }}</span>
+                @endforeach
+            </div>
+            @endif
+
         </div>
-        @endif
     </div>
 
     {{-- ══ BODY ══ --}}
@@ -300,186 +412,150 @@
 
         <div class="greeting">Yth. {{ $mahasiswa->nama }},</div>
         <p class="intro">
-            Sistem SIAKAD Politeknik Negeri Malang mendeteksi bahwa terdapat kondisi akademik
-            yang memerlukan perhatian segera. Mohon tinjau informasi di bawah ini dan segera
-            hubungi <strong>Dosen Pembimbing Akademik</strong> Anda untuk konsultasi.
+            SIAKAD Politeknik Negeri Malang mendeteksi kondisi akademik yang memerlukan
+            perhatian segera. Tinjau rincian di bawah ini dan segera konsultasikan dengan
+            <strong>Dosen Pembimbing Akademik</strong> Anda.
         </p>
 
-        {{-- Info strip --}}
-        <div class="info-strip">
-            <div class="info-item">
-                <div class="info-label">NIM</div>
-                <div class="info-val">{{ $mahasiswa->nim }}</div>
+        {{-- Info cards --}}
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-card-label">NIM</div>
+                <div class="info-card-val">{{ $mahasiswa->nim }}</div>
             </div>
-            <div class="info-item">
-                <div class="info-label">Kelas</div>
-                <div class="info-val">{{ $mahasiswa->kelas->nama ?? '-' }}</div>
+            <div class="info-card">
+                <div class="info-card-label">Kelas</div>
+                <div class="info-card-val">{{ $mahasiswa->kelas->nama ?? '—' }}</div>
             </div>
-            <div class="info-item">
-                <div class="info-label">IPK Saat Ini</div>
-                <div class="info-val" style="color:{{ $ipk < 2.00 ? '#EF4444' : ($ipk < 2.50 ? '#F59E0B' : '#0F172A') }};">{{ $ipk }}</div>
+            <div class="info-card">
+                <div class="info-card-label">IPK Saat Ini</div>
+                <div class="info-card-val {{ $ipk < 2.00 ? 'val-danger' : ($ipk < 2.50 ? 'val-warn' : '') }}">
+                    {{ $ipk }}
+                </div>
             </div>
-            <div class="info-item">
-                <div class="info-label">Dosen PA</div>
-                <div class="info-val">{{ $mahasiswa->dosenPa->nama ?? '-' }}</div>
+            <div class="info-card">
+                <div class="info-card-label">Dosen PA</div>
+                <div class="info-card-val" style="font-size:13px;">{{ $mahasiswa->dosenPa->nama ?? '—' }}</div>
             </div>
         </div>
 
         {{-- Kategori risiko --}}
         @if(!empty($kategoriRisiko))
-        <div class="risiko-strip">
-            <div class="risiko-strip-title">⚠ Kategori Risiko Terdeteksi</div>
+        <div class="section-label">Kategori Risiko</div>
+        <div class="risiko-block">
             <div class="risiko-pills">
                 @foreach($kategoriRisiko as $k)
                 @php
                     $isSpOrPs = in_array($k, ['ps','sp3','sp2','sp1']);
                     $isNilai  = in_array($k, ['nilai_e','nilai_d']);
-                    $pillClass = $isSpOrPs ? 'risiko-pill-sp' : ($isNilai ? 'risiko-pill-nilai' : 'risiko-pill-ips');
-                    $pillLabel = match($k) {
-                        'ps'         => '⛔ Putus Studi (≥ 56j alpha)',
-                        'sp3'        => '⛔ Surat Peringatan III (≥ 47j alpha)',
-                        'sp2'        => '⚠ Surat Peringatan II (≥ 36j alpha)',
-                        'sp1'        => '⚠ Surat Peringatan I (≥ 18j alpha)',
-                        'nilai_e'    => '📊 Ada Nilai E',
-                        'nilai_d'    => '📊 Nilai D Lebih dari 3 MK',
-                        'ips_rendah' => '📉 IPS < 2.00',
+                    $rClass   = $isSpOrPs ? 'rpill-danger' : ($isNilai ? 'rpill-warn' : 'rpill-purple');
+                    $rLabel   = match($k) {
+                        'ps'         => '⛔ Putus Studi — ≥56 jam alpha',
+                        'sp3'        => '⛔ Surat Peringatan III — ≥47 jam',
+                        'sp2'        => '⚠ Surat Peringatan II — ≥36 jam',
+                        'sp1'        => '⚠ Surat Peringatan I — ≥18 jam',
+                        'nilai_e'    => '📊 Terdapat Nilai E',
+                        'nilai_d'    => '📊 Nilai D lebih dari 3 MK',
+                        'ips_rendah' => '📉 IPS di bawah 2.00',
                         default      => $k,
                     };
                 @endphp
-                <span class="risiko-pill {{ $pillClass }}">{{ $pillLabel }}</span>
+                <span class="rpill {{ $rClass }}">{{ $rLabel }}</span>
                 @endforeach
+            </div>
+        </div>
+        @endif
+
+        {{-- Absensi alpha --}}
+        @if(!empty($absensiAlpha))
+        <div class="section-label">Rekap Kehadiran Semester Ini</div>
+        <div class="absensi-row">
+            <div class="abs-card abs-danger">
+                <div class="abs-num">{{ $absensiAlpha['jam_alpha'] }}j</div>
+                <div class="abs-label">Alpha</div>
+            </div>
+            <div class="abs-card abs-safe">
+                <div class="abs-num" style="color:#0D1117;">{{ $absensiAlpha['jam_izin'] }}j</div>
+                <div class="abs-label">Izin</div>
+            </div>
+            <div class="abs-card abs-safe">
+                <div class="abs-num" style="color:#0D1117;">{{ $absensiAlpha['jam_sakit'] }}j</div>
+                <div class="abs-label">Sakit</div>
             </div>
         </div>
         @endif
 
         {{-- Nilai D/E --}}
-        @if(count($nilaiDE) > 0)
-        <div class="section-title">📊 Nilai Kategori D/E ({{ count($nilaiDE) }} mata kuliah)</div>
-        <table class="data-table">
+        @if(!empty($nilaiDE))
+        <div class="section-label">Nilai D / E Semester Ini</div>
+        <table class="nilai-table">
             <thead>
                 <tr>
                     <th>Mata Kuliah</th>
-                    <th style="text-align:center;">Nilai Akhir</th>
                     <th style="text-align:center;">Grade</th>
+                    <th style="text-align:right;">Nilai</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($nilaiDE as $n)
                 <tr>
-                    <td>{{ $n['nama'] }}</td>
-                    <td style="text-align:center;font-weight:700;color:#EF4444;">{{ $n['nilai'] }}</td>
+                    <td><span class="mk-name">{{ $n['nama'] }}</span></td>
                     <td style="text-align:center;">
                         <span class="grade-badge grade-{{ $n['grade'] }}">{{ $n['grade'] }}</span>
                     </td>
+                    <td style="text-align:right; font-weight:700; color:#5C6370;">{{ $n['nilai'] }}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
         @endif
 
-        {{-- Absensi alpha --}}
-        @if(count($absensiAlpha) > 0)
-        <div class="section-title">📅 Rekap Ketidakhadiran ({{ count($absensiAlpha) }} mata kuliah)</div>
-
-        {{-- Total alpha + SP level --}}
-        <div class="alpha-info">
-            <div>
-                <div class="alpha-info-label">Total Alpha Semester Ini</div>
-                <div class="alpha-info-val" style="color:{{ $totalAlpha >= 47 ? '#7F1D1D' : ($totalAlpha >= 36 ? '#DC2626' : ($totalAlpha >= 18 ? '#EF4444' : '#F59E0B')) }};">
-                    {{ $totalAlpha }} jam
-                </div>
-            </div>
-            <div style="text-align:right;">
-                <div class="alpha-info-label">Status</div>
-                @php
-                    $spStatus = match(true) {
-                        $alphaEfektif >= 56 => ['label' => '⛔ Putus Studi', 'color' => '#7F1D1D'],
-                        $alphaEfektif >= 47 => ['label' => '⛔ SP III', 'color' => '#991B1B'],
-                        $alphaEfektif >= 36 => ['label' => '⚠ SP II', 'color' => '#DC2626'],
-                        $alphaEfektif >= 18 => ['label' => '⚠ SP I', 'color' => '#EF4444'],
-                        default             => ['label' => '✅ Aman', 'color' => '#15803D'],
-                    };
-                @endphp
-                <div class="alpha-info-val" style="color:{{ $spStatus['color'] }};">{{ $spStatus['label'] }}</div>
-            </div>
-        </div>
-        {{-- Progress bar: 56j = batas PS --}}
-        <div class="alpha-progress" style="margin-bottom: 16px;">
-            <div class="progress-bar">
-                <div class="progress-fill" style="width:{{ min(($totalAlpha/56)*100,100) }}%;background:{{ $totalAlpha >= 47 ? '#7F1D1D' : ($totalAlpha >= 36 ? '#DC2626' : ($totalAlpha >= 18 ? '#EF4444' : '#F59E0B')) }};"></div>
-            </div>
-            <div class="progress-markers">
-                <span>0j</span>
-                <span>SP I (18j)</span>
-                <span>SP II (36j)</span>
-                <span>SP III (47j)</span>
-                <span>PS (56j)</span>
-            </div>
-        </div>
-
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Mata Kuliah</th>
-                    <th style="text-align:center;">Jam Alpha</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($absensiAlpha as $a)
-                <tr>
-                    <td>{{ $a['nama'] }}</td>
-                    <td style="text-align:center;font-weight:800;color:{{ $a['jam_alpha'] >= 18 ? '#EF4444' : ($a['jam_alpha'] >= 10 ? '#F59E0B' : '#64748B') }};">
-                        {{ $a['jam_alpha'] }}j
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        @endif
-
-        {{-- Warning box --}}
-        <div class="warning-box">
-            <div class="warning-box-title">⚠ Yang perlu Anda lakukan sekarang:</div>
-            <div class="warning-box-text">
+        {{-- Action items --}}
+        <div class="section-label">Langkah Yang Perlu Dilakukan</div>
+        <div class="action-box">
+            <div class="action-title">⚠ Segera lakukan hal berikut</div>
+            <ul class="action-list">
                 @foreach($kategoriRisiko as $k)
                 @if($k === 'ps')
-                • Segera datangi Jurusan untuk konsultasi status akademik.<br>
+                <li>Datangi Jurusan secepatnya untuk konsultasi status akademik.</li>
                 @elseif(in_array($k, ['sp3','sp2','sp1']))
-                • Perbaiki kehadiran segera dan konsultasi dengan Dosen PA terkait {{ match($k) { 'sp3' => 'Surat Peringatan III', 'sp2' => 'Surat Peringatan II', default => 'Surat Peringatan I' } }}.<br>
+                <li>Perbaiki kehadiran dan konsultasikan {{ match($k) { 'sp3' => 'Surat Peringatan III', 'sp2' => 'Surat Peringatan II', default => 'Surat Peringatan I' } }} dengan Dosen PA.</li>
                 @elseif($k === 'nilai_e')
-                • Konsultasikan rencana perbaikan nilai E dengan Dosen PA.<br>
+                <li>Rencanakan perbaikan nilai E bersama Dosen PA sesegera mungkin.</li>
                 @elseif($k === 'nilai_d')
-                • Diskusikan strategi peningkatan nilai D dengan Dosen terkait dan Dosen PA.<br>
+                <li>Diskusikan strategi peningkatan nilai D dengan Dosen pengampu dan Dosen PA.</li>
                 @elseif($k === 'ips_rendah')
-                • Rencanakan perbaikan IPS bersama Dosen PA untuk semester berikutnya.<br>
+                <li>Susun rencana peningkatan IPS bersama Dosen PA untuk semester berikutnya.</li>
                 @endif
                 @endforeach
-                • Hubungi <strong>{{ $mahasiswa->dosenPa->nama ?? 'Dosen PA' }}</strong> untuk jadwal bimbingan.<br>
-                • Login ke SIAKAD untuk melihat detail lengkap nilai dan absensi Anda.
-            </div>
+                <li>Hubungi <strong>{{ $mahasiswa->dosenPa->nama ?? 'Dosen PA' }}</strong> untuk menjadwalkan bimbingan.</li>
+                <li>Masuk ke SIAKAD untuk melihat detail lengkap nilai dan absensi Anda.</li>
+            </ul>
         </div>
 
         {{-- CTA --}}
         <div class="cta-wrap">
             <a href="{{ url('/mahasiswa/dashboard') }}" class="cta-btn">
-                🔍 Lihat Dashboard Akademik Saya
+                Lihat Dashboard Akademik →
             </a>
         </div>
 
         <div class="divider"></div>
 
-        <p style="font-size:12.5px;color:#94A3B8;line-height:1.6;text-align:center;">
+        <p class="footer-note">
             Email ini dikirim otomatis oleh sistem SIAKAD Politeknik Negeri Malang.<br>
             Jika Anda merasa ini adalah kesalahan, hubungi admin jurusan.
         </p>
+
     </div>
 
     {{-- ══ FOOTER ══ --}}
     <div class="footer">
-        <div class="footer-brand">Academia</div>
+        <div class="footer-brand">Acade<span>mia</span></div>
         <div class="footer-text">
             Sistem Informasi Akademik — Jurusan Teknologi Informasi<br>
-            Politeknik Negeri Malang · <a href="mailto:admin@polinema.ac.id">admin@polinema.ac.id</a>
+            Politeknik Negeri Malang ·
+            <a href="mailto:admin@polinema.ac.id">admin@polinema.ac.id</a>
         </div>
     </div>
 

@@ -670,9 +670,9 @@
                         ->filter(fn($m) => $m->isBerisiko())->count();
                 }
             @endphp
-            @if($jmlBerisiko > 0)
+            {{-- @if($jmlBerisiko > 0)
                 <span class="nav-badge">{{ $jmlBerisiko }}</span>
-            @endif
+            @endif --}}
         </a>
         <a href="{{ route('dosen.berisiko.index') }}"
             class="nav-link-item {{ request()->routeIs('dosen.berisiko*') ? 'active' : '' }}">
@@ -690,11 +690,11 @@
                         )->count()
                     : 0;
             @endphp
-            @if($jmlBerisiko > 0)
+            {{-- @if($jmlBerisiko > 0)
             <span style="margin-left:auto;background:#EF4444;color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;font-weight:700;">
                 {{ $jmlBerisiko }}
             </span>
-            @endif
+            @endif --}}
         </a>
         <a href="{{ route('dosen.kompensasi.index') }}"
             class="nav-link-item {{ request()->routeIs('dosen.kompensasi*') ? 'active' : '' }}">
@@ -720,9 +720,9 @@
                     }
                 }
             @endphp
-            @if($jmlSisaKompen > 0)
+            {{-- @if($jmlSisaKompen > 0)
             <span class="nav-badge">{{ $jmlSisaKompen }}</span>
-            @endif
+            @endif --}}
         </a>
     </nav>
     <div class="sidebar-footer">
