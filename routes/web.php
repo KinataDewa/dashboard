@@ -90,10 +90,12 @@ Route::middleware(['auth', 'role.admin'])
         });
 
         Route::prefix('kompensasi')->name('kompensasi.')->group(function () {
-            Route::get('/',                        [KompensasiController::class, 'index'])->name('index');
-            Route::get('/create',                  [KompensasiController::class, 'create'])->name('create');
-            Route::post('/',                       [KompensasiController::class, 'store'])->name('store');
-            Route::get('/{kompensasi}',            [KompensasiController::class, 'show'])->name('show');
+            Route::get('/',                                [KompensasiController::class, 'index'])->name('index');
+            Route::get('/create',                          [KompensasiController::class, 'create'])->name('create');
+            Route::post('/',                               [KompensasiController::class, 'store'])->name('store');
+            Route::get('/search-mahasiswa',                [KompensasiController::class, 'searchMahasiswa'])->name('search-mahasiswa');
+            Route::get('/riwayat-alpha/{mahasiswaId}',     [KompensasiController::class, 'riwayatAlpha'])->name('riwayat-alpha');
+            Route::get('/{kompensasi}',                    [KompensasiController::class, 'show'])->name('show');
             Route::post('/{kompensasi}/ttd-admin', [KompensasiController::class, 'ttdAdmin'])->name('ttd-admin');
             Route::post('/{kompensasi}/ttd-kajur', [KompensasiController::class, 'ttdKajur'])->name('ttd-kajur');
             Route::delete('/{kompensasi}',         [KompensasiController::class, 'destroy'])->name('destroy');

@@ -55,29 +55,89 @@ class KompensasiController extends Controller
     // ── Create: form buat kompen baru ────────────────
     public function create(Request $request)
     {
-        // Bisa pre-fill dari mahasiswa tertentu
-        $mahasiswaId = $request->get('mahasiswa_id');
+        // Pre-fill dari GET param atau old() setelah validasi gagal
+        $mahasiswaId = $request->get('mahasiswa_id') ?? session()->getOldInput('mahasiswa_id');
         $mahasiswa   = $mahasiswaId
             ? Mahasiswa::with(['kelas', 'absensis'])->findOrFail($mahasiswaId)
             : null;
- 
-        // Gunakan semester terbaru dari pivot agar akurat untuk mahasiswa yang pindah kelas
-        $semesterAktif = $mahasiswaId
-            ? (\App\Models\KelasMahasiswa::where('mahasiswa_id', $mahasiswaId)->max('semester') ?? ($mahasiswa?->kelas?->semester ?? 1))
-            : 1;
-        $tahunAkademik = $mahasiswa?->kelas->tahun_akademik ?? '2024/2025';
+
+        $latestKm = $mahasiswaId
+            ? \App\Models\KelasMahasiswa::where('mahasiswa_id', $mahasiswaId)->orderBy('semester', 'desc')->first()
+            : null;
+
+        $semesterAktif = $latestKm?->semester ?? ($mahasiswa?->kelas?->semester ?? 1);
+        $tahunAkademik = $latestKm?->tahun_akademik ?? ($mahasiswa?->kelas?->tahun_akademik ?? config('akademik.tahun_akademik'));
         $jamAlpha      = $mahasiswa
             ? $mahasiswa->absensis->where('semester', $semesterAktif)->sum('jam_alpha')
             : 0;
- 
-        $mahasiswas = Mahasiswa::with('kelas')
-            ->orderBy('nama')
-            ->get();
- 
+
         return view('admin.kompensasi.create', compact(
-            'mahasiswas', 'mahasiswa',
-            'semesterAktif', 'tahunAkademik', 'jamAlpha'
+            'mahasiswa', 'semesterAktif', 'tahunAkademik', 'jamAlpha'
         ));
+    }
+
+    // ── Search Mahasiswa (AJAX) ───────────────────────
+    public function searchMahasiswa(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $q = trim($request->get('q', ''));
+
+        $results = Mahasiswa::with('kelas')
+            ->where(function ($query) use ($q) {
+                $query->where('nama', 'like', "%{$q}%")
+                      ->orWhere('nim', 'like', "%{$q}%");
+            })
+            ->orderBy('nama')
+            ->limit(10)
+            ->get()
+            ->map(function ($mhs) {
+                $latestKm = \App\Models\KelasMahasiswa::where('mahasiswa_id', $mhs->id)
+                    ->orderBy('semester', 'desc')
+                    ->first();
+                return [
+                    'id'                   => $mhs->id,
+                    'nama'                 => $mhs->nama,
+                    'nim'                  => $mhs->nim,
+                    'kelas_nama'           => $mhs->kelas->nama ?? '-',
+                    'semester_aktif'       => $latestKm?->semester ?? ($mhs->kelas?->semester ?? 1),
+                    'tahun_akademik_aktif' => $latestKm?->tahun_akademik ?? ($mhs->kelas?->tahun_akademik ?? config('akademik.tahun_akademik')),
+                ];
+            });
+
+        return response()->json($results);
+    }
+
+    // ── Riwayat Alpha per Mahasiswa (AJAX) ────────────
+    public function riwayatAlpha(int $mahasiswaId): \Illuminate\Http\JsonResponse
+    {
+        $mahasiswa = Mahasiswa::with('kelas')->findOrFail($mahasiswaId);
+
+        $absensis = \App\Models\Absensi::where('mahasiswa_id', $mahasiswaId)
+            ->selectRaw('semester, SUM(jam_alpha) as jam_alpha, SUM(jam_izin) as jam_izin, SUM(jam_sakit) as jam_sakit, SUM(jam_hadir) as jam_hadir')
+            ->groupBy('semester')
+            ->orderBy('semester')
+            ->get();
+
+        $kmBySemester = \App\Models\KelasMahasiswa::where('mahasiswa_id', $mahasiswaId)
+            ->pluck('tahun_akademik', 'semester');
+
+        $riwayat = $absensis->map(fn ($row) => [
+            'semester'       => $row->semester,
+            'tahun_akademik' => $kmBySemester[$row->semester] ?? '-',
+            'jam_alpha'      => (int) $row->jam_alpha,
+            'jam_izin'       => (int) $row->jam_izin,
+            'jam_sakit'      => (int) $row->jam_sakit,
+            'jam_hadir'      => (int) $row->jam_hadir,
+        ]);
+
+        $latestKm = \App\Models\KelasMahasiswa::where('mahasiswa_id', $mahasiswaId)
+            ->orderBy('semester', 'desc')
+            ->first();
+
+        return response()->json([
+            'riwayat'              => $riwayat,
+            'semester_aktif'       => $latestKm?->semester ?? ($mahasiswa->kelas?->semester ?? 1),
+            'tahun_akademik_aktif' => $latestKm?->tahun_akademik ?? ($mahasiswa->kelas?->tahun_akademik ?? config('akademik.tahun_akademik')),
+        ]);
     }
  
     // ── Store: simpan kompen baru ─────────────────────
