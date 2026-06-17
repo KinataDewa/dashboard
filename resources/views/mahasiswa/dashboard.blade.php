@@ -826,7 +826,8 @@
                         @forelse($nilais->take(7) as $nilai)
                         @php
                             $isDE = in_array($nilai->grade, ['D','E']);
-                            $scoreWidth = min($nilai->nilai_akhir, 100);
+                            // $scoreWidth = min($nilai->nilai_akhir, 100);
+                            $scoreWidth = min(($nilai->nilai_akhir / 4) * 100, 100);
                             $scoreColor = match($nilai->grade) {
                                 'A'  => '#22C55E',
                                 'B+' => '#3B82F6',
@@ -991,9 +992,6 @@
                             <th style="text-align:center;">Alpha</th>
                             <th style="text-align:center;">Wajib</th>
                             <th style="text-align:center;">Status</th>
-                            <th style="text-align:center;">Admin</th>
-                            <th style="text-align:center;">Kajur</th>
-                            <th style="text-align:center;">Lunas</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1009,19 +1007,11 @@
                             <td style="text-align:center;font-weight:700;color:var(--text-1);">{{ $kompen->jam_kompen_wajib }}j</td>
                             <td style="text-align:center;">
                                 @if($kompen->status === 'lunas')
-                                    <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#DCFCE7;color:#15803D;">
-                                        <i class="bi bi-check-circle-fill" style="font-size:10px;"></i> Lunas
-                                    </span>
+                                    <span class="badge badge-green"><i class="bi bi-check-circle-fill"></i> Lunas</span>
                                 @else
-                                    <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#FEF9C3;color:#854D0E;">
-                                        <i class="bi bi-hourglass-split" style="font-size:10px;"></i> Belum Lunas
-                                    </span>
+                                    <span class="badge badge-yellow"><i class="bi bi-hourglass-split"></i> Belum Lunas</span>
                                 @endif
                             </td>
-                            <td style="text-align:center;font-size:15px;">{{ $kompen->ttd_admin ? '✅' : '⏳' }}</td>
-                            <td style="text-align:center;font-size:15px;">{{ $kompen->ttd_kajur ? '✅' : '⏳' }}</td>
-                            <td style="text-align:center;font-size:12px;color:var(--text-2);">
-                                {{ $kompen->tanggal_lunas ? $kompen->tanggal_lunas->format('d M Y') : '—' }}
                             </td>
                         </tr>
                         @endforeach
@@ -1234,7 +1224,8 @@ function onSemNilaiChange(sem) {
             tbody.innerHTML = data.slice(0,7).map(function(item) {
                 var isDE = item.grade === 'D' || item.grade === 'E';
                 var gc   = item.grade.replace('+','p');
-                var sw   = Math.min(item.nilai_akhir, 100);
+                // var sw   = Math.min(item.nilai_akhir, 100);
+                var sw   = Math.min((item.nilai_akhir / 4) * 100, 100);
                 var col  = G2C[item.grade] || '#2563EB';
                 var nm   = item.nama_mk; var km = item.kode_mk;
                 return '<tr data-matkul="' + nm.toLowerCase() + '" data-status="' + (isDE?'perhatian':'baik') + '">' +
