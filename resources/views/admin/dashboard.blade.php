@@ -159,13 +159,15 @@
 .filter-select{padding:6px 28px 6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text-1);background:var(--white);cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;}
 .filter-select:focus{border-color:var(--blue);}
 .donut-wrap{display:flex;align-items:center;gap:16px;margin-top:12px;flex-wrap:wrap;}
-.donut-canvas-box{flex-shrink:0;width:140px;height:140px;position:relative;}
+.donut-canvas-box{flex-shrink:0;width:168px;height:168px;position:relative;}
 .donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;}
-.donut-center-num{font-size:22px;font-weight:800;color:var(--text-1);line-height:1;}
+.donut-center-num{font-size:25px;font-weight:800;color:var(--text-1);line-height:1;}
 .donut-center-sub{font-size:10px;color:var(--text-2);font-weight:500;margin-top:2px;}
-.risk-legend-list{display:flex;flex-direction:column;gap:6px;flex:1;}
-.risk-legend-row{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;}
-.risk-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-right:6px;}
+.risk-legend-list{display:flex;flex-direction:column;gap:8px;flex:1;}
+.risk-legend-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;padding:4px 0;}
+.risk-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-right:8px;}
+.risk-insight-note,.grade-insight{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:6px;}
+.risk-insight-note strong,.grade-insight strong{color:var(--text-1);font-weight:700;}
 .kelas-tbl{width:100%;border-collapse:collapse;}
 .kelas-tbl thead th{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;padding:9px 14px;border-bottom:1.5px solid var(--border);background:#FAFBFF;white-space:nowrap;}
 .kelas-tbl tbody tr{border-bottom:1px solid #F8FAFC;transition:background .1s;}
@@ -231,7 +233,7 @@
 
 {{-- ══ STAT CARDS ══ --}}
 <div class="section-label">Statistik Sistem</div>
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-3">
     @php
     $totalKompenPending = \App\Models\Kompensasi::where('status','pending')->count();
     $stats = [
@@ -239,18 +241,19 @@
         ['label'=>'Total Dosen',        'val'=>$totalDosen,        'icon'=>'bi-person-badge-fill',        'accent'=>'linear-gradient(90deg,#16A34A,#86EFAC)', 'ibg'=>'#F0FDF4', 'ic'=>'#16A34A', 'badge'=>'Aktif mengajar', 'bbg'=>'#DCFCE7', 'bc'=>'#166534'],
         ['label'=>'Mata Kuliah',        'val'=>$totalMatkul,       'icon'=>'bi-book-fill',                'accent'=>'linear-gradient(90deg,#7C3AED,#A78BFA)', 'ibg'=>'#F5F3FF', 'ic'=>'#7C3AED', 'badge'=>'Semester aktif', 'bbg'=>'#EDE9FE', 'bc'=>'#5B21B6'],
         ['label'=>'Kelas Aktif',        'val'=>$totalKelas,        'icon'=>'bi-grid-3x3-gap-fill',        'accent'=>'linear-gradient(90deg,#0891B2,#67E8F9)', 'ibg'=>'#ECFEFF', 'ic'=>'#0891B2', 'badge'=>'Semua angkatan', 'bbg'=>'#CFFAFE', 'bc'=>'#0E7490'],
-        ['label'=>'Mahasiswa Berisiko', 'val'=>$mahasiswaBerisiko, 'icon'=>'bi-exclamation-triangle-fill','accent'=>$mahasiswaBerisiko>0 ? 'linear-gradient(90deg,#EF4444,#FCA5A5)' : 'linear-gradient(90deg,#22C55E,#86EFAC)', 'ibg'=>$mahasiswaBerisiko>0 ? '#FEF2F2' : '#F0FDF4', 'ic'=>$mahasiswaBerisiko>0 ? '#EF4444' : '#22C55E', 'badge'=>$mahasiswaBerisiko>0 ? 'Perlu penanganan' : 'Semua aman', 'bbg'=>$mahasiswaBerisiko>0 ? '#FEE2E2' : '#DCFCE7', 'bc'=>$mahasiswaBerisiko>0 ? '#991B1B' : '#166534'],
+        ['label'=>'Mahasiswa Berisiko', 'val'=>$mahasiswaBerisiko, 'icon'=>'bi-exclamation-triangle-fill','accent'=>'linear-gradient(90deg,#94A3B8,#CBD5E1)', 'ibg'=>'#F8FAFC', 'ic'=>$mahasiswaBerisiko>0 ? '#EF4444' : '#22C55E', 'badge'=>$mahasiswaBerisiko>0 ? 'Perlu penanganan' : 'Semua aman', 'bbg'=>$mahasiswaBerisiko>0 ? '#FEE2E2' : '#DCFCE7', 'bc'=>$mahasiswaBerisiko>0 ? '#991B1B' : '#166534'],
         ['label'=>'Kompen Pending', 'val'=>$totalKompenPending, 'icon'=>'bi-clipboard2-check-fill', 'accent'=>$totalKompenPending>0 ? 'linear-gradient(90deg,#F59E0B,#FCD34D)' : 'linear-gradient(90deg,#22C55E,#86EFAC)', 'ibg'=>$totalKompenPending>0 ? '#FEF3C7' : '#F0FDF4', 'ic'=>$totalKompenPending>0 ? '#F59E0B' : '#22C55E', 'badge'=>$totalKompenPending>0 ? 'Perlu ditangani' : 'Semua lunas', 'bbg'=>$totalKompenPending>0 ? '#FEF9C3' : '#DCFCE7', 'bc'=>$totalKompenPending>0 ? '#854D0E' : '#166534'],
     ];
     @endphp
 
     @foreach($stats as $stat)
     <div class="col-md col-6">
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform .18s,box-shadow .18s;height:100%;"
+        <div style="position:relative;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform .18s,box-shadow .18s;height:100%;"
              onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'"
              onmouseout="this.style.transform='';this.style.boxShadow='var(--shadow)'">
             <div style="height:3px;background:{{ $stat['accent'] }};"></div>
-            <div style="padding:16px 18px;">
+            <i class="bi {{ $stat['icon'] }}" style="position:absolute;right:-8px;bottom:-12px;font-size:68px;color:{{ $stat['ic'] }};opacity:.06;pointer-events:none;"></i>
+            <div style="padding:16px 18px;position:relative;z-index:1;">
                 <div style="display:flex;align-items:center;gap:12px;">
                     <div style="width:40px;height:40px;border-radius:10px;background:{{ $stat['ibg'] }};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
                         <i class="bi {{ $stat['icon'] }}" style="color:{{ $stat['ic'] }};"></i>
@@ -273,7 +276,7 @@
 
 {{-- ══ SECTION 1: TREN IPK ARIMA ══ --}}
 <div class="section-label">Tren IPK per Angkatan</div>
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-3">
     <div class="col-lg-7">
         <div class="chart-card-v2">
             <div class="chart-head-v2">
@@ -321,7 +324,7 @@
 
 {{-- ══ SECTION 2: DISTRIBUSI ══ --}}
 <div class="section-label">Distribusi Akademik</div>
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-3 align-items-start">
     {{-- Donut Risiko --}}
     <div class="col-lg-5">
         <div class="chart-card-v2">
@@ -338,11 +341,15 @@
                 $riskKeys   = ['sp1','sp2','sp3','ps','nilai_e','nilai_d','ips_rendah'];
                 $riskLabels = ['SP I','SP II','SP III','Putus Studi','Nilai E','D>3 MK','IPS<2.00'];
                 $riskColors = ['#FCD34D','#FB923C','#EF4444','#991B1B','#7F1D1D','#6D28D9','#1D4ED8'];
+                $riskMaxIdx = null; $riskMaxVal = -1;
+                foreach ($riskKeys as $idx => $kat) {
+                    if ($distribusiRisiko[$kat] > $riskMaxVal) { $riskMaxVal = $distribusiRisiko[$kat]; $riskMaxIdx = $idx; }
+                }
             @endphp
             @if(array_sum($distribusiRisiko) > 0)
             <div class="donut-wrap">
                 <div class="donut-canvas-box">
-                    <canvas id="risikoChart" width="140" height="140"></canvas>
+                    <canvas id="risikoChart" width="168" height="168"></canvas>
                     <div class="donut-center">
                         <div class="donut-center-num">{{ $mahasiswaBerisiko }}</div>
                         <div class="donut-center-sub">Berisiko</div>
@@ -362,6 +369,12 @@
                     @endforeach
                 </div>
             </div>
+            @if($riskMaxIdx !== null && $riskMaxVal > 0)
+            <div class="risk-insight-note">
+                <i class="bi bi-info-circle-fill" style="color:var(--text-3);"></i>
+                Kategori terbanyak: <strong>{{ $riskLabels[$riskMaxIdx] }}</strong> ({{ $riskMaxVal }} mahasiswa)
+            </div>
+            @endif
             @else
             <div style="text-align:center;padding:40px 16px;color:var(--text-3);">
                 <i class="bi bi-shield-check-fill" style="font-size:40px;color:#22C55E;display:block;margin-bottom:10px;"></i>
@@ -390,13 +403,25 @@
             <div style="position:relative;height:228px;margin-top:4px;">
                 <canvas id="gradeChart"></canvas>
             </div>
+            @php
+                $totalGradeAll = array_sum($distribusiGrade);
+                $maxGradeKey   = array_search(max($distribusiGrade), $distribusiGrade);
+                $maxGradeVal   = $maxGradeKey !== false ? $distribusiGrade[$maxGradeKey] : 0;
+                $maxGradePct   = $totalGradeAll > 0 ? round($maxGradeVal / $totalGradeAll * 100) : 0;
+            @endphp
+            @if($maxGradeKey !== false)
+            <div class="grade-insight" id="gradeInsight">
+                <i class="bi bi-bar-chart-fill" style="color:var(--text-3);"></i>
+                Grade <strong>{{ $maxGradeKey }}</strong> mendominasi — {{ $maxGradeVal }} dari {{ $totalGradeAll }} nilai (<strong>{{ $maxGradePct }}%</strong>)
+            </div>
+            @endif
         </div>
     </div>
 </div>
 
 {{-- ══ SECTION 3: TABEL RINGKASAN PER KELAS ══ --}}
 <div class="section-label">Ringkasan Akademik per Kelas</div>
-<div class="card-white tbl-card-v2 mb-4">
+<div class="card-white tbl-card-v2 mb-3">
     <div class="tbl-head-v2">
         <div>
             <div class="tbl-title-v2">Performa per Kelas</div>
@@ -435,8 +460,8 @@
                     <td style="text-align:center;">
                         <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
                             <span style="font-weight:700;font-size:12.5px;color:{{ $perlu ? '#EF4444' : 'var(--text-2)' }};">{{ $kls['pct_risiko'] }}%</span>
-                            <div style="width:44px;height:4px;background:#F1F5F9;border-radius:2px;overflow:hidden;">
-                                <div style="height:100%;width:{{ min($kls['pct_risiko'],100) }}%;background:{{ $perlu ? '#EF4444' : '#22C55E' }};border-radius:2px;"></div>
+                            <div style="width:56px;height:7px;background:#E2E8F0;border-radius:4px;overflow:hidden;">
+                                <div style="height:100%;width:{{ min($kls['pct_risiko'],100) }}%;background:{{ $perlu ? '#EF4444' : '#22C55E' }};border-radius:4px;"></div>
                             </div>
                         </div>
                     </td>
@@ -463,6 +488,22 @@
                 @endforeach
             </tbody>
         </table>
+    </div>
+    @php
+        $kelasMaxRisk = collect($ringkasanKelas)->sortByDesc('pct_risiko')->first();
+        $kelasAman    = collect($ringkasanKelas)->where('pct_risiko', 0)->pluck('kelas');
+    @endphp
+    <div class="tbl-footer">
+        @if($kelasMaxRisk && $kelasMaxRisk['pct_risiko'] > 0)
+        <div class="info-chip" style="background:#FEE2E2;color:#991B1B;">
+            <i class="bi bi-exclamation-triangle-fill"></i> Risiko tertinggi: {{ $kelasMaxRisk['kelas'] }} ({{ $kelasMaxRisk['pct_risiko'] }}%)
+        </div>
+        @endif
+        @if($kelasAman->isNotEmpty())
+        <div class="info-chip" style="background:#DCFCE7;color:#166534;">
+            <i class="bi bi-check-circle-fill"></i> Paling stabil: {{ $kelasAman->implode(', ') }}
+        </div>
+        @endif
     </div>
     @endif
 </div>
@@ -667,11 +708,22 @@ function renderGradeChart(vals) {
     });
 }
 
+function updateGradeInsight(d) {
+    var el = document.getElementById('gradeInsight');
+    if (!el) return;
+    var entries = Object.entries(d);
+    if (!entries.length) { el.innerHTML = ''; return; }
+    var total = entries.reduce(function(s, e) { return s + e[1]; }, 0);
+    var maxEntry = entries.reduce(function(a, b) { return b[1] > a[1] ? b : a; }, entries[0]);
+    var pct = total > 0 ? Math.round(maxEntry[1] / total * 100) : 0;
+    el.innerHTML = '<i class="bi bi-bar-chart-fill" style="color:var(--text-3);"></i> Grade <strong>' + maxEntry[0] + '</strong> mendominasi — ' + maxEntry[1] + ' dari ' + total + ' nilai (<strong>' + pct + '%</strong>)';
+}
+
 function loadGrade() {
     var ang = document.getElementById('gradeAngkatanSel').value;
     fetch('{{ route("admin.api.distribusi-grade") }}?semester={{ $semesterAktif }}&angkatan=' + encodeURIComponent(ang))
         .then(function(r) { return r.json(); })
-        .then(function(d) { renderGradeChart(Object.values(d)); })
+        .then(function(d) { renderGradeChart(Object.values(d)); updateGradeInsight(d); })
         .catch(function() {});
 }
 
