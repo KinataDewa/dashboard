@@ -1,8 +1,13 @@
 @extends('layouts.dosen')
 
+@php
+    $namaKelas = $kelas->isNotEmpty() ? $kelas->pluck('nama')->implode(', ') : 'Belum ada kelas';
+    $tahunAkad = $kelas->isNotEmpty() ? ($kelas->first()->tahun_akademik ?? '2024/2025') : '2024/2025';
+@endphp
+
 @section('title', 'Dashboard DPA')
 @section('page-title', 'Dashboard DPA')
-@section('page-sub', ($dosen->nama ?? '') . ' · ' . $totalMahasiswa . ' Mahasiswa Bimbingan')
+@section('page-sub', 'Kelas ' . $namaKelas . ' · Semester ' . $semesterAktif)
 
 @push('styles')
 <style>
@@ -97,8 +102,9 @@
     'gradient'     => 'linear-gradient(135deg, #1E3A8A 0%, #4338CA 55%, #6366F1 100%)',
     'icon'         => 'bi-person-badge-fill',
     'title'        => 'Dashboard DPA — ' . ($dosen->nama ?? auth()->user()->name),
-    'sub'          => 'Panel Dosen Pembimbing Akademik · Tahun Akademik 2024/2025',
+    'sub'          => 'Kelas ' . $namaKelas . ' · Semester ' . $semesterAktif . ' · ' . $tahunAkad,
     'chips'        => [
+        ['icon' => 'bi-building',                 'label' => 'Kelas ' . $namaKelas],
         ['icon' => 'bi-people-fill',              'label' => $totalMahasiswa . ' Mahasiswa Bimbingan'],
         ['icon' => 'bi-exclamation-triangle-fill','label' => $totalBerisiko . ' Berisiko'],
         ['icon' => 'bi-award-fill',               'label' => 'IPK Rata-rata ' . number_format($rataRataIpk, 2)],

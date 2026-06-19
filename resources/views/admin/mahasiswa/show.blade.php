@@ -169,9 +169,12 @@
                                 <span style="font-weight:700;color:{{ $isDE ? '#EF4444' : 'var(--text-1)' }};">
                                     {{ number_format($nilai->nilai_akhir, 1) }}
                                 </span>
-                                <div class="score-bar">
-                                    <div class="score-bar-fill" style="width:{{ $nilai->nilai_akhir }}%;background:{{ $isDE ? '#EF4444' : ($nilai->grade==='A' ? '#22C55E' : '#3B82F6') }};"></div>
+                            <div class="score-bar">
+                                <div class="score-bar-fill"
+                                    style="width:{{ ($nilai->nilai_akhir / 4) * 100 }}%;
+                                            background:{{ $isDE ? '#EF4444' : ($nilai->grade === 'A' ? '#22C55E' : '#3B82F6') }};">
                                 </div>
+                            </div>
                             </td>
                             <td style="text-align:center;">
                                 @php $gradeClass = str_replace('+', 'p', $nilai->grade); @endphp

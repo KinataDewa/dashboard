@@ -17,7 +17,8 @@
       "Bash(php -l app/Http/Controllers/Admin/ImportController.php)",
       "PowerShell(php artisan route:list --path=admin/import 2>&1)",
       "Bash(php -r ' *)",
-      "Bash(php *)"
+      "Bash(php *)",
+      "Bash(grep -v \"^[0-9]*:.*--\\\\|//\\\\|\\\\/\\\\*\")"
     ]
   }
 }

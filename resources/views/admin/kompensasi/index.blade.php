@@ -57,17 +57,24 @@
 <div class="card-white tbl-card-v2">
 
     {{-- Header --}}
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
         <div>
             <div class="tbl-title-v2">Daftar Kompensasi</div>
             <div class="tbl-sub-v2">Total <strong>{{ $kompensasis->total() }}</strong> data kompensasi</div>
         </div>
-        @if(request()->hasAny(['search','status','semester']))
-        <a href="{{ route('admin.kompensasi.index') }}"
-           style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#EF4444;text-decoration:none;padding:5px 12px;border:1.5px solid #FECACA;border-radius:20px;background:#FEF2F2;">
-            <i class="bi bi-x-circle-fill"></i> Reset Filter
-        </a>
-        @endif
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            @if(request()->hasAny(['search','status','semester']))
+            <a href="{{ route('admin.kompensasi.index') }}"
+               style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#EF4444;text-decoration:none;padding:5px 12px;border:1.5px solid #FECACA;border-radius:20px;background:#FEF2F2;">
+                <i class="bi bi-x-circle-fill"></i> Reset Filter
+            </a>
+            @endif
+            <a href="{{ route('admin.kompensasi.create') }}"
+               style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-size:13.5px;font-weight:600;background:var(--blue);color:#fff;text-decoration:none;">
+                <i class="bi bi-plus-circle-fill" style="font-size:13px;"></i>
+                Tambah Kompensasi
+            </a>
+        </div>
     </div>
 
     {{-- Filter --}}
