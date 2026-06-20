@@ -198,7 +198,7 @@
             <div class="left-tagline">Dashboard<br><span>Akademik</span><br>Terpadu</div>
             <p class="left-desc">Platform digital untuk memantau performa akademik mahasiswa, absensi, dan nilai secara real-time.</p>
         </div>
-        <div class="stats-strip">
+        {{-- <div class="stats-strip">
             <div class="stat-item">
                 <div class="stat-num">103<span>+</span></div>
                 <div class="stat-label">Mahasiswa Aktif</div>
@@ -213,7 +213,7 @@
                 <div class="stat-num">4</div>
                 <div class="stat-label">Kelas Aktif</div>
             </div>
-        </div>
+        </div> --}}
     </div>
 
     {{-- RIGHT --}}
