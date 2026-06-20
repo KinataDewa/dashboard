@@ -284,7 +284,7 @@
 
                     <td>
                         <input type="checkbox" class="cb-mhs cb-row" value="{{ $mhs['id'] }}"
-                               checked onchange="updateCount()">
+                                onchange="updateCount()">
                     </td>
 
                     <td style="font-size:12px;color:var(--text-3);">{{ $i + 1 }}</td>

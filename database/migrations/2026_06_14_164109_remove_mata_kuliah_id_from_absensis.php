@@ -20,6 +20,16 @@ return new class extends Migration
         if ($this->indexExists('absensis', 'unique_absensi')) {
             \DB::statement('ALTER TABLE absensis DROP INDEX unique_absensi');
         }
+        $fkExists = \DB::select("
+            SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS
+            WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME = 'absensis'
+            AND CONSTRAINT_NAME = 'absensis_mata_kuliah_id_foreign'
+            AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+        ");
+        if (!empty($fkExists)) {
+            \DB::statement('ALTER TABLE absensis DROP FOREIGN KEY absensis_mata_kuliah_id_foreign');
+        }
         if ($this->indexExists('absensis', 'absensis_mata_kuliah_id_foreign')) {
             \DB::statement('ALTER TABLE absensis DROP INDEX absensis_mata_kuliah_id_foreign');
         }

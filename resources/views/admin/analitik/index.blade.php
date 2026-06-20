@@ -282,7 +282,7 @@
             </div>
         </div>
 
-        {{-- Tentang Metode --}}
+        {{-- Tentang Metode
         <div class="card-white tbl-card-v2">
             <div class="tbl-head-v2" style="margin-bottom:12px;">
                 <div>
@@ -331,7 +331,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
     </div>
 
