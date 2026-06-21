@@ -388,17 +388,17 @@
         {{-- Stats --}}
         <div class="stats-row">
             <div class="stat-card">
-                <div class="stat-num"><span class="count" data-target="103">0</span><span class="stat-plus">+</span></div>
+                <div class="stat-num"><span class="count" data-target="{{ $mahasiswa_aktif }}">0</span><span class="stat-plus">+</span></div>
                 <div class="stat-label">Mahasiswa Aktif</div>
             </div>
             <div class="stat-card">
-                <div class="stat-num"><span class="count" data-target="8">0</span></div>
+                <div class="stat-num"><span class="count" data-target="{{ $dosen_pa }}">0</span></div>
                 <div class="stat-label">Dosen PA</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-num"><span class="count" data-target="4">0</span></div>
+            {{-- <div class="stat-card">
+                <div class="stat-num"><span class="count" data-target="{{ $kelas_aktif }}">0</span></div>
                 <div class="stat-label">Kelas Aktif</div>
-            </div>
+            </div> --}}
         </div>
     </div>
 
@@ -456,7 +456,7 @@
                 </button>
             </form>
 
-            <div class="demo-section">
+            {{-- <div class="demo-section">
                 <div class="demo-label">Quick Login — Akun Demo</div>
                 <div class="demo-cards">
                     <div class="demo-card" onclick="fillDemo('admin@polinema.ac.id', event)">
@@ -485,7 +485,7 @@
                         <span class="demo-card-tag" style="background:rgba(96,165,250,.15);color:#60a5fa;">Student</span>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             <div class="form-footer">Politeknik Negeri Malang · Jurusan Teknologi Informasi</div>
         </div>
