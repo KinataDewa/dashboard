@@ -25,9 +25,9 @@ class KelasController extends Controller
             ->with(['kelas', 'nilais.mataKuliah', 'absensis', 'kompensasis'])
             ->orderBy('nama')
             ->get()
-            ->map(function ($m) {
+            ->map(function ($m) use ($semesterAktif) {
                 $m->ipk_val     = $m->ipk;
-                $m->is_berisiko = $m->isBerisiko();
+                $m->is_berisiko = $m->getKategoriRisiko($semesterAktif) !== [];
                 return $m;
             });
 

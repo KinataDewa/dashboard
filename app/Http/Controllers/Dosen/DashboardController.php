@@ -38,7 +38,7 @@ class DashboardController extends Controller
             ->orderBy('nama')
             ->get();
 
-        $mahasiswaBerisiko = $mahasiswas->filter(fn($m) => $m->isBerisiko());
+        $mahasiswaBerisiko = $mahasiswas->filter(fn($m) => $m->getKategoriRisiko($semesterAktif) !== []);
 
         $totalMahasiswa = $mahasiswas->count();
         $totalBerisiko  = $mahasiswaBerisiko->count();

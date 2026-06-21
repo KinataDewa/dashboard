@@ -18,7 +18,8 @@
       "PowerShell(php artisan route:list --path=admin/import 2>&1)",
       "Bash(php -r ' *)",
       "Bash(php *)",
-      "Bash(grep -v \"^[0-9]*:.*--\\\\|//\\\\|\\\\/\\\\*\")"
+      "Bash(grep -v \"^[0-9]*:.*--\\\\|//\\\\|\\\\/\\\\*\")",
+      "PowerShell(git clone https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git \"C:\\\\Users\\\\ASUS N 7400 P\\\\.claude\\\\skills\\\\ui-ux-pro-max-skill\" 2>&1)"
     ]
   }
 }

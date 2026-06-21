@@ -365,9 +365,9 @@ $_jmlBerisiko   = \App\Models\Mahasiswa::with(['nilais','absensis','kompensasis'
     <a href="{{ route('admin.berisiko.index') }}"
        class="mobile-drawer-link {{ request()->routeIs('admin.berisiko*') ? 'active' : '' }}">
         <i class="bi bi-exclamation-triangle-fill"></i> Mahasiswa Berisiko
-        @if($_jmlBerisiko > 0)
+        {{-- @if($_jmlBerisiko > 0)
         <span style="margin-left:auto;background:#EF4444;color:#fff;border-radius:99px;padding:1px 6px;font-size:10px;font-weight:700;">{{ $_jmlBerisiko }}</span>
-        @endif
+        @endif --}}
     </a>
     <a href="{{ route('admin.kompensasi.index') }}"
        class="mobile-drawer-link {{ request()->routeIs('admin.kompensasi*') ? 'active' : '' }}">

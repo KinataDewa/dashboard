@@ -42,7 +42,7 @@ class ImportController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Import nilai error: ' . $e->getMessage());
-            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memproses file nilai. Pastikan format file sesuai template, lalu coba lagi.');
         }
     }
 
@@ -68,7 +68,7 @@ class ImportController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Import absensi error: ' . $e->getMessage());
-            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memproses file absensi. Pastikan format file sesuai template, lalu coba lagi.');
         }
     }
 
@@ -94,7 +94,7 @@ class ImportController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Import mahasiswa error: ' . $e->getMessage());
-            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memproses file mahasiswa. Pastikan format file sesuai template, lalu coba lagi.');
         }
     }
 
@@ -115,7 +115,7 @@ class ImportController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Import dosen error: ' . $e->getMessage());
-            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memproses file dosen. Pastikan format file sesuai template, lalu coba lagi.');
         }
     }
 
@@ -141,7 +141,7 @@ class ImportController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Import matkul error: ' . $e->getMessage());
-            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memproses file mata kuliah. Pastikan format file sesuai template, lalu coba lagi.');
         }
     }
 
@@ -177,7 +177,7 @@ class ImportController extends Controller
 
             } catch (\Exception $e) {
                 Log::error('Import rapor error [' . $file->getClientOriginalName() . ']: ' . $e->getMessage());
-                $errors[] = $file->getClientOriginalName() . ': ' . $e->getMessage();
+                $errors[] = $file->getClientOriginalName() . ' gagal diproses (periksa format file)';
             }
         }
 

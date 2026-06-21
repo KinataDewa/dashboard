@@ -106,7 +106,7 @@ class Mahasiswa extends Model
                 'D'  => 1.0,
                 default => 0.0, // E dan null
             };
-            $sks         = $n->mataKuliah->sks ?? 0;
+            $sks         = $n->mataKuliah?->sks ?? 0;
             $totalBobot += $bobot * $sks;
             $totalSks   += $sks;
         }

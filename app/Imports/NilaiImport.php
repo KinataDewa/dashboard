@@ -36,12 +36,12 @@ class NilaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnErr
                 + ($uts   * config('akademik.bobot_nilai.uts',   0.3))
                 + ($uas   * config('akademik.bobot_nilai.uas',   0.4));
         $grade  = match(true) {
-            $akhir >  80 => 'A',
-            $akhir >  73 => 'B+',
-            $akhir >  65 => 'B',
-            $akhir >  60 => 'C+',
-            $akhir >  50 => 'C',
-            $akhir >  39 => 'D',
+            $akhir >= 80 => 'A',
+            $akhir >= 73 => 'B+',
+            $akhir >= 65 => 'B',
+            $akhir >= 60 => 'C+',
+            $akhir >= 50 => 'C',
+            $akhir >= 39 => 'D',
             default      => 'E',
         };
  

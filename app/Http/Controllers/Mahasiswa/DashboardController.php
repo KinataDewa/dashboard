@@ -50,7 +50,7 @@ class DashboardController extends Controller
         $totalAlpha = (int) $absensis->sum('jam_alpha');
 
         // Kategori risiko sesuai Pedoman Akademik D4 TI Polinema 2022/2023
-        $kategoriRisiko = $mahasiswa->getKategoriRisiko();
+        $kategoriRisiko = $mahasiswa->getKategoriRisiko($semesterAktif);
 
         // Nilai D/E semester aktif (untuk stat card)
         $nilaiDE = $nilais->whereIn('grade', ['D', 'E']);
@@ -58,15 +58,15 @@ class DashboardController extends Controller
         // Absensi kritis: semester aktif dengan alpha >= 18 jam (batas SP I)
         $absensiKritis = $absensis->where('jam_alpha', '>=', 18);
 
-        // Rata-rata nilai per matkul (dari nilai mahasiswa semester aktif)
-        $matkulIds = $nilais->pluck('mata_kuliah_id')->unique();
-        $rataRataKelas = [];
-        foreach ($matkulIds as $mkId) {
-            $rataRataKelas[$mkId] = round(
-                \App\Models\Nilai::where('mata_kuliah_id', $mkId)->avg('nilai_akhir') ?? 0,
-                2
-            );
-        }
+        // Rata-rata nilai per matkul untuk semua mahasiswa (satu query GROUP BY)
+        $matkulIds     = $nilais->pluck('mata_kuliah_id')->unique()->values();
+        $rataRataKelas = $matkulIds->isNotEmpty()
+            ? \App\Models\Nilai::whereIn('mata_kuliah_id', $matkulIds)
+                ->selectRaw('mata_kuliah_id, ROUND(AVG(nilai_akhir), 2) as rata')
+                ->groupBy('mata_kuliah_id')
+                ->pluck('rata', 'mata_kuliah_id')
+                ->all()
+            : [];
 
         $kompenAktif = $mahasiswa->getKompensasiSemester($semesterAktif);
 

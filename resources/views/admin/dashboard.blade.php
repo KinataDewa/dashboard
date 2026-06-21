@@ -1,188 +1,322 @@
 @extends('layouts.admin')
 @section('title','Admin Dashboard')
-@section('page-title','Overview Sistem')
-@section('page-sub','Jurusan Teknologi Informasi — Politeknik Negeri Malang')
-
-@section('topbar-actions')
-<a href="{{ route('admin.import.index') }}" class="btn-primary">
-    <i class="bi bi-file-earmark-arrow-up"></i> Import Data
-</a>
-@endsection
 
 @push('styles')
 <style>
-.risk-alert-wrap {
-    position: relative;
-    background: linear-gradient(135deg, #1A0A0A 0%, #7F1D1D 40%, #991B1B 100%);
-    border-radius: 14px;
-    padding: 20px 24px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(239,68,68,.25), 0 2px 8px rgba(239,68,68,.15);
-    animation: alertSlideIn .4s cubic-bezier(.16,1,.3,1) both;
-    flex-wrap: wrap;
-}
-@keyframes alertSlideIn {
-    from { opacity:0; transform: translateY(-12px) scale(.98); }
-    to   { opacity:1; transform: translateY(0) scale(1); }
-}
-@keyframes alertSlideOut {
-    from { opacity:1; transform: translateY(0) scale(1); max-height:200px; margin-bottom:24px; padding:20px 24px; }
-    to   { opacity:0; transform: translateY(-8px) scale(.97); max-height:0; margin-bottom:0; padding:0 24px; }
-}
-.risk-alert-wrap::before {
-    content: '';
-    position: absolute; inset: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px);
-    background-size: 24px 24px;
-    pointer-events: none;
-}
-.risk-alert-wrap::after {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 60%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent);
-    animation: glowSweep 4s ease infinite;
-    pointer-events: none;
-}
-@keyframes glowSweep {
-    0%   { left: -60%; }
-    100% { left: 140%; }
-}
-.risk-pulse-ring {
-    position: absolute;
-    left: 28px; top: 50%;
-    transform: translateY(-50%);
-    width: 52px; height: 52px;
-    border-radius: 50%;
-    background: rgba(239,68,68,.2);
-    animation: ringPulse 2s ease-out infinite;
-    pointer-events: none;
-}
-@keyframes ringPulse {
-    0%   { transform: translateY(-50%) scale(1);   opacity:.8; }
-    70%  { transform: translateY(-50%) scale(1.8); opacity:0; }
-    100% { transform: translateY(-50%) scale(1);   opacity:0; }
-}
-.risk-alert-left {
-    display: flex; align-items: flex-start;
-    gap: 16px; flex: 1; min-width: 0;
-    position: relative; z-index: 1;
-}
-.risk-alert-icon {
-    width: 44px; height: 44px; border-radius: 12px;
-    background: rgba(255,255,255,.15);
-    border: 1px solid rgba(255,255,255,.2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; color: #FCA5A5; flex-shrink: 0;
-    animation: iconShake 3s ease infinite;
-}
-@keyframes iconShake {
-    0%,90%,100% { transform: rotate(0deg); }
-    92%  { transform: rotate(-8deg); }
-    94%  { transform: rotate(8deg); }
-    96%  { transform: rotate(-4deg); }
-    98%  { transform: rotate(4deg); }
-}
-.risk-alert-content { min-width: 0; }
-.risk-alert-tag {
-    display: inline-flex; align-items: center;
-    background: rgba(255,255,255,.15);
-    border: 1px solid rgba(255,255,255,.25);
-    border-radius: 20px; padding: 2px 10px;
-    font-size: 11px; font-weight: 700;
-    color: #FCA5A5; letter-spacing: .5px; margin-bottom: 6px;
-}
-.risk-alert-title {
-    font-size: 15px; font-weight: 800;
-    color: #fff; line-height: 1.3;
-    margin-bottom: 5px; letter-spacing: -.2px;
-}
-.risk-alert-desc {
-    font-size: 12.5px; color: rgba(255,255,255,.7); line-height: 1.5;
-}
-.risk-alert-desc strong { color: #FCA5A5; font-weight: 700; }
-.risk-alert-right {
-    display: flex; align-items: center; gap: 10px;
-    flex-shrink: 0; position: relative; z-index: 1;
-}
-.risk-alert-btn {
-    background: #fff; color: #991B1B;
-    border: none; border-radius: 9px;
-    padding: 10px 18px; font-size: 13px; font-weight: 700;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    cursor: pointer; text-decoration: none;
-    display: inline-flex; align-items: center; gap: 7px;
-    transition: all .2s; white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0,0,0,.2);
-}
-.risk-alert-btn:hover {
-    background: #FEF2F2; color: #7F1D1D;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,.25);
-}
-.risk-alert-btn i { font-size: 15px; }
-.risk-alert-close {
-    width: 34px; height: 34px; border-radius: 8px;
-    background: rgba(255,255,255,.1);
-    border: 1px solid rgba(255,255,255,.15);
-    color: rgba(255,255,255,.7); cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; transition: all .2s; flex-shrink: 0;
-}
-.risk-alert-close:hover {
-    background: rgba(255,255,255,.2); color: #fff;
-    border-color: rgba(255,255,255,.3); transform: scale(1.05);
-}
-@media (max-width: 768px) {
-    .risk-alert-wrap  { padding: 16px 18px; gap: 14px; }
-    .risk-alert-right { width: 100%; justify-content: space-between; }
-    .risk-alert-btn   { flex: 1; justify-content: center; }
-    .risk-pulse-ring  { display: none; }
-    .risk-alert-title { font-size: 14px; }
+/* ══════════════════════════════════════
+   ADMIN DASHBOARD — CLEAN MINIMAL v3
+   ══════════════════════════════════════ */
+
+/* Subtle page-level gradient overlay */
+.page-wrap {
+    background:
+        radial-gradient(ellipse at 0% 0%,   rgba(37,99,235,.035) 0%, transparent 55%),
+        radial-gradient(ellipse at 100% 90%, rgba(124,58,237,.025) 0%, transparent 50%);
 }
 
-/* ─── Dashboard insight sections ─── */
-.chart-card-v2{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;}
-.chart-head-v2{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
-.chart-title-v2{font-size:15px;font-weight:700;color:var(--text-1);}
-.chart-sub-v2{font-size:12px;color:var(--text-2);margin-top:2px;}
-.trend-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
-.trend-naik{background:#DCFCE7;color:#15803D;}
-.trend-turun{background:#FEE2E2;color:#991B1B;}
-.trend-stabil{background:#F1F5F9;color:#475569;}
-.filter-select{padding:6px 28px 6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text-1);background:var(--white);cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;}
-.filter-select:focus{border-color:var(--blue);}
-.donut-wrap{display:flex;align-items:center;gap:16px;margin-top:12px;flex-wrap:wrap;}
-.donut-canvas-box{flex-shrink:0;width:168px;height:168px;position:relative;}
-.donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;}
-.donut-center-num{font-size:25px;font-weight:800;color:var(--text-1);line-height:1;}
-.donut-center-sub{font-size:10px;color:var(--text-2);font-weight:500;margin-top:2px;}
-.risk-legend-list{display:flex;flex-direction:column;gap:8px;flex:1;}
-.risk-legend-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;padding:4px 0;}
-.risk-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-right:8px;}
-.risk-insight-note,.grade-insight{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:6px;}
-.risk-insight-note strong,.grade-insight strong{color:var(--text-1);font-weight:700;}
-.kelas-tbl{width:100%;border-collapse:collapse;}
-.kelas-tbl thead th{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;padding:9px 14px;border-bottom:1.5px solid var(--border);background:#FAFBFF;white-space:nowrap;}
-.kelas-tbl tbody tr{border-bottom:1px solid #F8FAFC;transition:background .1s;}
-.kelas-tbl tbody tr:last-child{border-bottom:none;}
-.kelas-tbl tbody tr:hover{background:#FAFBFF;}
-.kelas-tbl tbody td{padding:11px 14px;font-size:13px;vertical-align:middle;}
-.ipk-mini-bar{width:60px;height:4px;background:#F1F5F9;border-radius:2px;display:inline-block;vertical-align:middle;overflow:hidden;}
-.ipk-mini-fill{height:100%;border-radius:2px;}
-@media(max-width:768px){.donut-wrap{flex-direction:column;align-items:center;}.hide-sm{display:none!important;}}
+/* ── Section label ────────────────────── */
+.db-sec {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    margin-bottom: 14px;
+    margin-top: 6px;
+}
+.db-sec::before {
+    content: '';
+    width: 3px;
+    height: 15px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #2563EB, #7C3AED);
+    flex-shrink: 0;
+}
+.db-sec::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, #E2E8F0, transparent);
+}
+
+/* ── Stat cards ───────────────────────── */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+}
+.db-stat {
+    background: #fff;
+    border: 1px solid #EDF0F7;
+    border-radius: 13px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+    overflow: hidden;
+    transition: transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s;
+    cursor: default;
+}
+.db-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+}
+.db-stat-bar { height: 3px; }
+.db-stat-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 8px;
+    position: relative;
+}
+.db-stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+.db-stat-info { flex: 1; min-width: 0; }
+.db-stat-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+}
+.db-stat-num {
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -1.2px;
+}
+.db-stat-foot { padding: 0 16px 13px; }
+.db-stat-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 700;
+}
+
+/* ── Chart / info cards ───────────────── */
+.db-card {
+    background: #fff;
+    border: 1px solid #EDF0F7;
+    border-radius: 13px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+    padding: 22px 24px;
+    height: 100%;
+}
+.db-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.db-card-title { font-size: 14px; font-weight: 700; color: #0F172A; }
+.db-card-sub   { font-size: 12px; color: #64748B; margin-top: 2px; }
+
+.trend-badge  { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700; }
+.trend-naik   { background:#DCFCE7;color:#15803D; }
+.trend-turun  { background:#FEE2E2;color:#991B1B; }
+.trend-stabil { background:#F1F5F9;color:#475569; }
+
+.db-select {
+    padding: 6px 26px 6px 10px;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: #0F172A;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    transition: border-color .15s;
+}
+.db-select:focus { border-color: #2563EB; }
+
+.db-legend-row  { display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12px;color:#64748B; }
+.db-legend-item { display:flex;align-items:center;gap:5px; }
+
+.db-link {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2563EB;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: color .15s;
+}
+.db-link:hover { color: #1D4ED8; }
+
+/* ── ARIMA panel boxes (used by JS) ───── */
+.ap-box         { border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+.ap-box:last-child { margin-bottom: 0; }
+.ap-box-blue    { background: #F0F6FF; border: 1.5px solid #BFDBFE; }
+.ap-box-amber   { background: #FFFBEB; border: 1.5px solid #FCD34D; }
+.ap-box-green   { background: #F0FDF4; border: 1px solid #BBF7D0; }
+.ap-lbl         { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .7px; margin-bottom: 4px; }
+.ap-lbl-blue    { color: #1D4ED8; }
+.ap-lbl-amber   { color: #D97706; }
+.ap-lbl-green   { color: #16A34A; }
+.ap-num         { font-size: 30px; font-weight: 900; line-height: 1; letter-spacing: -1.5px; }
+.ap-num-blue    { color: #2563EB; }
+.ap-num-amber   { color: #D97706; }
+.ap-sub         { font-size: 11.5px; color: #64748B; margin-top: 5px; }
+.ap-eval-row    { display:flex; gap:12px; }
+.ap-eval-item   { flex:1; text-align:center; }
+.ap-eval-num    { font-size: 20px; font-weight: 800; color: #16A34A; letter-spacing: -.8px; }
+.ap-eval-lbl    { font-size: 9.5px; color: #6B7280; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+
+/* ── Donut ────────────────────────────── */
+.db-donut-wrap  { display:flex;align-items:center;gap:18px;margin-top:12px;flex-wrap:wrap; }
+.db-donut-box   { position:relative;width:156px;height:156px;flex-shrink:0; }
+.db-donut-center{
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+    pointer-events: none;
+}
+.db-donut-num { font-size: 24px; font-weight: 900; color: #0F172A; line-height: 1; letter-spacing: -1px; }
+.db-donut-lbl { font-size: 9.5px; color: #94A3B8; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+
+.db-leg-list    { display:flex;flex-direction:column;gap:7px;flex:1;min-width:110px; }
+.db-leg-row     { display:flex;align-items:center;justify-content:space-between;gap:6px; }
+.db-leg-left    { display:flex;align-items:center;gap:7px;min-width:0; }
+.db-leg-dot     { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+.db-leg-name    { font-size:12px;color:#64748B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.db-leg-val     { font-size:12.5px;font-weight:800;color:#0F172A;flex-shrink:0; }
+
+.db-insight {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 11px;
+    border-top: 1px solid #F1F5F9;
+    font-size: 12px;
+    color: #64748B;
+    flex-wrap: wrap;
+}
+.db-insight strong { color: #0F172A; font-weight: 700; }
+.db-insight i { color: #CBD5E1; flex-shrink: 0; }
+
+/* ── Table ────────────────────────────── */
+.db-tbl-wrap  {
+    background: #fff;
+    border: 1px solid #EDF0F7;
+    border-radius: 13px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+.db-tbl-head  {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid #F4F7FB;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.db-tbl-title { font-size: 14px; font-weight: 700; color: #0F172A; }
+.db-tbl-sub   { font-size: 12px; color: #64748B; margin-top: 2px; }
+
+.db-tbl { width: 100%; border-collapse: collapse; }
+.db-tbl thead tr { background: #FAFBFE; }
+.db-tbl thead th {
+    font-size: 10px;
+    font-weight: 800;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    padding: 10px 16px;
+    border-bottom: 1.5px solid #EEF2F8;
+    text-align: left;
+    white-space: nowrap;
+}
+.db-tbl tbody tr { border-bottom: 1px solid #F8FAFC; transition: background .12s; }
+.db-tbl tbody tr:last-child { border-bottom: none; }
+.db-tbl tbody tr:hover { background: #FAFBFF; }
+.db-tbl tbody td { padding: 12px 16px; font-size: 13px; vertical-align: middle; }
+.db-tbl .risk-row { background: rgba(239,68,68,.022) !important; }
+.db-tbl .risk-row td:first-child { border-left: 3px solid #EF4444; }
+
+.db-pct-wrap { display:flex;align-items:center;justify-content:center;gap:7px; }
+.db-pct-bar  { width:52px;height:5px;background:#F1F5F9;border-radius:3px;overflow:hidden;flex-shrink:0; }
+.db-pct-fill { height:100%;border-radius:3px;transition:width .5s; }
+.db-ipk-bar  { width:48px;height:4px;background:#F1F5F9;border-radius:2px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:5px; }
+.db-ipk-fill { height:100%;border-radius:2px; }
+
+.db-pill     { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:700;white-space:nowrap; }
+.db-pill-red { background:#FEE2E2;color:#991B1B; }
+.db-pill-grn { background:#DCFCE7;color:#166534; }
+
+.db-tbl-foot { padding:12px 22px;border-top:1px solid #F4F7FB;display:flex;gap:8px;flex-wrap:wrap;align-items:center; }
+.db-chip     { display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:600; }
+
+/* ── Animations ───────────────────────── */
+@keyframes db-fade-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.db-ani   { animation: db-fade-up .45s cubic-bezier(.16,1,.3,1) both; }
+.db-ani-1 { animation-delay: .04s; }
+.db-ani-2 { animation-delay: .11s; }
+.db-ani-3 { animation-delay: .18s; }
+.db-ani-4 { animation-delay: .25s; }
+.db-ani-5 { animation-delay: .32s; }
+
+/* ── Responsive ───────────────────────── */
+@media (max-width: 1199px) {
+    .stat-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 767px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .db-card   { padding: 16px 18px; }
+    .db-donut-wrap { flex-direction: column; align-items: center; gap: 14px; }
+    .db-leg-list { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 6px 14px; }
+    .db-leg-row  { flex: 0 0 auto; }
+    .db-tbl-head { padding: 14px 16px 12px; }
+    .db-tbl-foot { padding: 10px 16px; }
+    .db-tbl tbody td { padding: 10px 12px; }
+    .db-tbl thead th { padding: 9px 12px; }
+}
+@media (max-width: 575px) {
+    .stat-grid { gap: 8px; }
+    .db-stat-num { font-size: 22px; }
+    .hide-xs { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .db-ani, .db-stat { animation: none !important; }
+    .db-stat:hover { transform: none; }
+}
 </style>
 @endpush
 
 @section('content')
 
-{{-- Banner --}}
+{{-- ══ BANNER (unchanged) ══ --}}
 @include('components.page-banner', [
     'gradient'     => 'linear-gradient(135deg, #0C1445 0%, #1E3A8A 40%, #2563EB 100%)',
     'icon'         => 'bi-speedometer2',
@@ -200,19 +334,15 @@
     'badge2_label' => "Perlu\nPerhatian",
 ])
 
-{{-- ══ ALERT BERISIKO ══ --}}
+{{-- ══ ALERT (unchanged) ══ --}}
 @if($mahasiswaBerisiko > 0)
 <div class="risk-alert-wrap" id="riskAlertAdmin">
     <div class="risk-pulse-ring"></div>
     <div class="risk-alert-left">
-        <div class="risk-alert-icon">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-        </div>
+        <div class="risk-alert-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
         <div class="risk-alert-content">
-            <div class="risk-alert-tag">⚡ Tindakan Diperlukan</div>
-            <div class="risk-alert-title">
-                {{ $mahasiswaBerisiko }} Mahasiswa Terdeteksi Berisiko Akademik
-            </div>
+            <div class="risk-alert-tag">Tindakan Diperlukan</div>
+            <div class="risk-alert-title">{{ $mahasiswaBerisiko }} Mahasiswa Terdeteksi Berisiko Akademik</div>
             <div class="risk-alert-desc">
                 Terdapat mahasiswa dengan <strong>nilai D/E</strong>, <strong>alpha ≥18 jam (SP I–PS)</strong>, atau <strong>IPS &lt;2.00</strong> di semester terakhir.
                 Segera arahkan DPA untuk bimbingan agar tidak berdampak pada kelulusan.
@@ -221,73 +351,60 @@
     </div>
     <div class="risk-alert-right">
         <a href="{{ route('admin.mahasiswa.index') }}" class="risk-alert-btn">
-            <i class="bi bi-arrow-right-circle-fill"></i>
-            Lihat & Tangani Sekarang
+            <i class="bi bi-arrow-right-circle-fill"></i> Lihat &amp; Tangani Sekarang
         </a>
-        <button class="risk-alert-close" id="riskCloseAdmin" title="Tutup">
-            <i class="bi bi-x-lg"></i>
-        </button>
+        <button class="risk-alert-close" id="riskCloseAdmin" title="Tutup"><i class="bi bi-x-lg"></i></button>
     </div>
 </div>
 @endif
 
 {{-- ══ STAT CARDS ══ --}}
-<div class="section-label">Statistik Sistem</div>
-<div class="row g-3 mb-3">
-    @php
-    $totalKompenPending = \App\Models\Kompensasi::where('status','pending')->count();
-    $stats = [
-        ['label'=>'Mahasiswa Aktif',    'val'=>$totalMahasiswa,    'icon'=>'bi-mortarboard-fill',         'accent'=>'linear-gradient(90deg,#2563EB,#60A5FA)', 'ibg'=>'#EFF6FF', 'ic'=>'#2563EB', 'badge'=>'Terdaftar',      'bbg'=>'#DBEAFE', 'bc'=>'#1D4ED8'],
-        ['label'=>'Total Dosen',        'val'=>$totalDosen,        'icon'=>'bi-person-badge-fill',        'accent'=>'linear-gradient(90deg,#16A34A,#86EFAC)', 'ibg'=>'#F0FDF4', 'ic'=>'#16A34A', 'badge'=>'Aktif mengajar', 'bbg'=>'#DCFCE7', 'bc'=>'#166534'],
-        ['label'=>'Mata Kuliah',        'val'=>$totalMatkul,       'icon'=>'bi-book-fill',                'accent'=>'linear-gradient(90deg,#7C3AED,#A78BFA)', 'ibg'=>'#F5F3FF', 'ic'=>'#7C3AED', 'badge'=>'Semester aktif', 'bbg'=>'#EDE9FE', 'bc'=>'#5B21B6'],
-        ['label'=>'Kelas Aktif',        'val'=>$totalKelas,        'icon'=>'bi-grid-3x3-gap-fill',        'accent'=>'linear-gradient(90deg,#0891B2,#67E8F9)', 'ibg'=>'#ECFEFF', 'ic'=>'#0891B2', 'badge'=>'Semua angkatan', 'bbg'=>'#CFFAFE', 'bc'=>'#0E7490'],
-        ['label'=>'Mahasiswa Berisiko', 'val'=>$mahasiswaBerisiko, 'icon'=>'bi-exclamation-triangle-fill','accent'=>'linear-gradient(90deg,#94A3B8,#CBD5E1)', 'ibg'=>'#F8FAFC', 'ic'=>$mahasiswaBerisiko>0 ? '#EF4444' : '#22C55E', 'badge'=>$mahasiswaBerisiko>0 ? 'Perlu penanganan' : 'Semua aman', 'bbg'=>$mahasiswaBerisiko>0 ? '#FEE2E2' : '#DCFCE7', 'bc'=>$mahasiswaBerisiko>0 ? '#991B1B' : '#166534'],
-        ['label'=>'Kompen Pending', 'val'=>$totalKompenPending, 'icon'=>'bi-clipboard2-check-fill', 'accent'=>$totalKompenPending>0 ? 'linear-gradient(90deg,#F59E0B,#FCD34D)' : 'linear-gradient(90deg,#22C55E,#86EFAC)', 'ibg'=>$totalKompenPending>0 ? '#FEF3C7' : '#F0FDF4', 'ic'=>$totalKompenPending>0 ? '#F59E0B' : '#22C55E', 'badge'=>$totalKompenPending>0 ? 'Perlu ditangani' : 'Semua lunas', 'bbg'=>$totalKompenPending>0 ? '#FEF9C3' : '#DCFCE7', 'bc'=>$totalKompenPending>0 ? '#854D0E' : '#166534'],
-    ];
-    @endphp
+@php
+$stats = [
+    ['label'=>'Mahasiswa Aktif',    'val'=>$totalMahasiswa,    'icon'=>'bi-mortarboard-fill',          'bar'=>'linear-gradient(90deg,#2563EB,#60A5FA)', 'ibg'=>'#EFF6FF', 'ic'=>'#2563EB', 'nclr'=>'#1E40AF', 'badge'=>'Terdaftar',      'bbg'=>'#DBEAFE','bc'=>'#1D4ED8'],
+    ['label'=>'Total Dosen',        'val'=>$totalDosen,        'icon'=>'bi-person-badge-fill',         'bar'=>'linear-gradient(90deg,#16A34A,#86EFAC)', 'ibg'=>'#F0FDF4', 'ic'=>'#16A34A', 'nclr'=>'#166534', 'badge'=>'Aktif mengajar', 'bbg'=>'#DCFCE7','bc'=>'#166534'],
+    ['label'=>'Mata Kuliah',        'val'=>$totalMatkul,       'icon'=>'bi-book-fill',                 'bar'=>'linear-gradient(90deg,#7C3AED,#A78BFA)', 'ibg'=>'#F5F3FF', 'ic'=>'#7C3AED', 'nclr'=>'#5B21B6', 'badge'=>'Semester ini',   'bbg'=>'#EDE9FE','bc'=>'#5B21B6'],
+    ['label'=>'Kelas Aktif',        'val'=>$totalKelas,        'icon'=>'bi-grid-3x3-gap-fill',         'bar'=>'linear-gradient(90deg,#0891B2,#67E8F9)', 'ibg'=>'#ECFEFF', 'ic'=>'#0891B2', 'nclr'=>'#0E7490', 'badge'=>'Semua angkatan', 'bbg'=>'#CFFAFE','bc'=>'#0E7490'],
+    ['label'=>'Mahasiswa Berisiko', 'val'=>$mahasiswaBerisiko, 'icon'=>'bi-exclamation-triangle-fill', 'bar'=>$mahasiswaBerisiko>0?'linear-gradient(90deg,#EF4444,#FCA5A5)':'linear-gradient(90deg,#22C55E,#86EFAC)', 'ibg'=>$mahasiswaBerisiko>0?'#FEF2F2':'#F0FDF4', 'ic'=>$mahasiswaBerisiko>0?'#EF4444':'#22C55E', 'nclr'=>$mahasiswaBerisiko>0?'#DC2626':'#16A34A', 'badge'=>$mahasiswaBerisiko>0?'Perlu penanganan':'Semua aman', 'bbg'=>$mahasiswaBerisiko>0?'#FEE2E2':'#DCFCE7', 'bc'=>$mahasiswaBerisiko>0?'#991B1B':'#166534'],
+    ['label'=>'Semester Aktif',     'val'=>$semesterAktif,     'icon'=>'bi-calendar2-check-fill',      'bar'=>'linear-gradient(90deg,#DB2777,#F472B6)', 'ibg'=>'#FDF2F8', 'ic'=>'#DB2777', 'nclr'=>'#831843', 'badge'=>'Tahun ajaran',   'bbg'=>'#FCE7F3','bc'=>'#9D174D'],
+];
+@endphp
 
-    @foreach($stats as $stat)
-    <div class="col-md col-6">
-        <div style="position:relative;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform .18s,box-shadow .18s;height:100%;"
-             onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'"
-             onmouseout="this.style.transform='';this.style.boxShadow='var(--shadow)'">
-            <div style="height:3px;background:{{ $stat['accent'] }};"></div>
-            <i class="bi {{ $stat['icon'] }}" style="position:absolute;right:-8px;bottom:-12px;font-size:68px;color:{{ $stat['ic'] }};opacity:.06;pointer-events:none;"></i>
-            <div style="padding:16px 18px;position:relative;z-index:1;">
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <div style="width:40px;height:40px;border-radius:10px;background:{{ $stat['ibg'] }};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
-                        <i class="bi {{ $stat['icon'] }}" style="color:{{ $stat['ic'] }};"></i>
-                    </div>
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-size:11.5px;font-weight:600;color:var(--text-2);margin-bottom:2px;">{{ $stat['label'] }}</div>
-                        <div style="font-size:28px;font-weight:800;line-height:1;color:{{ $stat['ic'] }};letter-spacing:-1px;">{{ $stat['val'] }}</div>
-                    </div>
-                </div>
-                <div style="margin-top:10px;">
-                    <span style="display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:{{ $stat['bbg'] }};color:{{ $stat['bc'] }};">
-                        {{ $stat['badge'] }}
-                    </span>
-                </div>
+<div class="db-sec db-ani db-ani-1">Statistik Sistem</div>
+<div class="stat-grid db-ani db-ani-1">
+    @foreach($stats as $s)
+    <div class="db-stat">
+        <div class="db-stat-bar" style="background:{{ $s['bar'] }};"></div>
+        <div class="db-stat-body">
+            <div class="db-stat-icon" style="background:{{ $s['ibg'] }};color:{{ $s['ic'] }};">
+                <i class="bi {{ $s['icon'] }}"></i>
             </div>
+            <div class="db-stat-info">
+                <div class="db-stat-label">{{ $s['label'] }}</div>
+                <div class="db-stat-num" style="color:{{ $s['nclr'] }};">{{ $s['val'] }}</div>
+            </div>
+        </div>
+        <div class="db-stat-foot">
+            <span class="db-stat-badge" style="background:{{ $s['bbg'] }};color:{{ $s['bc'] }};">{{ $s['badge'] }}</span>
         </div>
     </div>
     @endforeach
 </div>
 
-{{-- ══ SECTION 1: TREN IPK ARIMA ══ --}}
-<div class="section-label">Tren IPK per Angkatan</div>
-<div class="row g-3 mb-3">
+{{-- ══ TREN IPK ARIMA ══ --}}
+<div class="db-sec db-ani db-ani-2">Tren IPK per Angkatan</div>
+<div class="row g-3 mb-4 db-ani db-ani-2">
     <div class="col-lg-7">
-        <div class="chart-card-v2">
-            <div class="chart-head-v2">
+        <div class="db-card">
+            <div class="db-card-head">
                 <div>
-                    <div class="chart-title-v2">Tren IPK & Prediksi ARIMA</div>
-                    <div class="chart-sub-v2">ARIMA(0,1,1) · Data historis & prediksi semester berikutnya</div>
+                    <div class="db-card-title">Tren IPK &amp; Prediksi ARIMA</div>
+                    <div class="db-card-sub">ARIMA(0,1,1) · Historis &amp; prediksi semester berikutnya</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                     <span id="trenBadge" class="trend-badge trend-stabil">→ Memuat...</span>
                     @if($angkatanList->isNotEmpty())
-                    <select id="angkatanSelect" class="filter-select">
+                    <select id="angkatanSelect" class="db-select">
                         @foreach($angkatanList as $a)
                         <option value="{{ $a }}">Angkatan {{ $a }}</option>
                         @endforeach
@@ -299,41 +416,44 @@
                 <canvas id="arimaChart"></canvas>
             </div>
             <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-                <div style="display:flex;gap:16px;font-size:11.5px;color:var(--text-2);">
-                    <div style="display:flex;align-items:center;gap:5px;">
-                        <div style="width:20px;height:2px;background:#2563EB;border-radius:1px;"></div> Historis
+                <div class="db-legend-row">
+                    <div class="db-legend-item">
+                        <div style="width:18px;height:2.5px;background:#2563EB;border-radius:1px;"></div>
+                        <span>Historis</span>
                     </div>
-                    <div style="display:flex;align-items:center;gap:5px;">
-                        <div style="width:20px;border-top:2px dashed #F59E0B;"></div> Prediksi
+                    <div class="db-legend-item">
+                        <div style="width:18px;border-top:2.5px dashed #F59E0B;"></div>
+                        <span>Prediksi</span>
                     </div>
                 </div>
-                <a href="{{ route('admin.analitik.index') }}" style="font-size:12.5px;font-weight:700;color:var(--blue);text-decoration:none;">
-                    Lihat Detail Analitik <i class="bi bi-arrow-right"></i>
+                <a href="{{ route('admin.analitik.index') }}" class="db-link">
+                    Detail Analitik <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </div>
     </div>
     <div class="col-lg-5">
-        <div class="chart-card-v2" style="height:100%;">
-            <div class="chart-title-v2">Ringkasan ARIMA</div>
-            <div class="chart-sub-v2" id="arimaPanelSub">Memuat data...</div>
-            <div id="arimaPanelContent" style="margin-top:16px;"></div>
+        <div class="db-card">
+            <div class="db-card-title" style="margin-bottom:4px;">Ringkasan ARIMA</div>
+            <div class="db-card-sub" id="arimaPanelSub">Memuat data...</div>
+            <div id="arimaPanelContent" style="margin-top:14px;"></div>
         </div>
     </div>
 </div>
 
-{{-- ══ SECTION 2: DISTRIBUSI ══ --}}
-<div class="section-label">Distribusi Akademik</div>
-<div class="row g-3 mb-3 align-items-start">
+{{-- ══ DISTRIBUSI AKADEMIK ══ --}}
+<div class="db-sec db-ani db-ani-3">Distribusi Akademik</div>
+<div class="row g-3 mb-4 db-ani db-ani-3 align-items-start">
+
     {{-- Donut Risiko --}}
     <div class="col-lg-5">
-        <div class="chart-card-v2">
-            <div class="chart-head-v2">
+        <div class="db-card">
+            <div class="db-card-head">
                 <div>
-                    <div class="chart-title-v2">Distribusi Mahasiswa Berisiko</div>
-                    <div class="chart-sub-v2">Per kategori risiko · Semester {{ $semesterAktif }}</div>
+                    <div class="db-card-title">Distribusi Mahasiswa Berisiko</div>
+                    <div class="db-card-sub">Per kategori risiko · Semester {{ $semesterAktif }}</div>
                 </div>
-                <a href="{{ route('admin.berisiko.index') }}" style="font-size:12px;font-weight:700;color:var(--blue);text-decoration:none;white-space:nowrap;">
+                <a href="{{ route('admin.berisiko.index') }}" class="db-link">
                     Lihat Detail <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
@@ -347,39 +467,39 @@
                 }
             @endphp
             @if(array_sum($distribusiRisiko) > 0)
-            <div class="donut-wrap">
-                <div class="donut-canvas-box">
-                    <canvas id="risikoChart" width="168" height="168"></canvas>
-                    <div class="donut-center">
-                        <div class="donut-center-num">{{ $mahasiswaBerisiko }}</div>
-                        <div class="donut-center-sub">Berisiko</div>
+            <div class="db-donut-wrap">
+                <div class="db-donut-box">
+                    <canvas id="risikoChart" width="156" height="156"></canvas>
+                    <div class="db-donut-center">
+                        <div class="db-donut-num">{{ $mahasiswaBerisiko }}</div>
+                        <div class="db-donut-lbl">Berisiko</div>
                     </div>
                 </div>
-                <div class="risk-legend-list">
+                <div class="db-leg-list">
                     @foreach($riskKeys as $idx => $kat)
                     @if($distribusiRisiko[$kat] > 0)
-                    <div class="risk-legend-row">
-                        <div style="display:flex;align-items:center;">
-                            <div class="risk-legend-dot" style="background:{{ $riskColors[$idx] }};"></div>
-                            <span style="color:var(--text-2);">{{ $riskLabels[$idx] }}</span>
+                    <div class="db-leg-row">
+                        <div class="db-leg-left">
+                            <div class="db-leg-dot" style="background:{{ $riskColors[$idx] }};"></div>
+                            <span class="db-leg-name">{{ $riskLabels[$idx] }}</span>
                         </div>
-                        <span style="font-weight:700;color:var(--text-1);">{{ $distribusiRisiko[$kat] }}</span>
+                        <span class="db-leg-val">{{ $distribusiRisiko[$kat] }}</span>
                     </div>
                     @endif
                     @endforeach
                 </div>
             </div>
             @if($riskMaxIdx !== null && $riskMaxVal > 0)
-            <div class="risk-insight-note">
-                <i class="bi bi-info-circle-fill" style="color:var(--text-3);"></i>
+            <div class="db-insight">
+                <i class="bi bi-info-circle-fill"></i>
                 Kategori terbanyak: <strong>{{ $riskLabels[$riskMaxIdx] }}</strong> ({{ $riskMaxVal }} mahasiswa)
             </div>
             @endif
             @else
-            <div style="text-align:center;padding:40px 16px;color:var(--text-3);">
+            <div style="text-align:center;padding:40px 16px;color:#94A3B8;">
                 <i class="bi bi-shield-check-fill" style="font-size:40px;color:#22C55E;display:block;margin-bottom:10px;"></i>
-                <div style="font-weight:600;color:#166534;">Tidak ada mahasiswa berisiko</div>
-                <div style="font-size:12px;margin-top:4px;">Semua mahasiswa aman di semester ini</div>
+                <div style="font-weight:700;font-size:13.5px;color:#166534;">Tidak ada mahasiswa berisiko</div>
+                <div style="font-size:12px;margin-top:3px;">Semua mahasiswa aman di semester ini</div>
             </div>
             @endif
         </div>
@@ -387,13 +507,13 @@
 
     {{-- Bar Grade --}}
     <div class="col-lg-7">
-        <div class="chart-card-v2">
-            <div class="chart-head-v2">
+        <div class="db-card">
+            <div class="db-card-head">
                 <div>
-                    <div class="chart-title-v2">Distribusi Grade Mahasiswa</div>
-                    <div class="chart-sub-v2">Jumlah nilai per grade · Semester {{ $semesterAktif }}</div>
+                    <div class="db-card-title">Distribusi Grade Nilai</div>
+                    <div class="db-card-sub">Jumlah nilai per grade · Semester {{ $semesterAktif }}</div>
                 </div>
-                <select id="gradeAngkatanSel" class="filter-select">
+                <select id="gradeAngkatanSel" class="db-select">
                     <option value="">Semua Angkatan</option>
                     @foreach($angkatanList as $a)
                     <option value="{{ $a }}">Angkatan {{ $a }}</option>
@@ -409,33 +529,36 @@
                 $maxGradeVal   = $maxGradeKey !== false ? $distribusiGrade[$maxGradeKey] : 0;
                 $maxGradePct   = $totalGradeAll > 0 ? round($maxGradeVal / $totalGradeAll * 100) : 0;
             @endphp
-            @if($maxGradeKey !== false)
-            <div class="grade-insight" id="gradeInsight">
-                <i class="bi bi-bar-chart-fill" style="color:var(--text-3);"></i>
+            @if($totalGradeAll > 0 && $maxGradeKey !== false)
+            <div class="db-insight" id="gradeInsight">
+                <i class="bi bi-bar-chart-fill"></i>
                 Grade <strong>{{ $maxGradeKey }}</strong> mendominasi — {{ $maxGradeVal }} dari {{ $totalGradeAll }} nilai (<strong>{{ $maxGradePct }}%</strong>)
             </div>
+            @else
+            <div class="db-insight" id="gradeInsight" style="display:none;"></div>
             @endif
         </div>
     </div>
 </div>
 
-{{-- ══ SECTION 3: TABEL RINGKASAN PER KELAS ══ --}}
-<div class="section-label">Ringkasan Akademik per Kelas</div>
-<div class="card-white tbl-card-v2 mb-3">
-    <div class="tbl-head-v2">
+{{-- ══ TABEL KELAS ══ --}}
+<div class="db-sec db-ani db-ani-4">Ringkasan Akademik per Kelas</div>
+<div class="db-tbl-wrap db-ani db-ani-4">
+    <div class="db-tbl-head">
         <div>
-            <div class="tbl-title-v2">Performa per Kelas</div>
-            <div class="tbl-sub-v2">Semester {{ $semesterAktif }} · {{ count($ringkasanKelas) }} kelas aktif</div>
+            <div class="db-tbl-title">Performa per Kelas</div>
+            <div class="db-tbl-sub">Semester {{ $semesterAktif }} · {{ count($ringkasanKelas) }} kelas aktif</div>
         </div>
     </div>
+
     @if(empty($ringkasanKelas))
-    <div style="text-align:center;padding:36px;color:var(--text-3);">
+    <div style="text-align:center;padding:48px;color:#94A3B8;">
         <i class="bi bi-grid-3x3-gap" style="font-size:32px;display:block;margin-bottom:10px;opacity:.3;"></i>
-        Belum ada data kelas untuk semester ini.
+        <div style="font-size:13.5px;font-weight:600;">Belum ada data kelas untuk semester ini.</div>
     </div>
     @else
-    <div style="overflow-x:auto;">
-        <table class="kelas-tbl">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <table class="db-tbl">
             <thead>
                 <tr>
                     <th>#</th>
@@ -443,44 +566,50 @@
                     <th style="text-align:center;">Total</th>
                     <th style="text-align:center;">Berisiko</th>
                     <th style="text-align:center;">% Risiko</th>
-                    <th style="text-align:center;" class="hide-sm">Rata-rata IPK</th>
+                    <th style="text-align:center;" class="hide-xs">Rata-rata IPK</th>
                     <th style="text-align:center;">Status</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($ringkasanKelas as $i => $kls)
                 @php $perlu = $kls['pct_risiko'] > 30; @endphp
-                <tr style="{{ $perlu ? 'background:rgba(239,68,68,.025);' : '' }}">
-                    <td style="font-size:12px;color:var(--text-3);{{ $perlu ? 'border-left:3px solid #EF4444;' : '' }}">{{ $i+1 }}</td>
-                    <td style="font-weight:700;">{{ $kls['kelas'] }}</td>
-                    <td style="text-align:center;">{{ $kls['total'] }}</td>
-                    <td style="text-align:center;font-weight:700;color:{{ $kls['berisiko'] > 0 ? '#EF4444' : '#22C55E' }};">
-                        {{ $kls['berisiko'] }}
+                <tr class="{{ $perlu ? 'risk-row' : '' }}">
+                    <td style="font-size:11.5px;color:#CBD5E1;font-weight:600;">{{ $i + 1 }}</td>
+                    <td style="font-weight:700;color:#0F172A;">{{ $kls['kelas'] }}</td>
+                    <td style="text-align:center;color:#64748B;font-weight:600;">{{ $kls['total'] }}</td>
+                    <td style="text-align:center;">
+                        <span style="font-weight:800;font-size:14px;color:{{ $kls['berisiko'] > 0 ? '#EF4444' : '#22C55E' }};">
+                            {{ $kls['berisiko'] }}
+                        </span>
                     </td>
                     <td style="text-align:center;">
-                        <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
-                            <span style="font-weight:700;font-size:12.5px;color:{{ $perlu ? '#EF4444' : 'var(--text-2)' }};">{{ $kls['pct_risiko'] }}%</span>
-                            <div style="width:56px;height:7px;background:#E2E8F0;border-radius:4px;overflow:hidden;">
-                                <div style="height:100%;width:{{ min($kls['pct_risiko'],100) }}%;background:{{ $perlu ? '#EF4444' : '#22C55E' }};border-radius:4px;"></div>
+                        <div class="db-pct-wrap">
+                            <span style="font-size:12px;font-weight:700;color:{{ $perlu ? '#EF4444' : '#64748B' }};min-width:32px;text-align:right;">
+                                {{ $kls['pct_risiko'] }}%
+                            </span>
+                            <div class="db-pct-bar">
+                                <div class="db-pct-fill" style="width:{{ min($kls['pct_risiko'],100) }}%;background:{{ $perlu ? '#EF4444' : '#22C55E' }};"></div>
                             </div>
                         </div>
                     </td>
-                    <td style="text-align:center;" class="hide-sm">
-                        <span style="font-weight:700;color:{{ $kls['ipk'] < 2.5 ? '#EF4444' : ($kls['ipk'] >= 3.5 ? '#22C55E' : 'var(--text-1)') }};">
-                            {{ number_format($kls['ipk'], 2) }}
-                        </span>
-                        <div class="ipk-mini-bar">
-                            <div class="ipk-mini-fill" style="width:{{ min(($kls['ipk']/4)*100,100) }}%;background:{{ $kls['ipk'] < 2.5 ? '#EF4444' : '#2563EB' }};"></div>
+                    <td style="text-align:center;" class="hide-xs">
+                        <div style="display:flex;align-items:center;justify-content:center;gap:5px;">
+                            <span style="font-weight:800;font-size:13px;color:{{ $kls['ipk'] < 2.5 ? '#EF4444' : ($kls['ipk'] >= 3.5 ? '#22C55E' : '#0F172A') }};">
+                                {{ number_format($kls['ipk'], 2) }}
+                            </span>
+                            <div class="db-ipk-bar">
+                                <div class="db-ipk-fill" style="width:{{ min(($kls['ipk']/4)*100,100) }}%;background:{{ $kls['ipk'] < 2.5 ? '#EF4444' : '#2563EB' }};"></div>
+                            </div>
                         </div>
                     </td>
                     <td style="text-align:center;">
                         @if($perlu)
-                        <span style="display:inline-flex;align-items:center;gap:3px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#FEE2E2;color:#991B1B;">
-                            <i class="bi bi-exclamation-triangle-fill" style="font-size:10px;"></i> Perlu Perhatian
+                        <span class="db-pill db-pill-red">
+                            <i class="bi bi-exclamation-triangle-fill" style="font-size:9px;"></i> Perlu Perhatian
                         </span>
                         @else
-                        <span style="display:inline-flex;align-items:center;gap:3px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#DCFCE7;color:#166534;">
-                            <i class="bi bi-check-circle-fill" style="font-size:10px;"></i> Baik
+                        <span class="db-pill db-pill-grn">
+                            <i class="bi bi-check-circle-fill" style="font-size:9px;"></i> Baik
                         </span>
                         @endif
                     </td>
@@ -489,20 +618,23 @@
             </tbody>
         </table>
     </div>
+
     @php
         $kelasMaxRisk = collect($ringkasanKelas)->sortByDesc('pct_risiko')->first();
         $kelasAman    = collect($ringkasanKelas)->where('pct_risiko', 0)->pluck('kelas');
     @endphp
-    <div class="tbl-footer">
+    <div class="db-tbl-foot">
         @if($kelasMaxRisk && $kelasMaxRisk['pct_risiko'] > 0)
-        <div class="info-chip" style="background:#FEE2E2;color:#991B1B;">
-            <i class="bi bi-exclamation-triangle-fill"></i> Risiko tertinggi: {{ $kelasMaxRisk['kelas'] }} ({{ $kelasMaxRisk['pct_risiko'] }}%)
-        </div>
+        <span class="db-chip" style="background:#FEE2E2;color:#991B1B;">
+            <i class="bi bi-exclamation-triangle-fill" style="font-size:10px;"></i>
+            Risiko tertinggi: {{ $kelasMaxRisk['kelas'] }} ({{ $kelasMaxRisk['pct_risiko'] }}%)
+        </span>
         @endif
         @if($kelasAman->isNotEmpty())
-        <div class="info-chip" style="background:#DCFCE7;color:#166534;">
-            <i class="bi bi-check-circle-fill"></i> Paling stabil: {{ $kelasAman->implode(', ') }}
-        </div>
+        <span class="db-chip" style="background:#DCFCE7;color:#166534;">
+            <i class="bi bi-check-circle-fill" style="font-size:10px;"></i>
+            Paling stabil: {{ $kelasAman->implode(', ') }}
+        </span>
         @endif
     </div>
     @endif
@@ -516,7 +648,7 @@
 <script>
 Chart.register(ChartDataLabels);
 
-// ── Alert Close ──────────────────────────────────────────────────
+// ── Alert close ──────────────────────────────────────────────────
 (function() {
     var el   = document.getElementById('riskAlertAdmin');
     var btnX = document.getElementById('riskCloseAdmin');
@@ -554,7 +686,7 @@ function renderArima(d) {
         label: 'Historis',
         data: histData,
         borderColor: '#2563EB',
-        backgroundColor: 'rgba(37,99,235,.08)',
+        backgroundColor: 'rgba(37,99,235,.07)',
         fill: true, tension: 0.3, borderWidth: 2.5,
         pointRadius: histData.map(function(v, i) { return i < hist.length ? 4 : 0; }),
         pointBackgroundColor: '#2563EB',
@@ -591,8 +723,8 @@ function renderArima(d) {
                 datalabels: { display: false },
             },
             scales: {
-                y: { min: 0, max: 4, ticks: { stepSize: 0.5, font: { family: 'Plus Jakarta Sans', size: 11 }, color: '#64748B' }, grid: { color: '#F8FAFC' }, border: { display: false } },
-                x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 }, color: '#64748B', maxRotation: 0 } }
+                y: { min: 0, max: 4, ticks: { stepSize: 0.5, font: { family: 'Plus Jakarta Sans', size: 11 }, color: '#94A3B8' }, grid: { color: '#F8FAFC' }, border: { display: false } },
+                x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 }, color: '#94A3B8', maxRotation: 0 } }
             }
         }
     });
@@ -622,26 +754,26 @@ function renderArimaPanel(d) {
 
     var evalHtml = '';
     if (d.evaluasi) {
-        evalHtml = '<div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;padding:12px;">'
-            + '<div style="font-size:10.5px;font-weight:700;color:#16A34A;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Evaluasi Model</div>'
-            + '<div style="display:flex;gap:12px;">'
-            + '<div style="text-align:center;flex:1;"><div style="font-size:18px;font-weight:800;color:#16A34A;">' + Number(d.evaluasi.mae).toFixed(2) + '</div><div style="font-size:10px;color:#6B7280;font-weight:600;">MAE</div></div>'
-            + '<div style="text-align:center;flex:1;"><div style="font-size:18px;font-weight:800;color:#16A34A;">' + Number(d.evaluasi.mape).toFixed(1) + '%</div><div style="font-size:10px;color:#6B7280;font-weight:600;">MAPE</div></div>'
+        evalHtml = '<div class="ap-box ap-box-green">'
+            + '<div class="ap-lbl ap-lbl-green">Evaluasi Model</div>'
+            + '<div class="ap-eval-row">'
+            + '<div class="ap-eval-item"><div class="ap-eval-num">' + Number(d.evaluasi.mae).toFixed(2) + '</div><div class="ap-eval-lbl">MAE</div></div>'
+            + '<div class="ap-eval-item"><div class="ap-eval-num">' + Number(d.evaluasi.mape).toFixed(1) + '%</div><div class="ap-eval-lbl">MAPE</div></div>'
             + '</div></div>';
     }
 
     var predHtml = '';
     if (pred !== null) {
-        predHtml = '<div style="background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:10px;padding:14px;margin-bottom:12px;">'
-            + '<div style="font-size:10.5px;font-weight:700;color:#D97706;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Prediksi Semester Berikutnya</div>'
-            + '<div style="font-size:32px;font-weight:800;color:#D97706;letter-spacing:-1px;line-height:1;">' + Number(pred).toFixed(2) + '</div>'
-            + '<div style="font-size:11.5px;color:var(--text-2);margin-top:6px;">' + (isNaik ? '↑ +' : '↓ ') + selisih + ' dari saat ini</div>'
+        predHtml = '<div class="ap-box ap-box-amber">'
+            + '<div class="ap-lbl ap-lbl-amber">Prediksi Semester Berikutnya</div>'
+            + '<div class="ap-num ap-num-amber">' + Number(pred).toFixed(2) + '</div>'
+            + '<div class="ap-sub">' + (isNaik ? '↑ +' : '↓ ') + selisih + ' dari saat ini</div>'
             + '</div>';
     }
 
-    cont.innerHTML = '<div style="background:#F8FAFF;border:1.5px solid #BFDBFE;border-radius:10px;padding:14px;margin-bottom:12px;">'
-        + '<div style="font-size:10.5px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">IPK Rata-rata Saat Ini</div>'
-        + '<div style="font-size:32px;font-weight:800;color:var(--blue);letter-spacing:-1px;line-height:1;">' + Number(last).toFixed(2) + '</div>'
+    cont.innerHTML = '<div class="ap-box ap-box-blue">'
+        + '<div class="ap-lbl ap-lbl-blue">IPK Rata-rata Saat Ini</div>'
+        + '<div class="ap-num ap-num-blue">' + Number(last).toFixed(2) + '</div>'
         + '</div>' + predHtml + evalHtml;
 }
 
@@ -689,7 +821,7 @@ function renderGradeChart(vals) {
             datasets: [{
                 data: vals,
                 backgroundColor: ['#22C55E','#3B82F6','#60A5FA','#FBBF24','#A78BFA','#F97316','#EF4444'],
-                borderRadius: 6, maxBarThickness: 44,
+                borderRadius: 7, maxBarThickness: 44,
             }]
         },
         options: {
@@ -701,8 +833,8 @@ function renderGradeChart(vals) {
             },
             layout: { padding: { top: 22 } },
             scales: {
-                x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 12 }, color: '#64748B' } },
-                y: { beginAtZero: true, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 }, color: '#64748B' }, grid: { color: '#F8FAFC' }, border: { display: false } }
+                x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 12 }, color: '#94A3B8' } },
+                y: { beginAtZero: true, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 }, color: '#94A3B8' }, grid: { color: '#F8FAFC' }, border: { display: false } }
             }
         }
     });
@@ -716,7 +848,7 @@ function updateGradeInsight(d) {
     var total = entries.reduce(function(s, e) { return s + e[1]; }, 0);
     var maxEntry = entries.reduce(function(a, b) { return b[1] > a[1] ? b : a; }, entries[0]);
     var pct = total > 0 ? Math.round(maxEntry[1] / total * 100) : 0;
-    el.innerHTML = '<i class="bi bi-bar-chart-fill" style="color:var(--text-3);"></i> Grade <strong>' + maxEntry[0] + '</strong> mendominasi — ' + maxEntry[1] + ' dari ' + total + ' nilai (<strong>' + pct + '%</strong>)';
+    el.innerHTML = '<i class="bi bi-bar-chart-fill"></i> Grade <strong>' + maxEntry[0] + '</strong> mendominasi — ' + maxEntry[1] + ' dari ' + total + ' nilai (<strong>' + pct + '%</strong>)';
 }
 
 function loadGrade() {
