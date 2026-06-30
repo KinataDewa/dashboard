@@ -324,18 +324,134 @@
         @keyframes fadeDown { from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);} }
         @keyframes spin     { to{transform:rotate(360deg);} }
 
+        /* ─── Mobile Header (hidden on desktop) ──────────── */
+        .mobile-header { display: none; }
+
         /* ─── Mobile ──────────────────────────────────────── */
         @media (max-width: 900px) {
             html, body { overflow: auto; }
             .left-panel { display: none; }
-            .right-panel { min-height: 100vh; padding: 40px 20px; align-items: center; }
-            .form-card { max-width: 480px; }
+
+            .right-panel {
+                min-height: 100vh;
+                padding: 52px 20px 48px;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: center;
+                gap: 28px;
+            }
+
+            /* ── Mobile Brand Header ── */
+            .mobile-header {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 14px;
+                width: 100%;
+                max-width: 480px;
+                position: relative;
+                animation: fadeUp .7s cubic-bezier(.16,1,.3,1) both;
+            }
+
+            /* Glow behind brand icon */
+            .m-glow-orb {
+                position: absolute;
+                width: 240px; height: 240px;
+                top: -70px; left: 50%; transform: translateX(-50%);
+                background: radial-gradient(circle, rgba(59,130,246,.22) 0%, rgba(139,92,246,.12) 40%, transparent 70%);
+                border-radius: 50%;
+                pointer-events: none;
+                filter: blur(32px);
+            }
+
+            .m-brand {
+                display: flex; align-items: center; gap: 14px;
+                position: relative; z-index: 1;
+            }
+
+            .m-brand-icon {
+                width: 56px; height: 56px; border-radius: 17px; flex-shrink: 0;
+                background: linear-gradient(135deg, var(--blue), var(--purple));
+                display: flex; align-items: center; justify-content: center;
+                font-size: 26px; color: #fff;
+                box-shadow: 0 10px 36px rgba(59,130,246,.5), 0 0 0 1px rgba(255,255,255,.12) inset;
+                animation: iconGlow 3s ease-in-out infinite;
+            }
+
+            .m-brand-info { display: flex; flex-direction: column; }
+
+            .m-brand-name {
+                font-size: 26px; font-weight: 900; color: var(--text);
+                letter-spacing: -.6px; line-height: 1;
+            }
+
+            .m-brand-badge {
+                display: inline-block; margin-top: 5px;
+                font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+                padding: 2px 9px; border-radius: 999px; width: fit-content;
+                background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.3);
+                color: var(--accent);
+            }
+
+            .m-tagline {
+                font-size: 13px; color: var(--text-muted); text-align: center;
+                max-width: 265px; line-height: 1.7;
+            }
+
+            /* Feature pills */
+            .m-pills {
+                display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+            }
+
+            .m-pill {
+                display: flex; align-items: center; gap: 5px;
+                padding: 5px 12px; border-radius: 999px;
+                background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.1);
+                font-size: 10px; font-weight: 600; color: var(--text-muted);
+                cursor: default;
+            }
+
+            .m-pill i { font-size: 11px; }
+
+            /* Gradient divider */
+            .m-divider {
+                width: 44px; height: 2px; border-radius: 999px;
+                background: linear-gradient(90deg, var(--blue), var(--purple), var(--cyan));
+                margin-top: 2px;
+            }
+
+            /* Stats strip */
+            .m-stats {
+                display: flex; gap: 8px; width: 100%;
+            }
+
+            .m-stat {
+                flex: 1; padding: 11px 14px; border-radius: 14px;
+                background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+                text-align: center; position: relative; overflow: hidden;
+            }
+
+            .m-stat::before {
+                content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(96,165,250,.5), transparent);
+            }
+
+            .m-stat-num  { font-size: 22px; font-weight: 900; color: var(--text); letter-spacing: -1px; line-height: 1; }
+            .m-stat-plus { font-size: 14px; color: var(--accent); font-weight: 700; }
+            .m-stat-label{ font-size: 9px; color: var(--text-dim); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; }
+
+            /* Form card */
+            .form-card { max-width: 480px; width: 100%; }
         }
+
         @media (max-width: 480px) {
-            .form-card { padding: 32px 22px; border-radius: 20px; }
-            .form-title { font-size: 23px; }
+            .right-panel { padding: 40px 16px 40px; gap: 22px; }
+            .form-card { padding: 28px 20px; border-radius: 20px; }
+            .form-title { font-size: 22px; }
             .demo-cards { flex-direction: column; }
             .demo-card { min-width: 100%; }
+            .m-brand-icon { width: 50px; height: 50px; font-size: 22px; border-radius: 14px; }
+            .m-brand-name { font-size: 22px; }
         }
     </style>
 </head>
@@ -393,7 +509,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-num"><span class="count" data-target="{{ $dosen_pa }}">0</span></div>
-                <div class="stat-label">Dosen PA</div>
+                <div class="stat-label">DPA</div>
             </div>
             {{-- <div class="stat-card">
                 <div class="stat-num"><span class="count" data-target="{{ $kelas_aktif }}">0</span></div>
@@ -404,6 +520,36 @@
 
     {{-- ── RIGHT PANEL ─────────────────────────────── --}}
     <div class="right-panel">
+
+        {{-- Mobile-only brand header --}}
+        <div class="mobile-header">
+            <div class="m-glow-orb"></div>
+            <div class="m-brand">
+                <div class="m-brand-icon"><i class="bi bi-mortarboard-fill"></i></div>
+                <div class="m-brand-info">
+                    <div class="m-brand-name">Academia</div>
+                    <span class="m-brand-badge">SIAKAD Polinema</span>
+                </div>
+            </div>
+            <p class="m-tagline">Platform digital untuk memantau performa akademik mahasiswa secara real-time.</p>
+            <div class="m-pills">
+                <div class="m-pill"><i class="bi bi-graph-up-arrow"></i> Analitik Real-time</div>
+                <div class="m-pill"><i class="bi bi-shield-check"></i> Aman &amp; Terenkripsi</div>
+                <div class="m-pill"><i class="bi bi-phone"></i> Responsif</div>
+            </div>
+            <div class="m-stats">
+                <div class="m-stat">
+                    <div class="m-stat-num"><span class="count-m" data-target="{{ $mahasiswa_aktif }}">0</span><span class="m-stat-plus">+</span></div>
+                    <div class="m-stat-label">Mahasiswa Aktif</div>
+                </div>
+                <div class="m-stat">
+                    <div class="m-stat-num"><span class="count-m" data-target="{{ $dosen_pa }}">0</span></div>
+                    <div class="m-stat-label">DPA</div>
+                </div>
+            </div>
+            <div class="m-divider"></div>
+        </div>
+
         <div class="form-card">
 
             <div class="form-greeting">
@@ -456,7 +602,7 @@
                 </button>
             </form>
 
-            {{-- <div class="demo-section">
+            <div class="demo-section">
                 <div class="demo-label">Quick Login — Akun Demo</div>
                 <div class="demo-cards">
                     <div class="demo-card" onclick="fillDemo('admin@polinema.ac.id', event)">
@@ -467,12 +613,12 @@
                     <div class="demo-card" onclick="fillDemo('ariadi.retno.tri.hayati.ririd@dosen.polinema.ac.id', event)">
                         <div class="demo-card-role" style="color:#34d399;">Dosen</div>
                         <div class="demo-card-email">ariadi...</div>
-                        <span class="demo-card-tag" style="background:rgba(52,211,153,.15);color:#34d399;">Dosen PA</span>
+                        <span class="demo-card-tag" style="background:rgba(52,211,153,.15);color:#34d399;">DPA</span>
                     </div>
                     <div class="demo-card" onclick="fillDemo('elok.nur.hamdana@dosen.polinema.ac.id', event)">
                         <div class="demo-card-role" style="color:#34d399;">Dosen</div>
                         <div class="demo-card-email">elok...</div>
-                        <span class="demo-card-tag" style="background:rgba(52,211,153,.15);color:#34d399;">Dosen PA</span>
+                        <span class="demo-card-tag" style="background:rgba(52,211,153,.15);color:#34d399;">DPA</span>
                     </div>
                     <div class="demo-card" onclick="fillDemo('dewadafug766@gmail.com', event)">
                         <div class="demo-card-role" style="color:#60a5fa;">Mahasiswa</div>
@@ -485,7 +631,7 @@
                         <span class="demo-card-tag" style="background:rgba(96,165,250,.15);color:#60a5fa;">Student</span>
                     </div>
                 </div>
-            </div> --}}
+            </div>
 
             <div class="form-footer">Politeknik Negeri Malang · Jurusan Teknologi Informasi</div>
         </div>
@@ -544,6 +690,16 @@ var obs = new IntersectionObserver(function(entries) {
     }
 }, { threshold: 0.4 });
 if (counters.length) obs.observe(counters[0]);
+
+// ── Mobile stat count-up (triggers after short delay on page load)
+var mobileCounters = document.querySelectorAll('.count-m');
+if (mobileCounters.length) {
+    setTimeout(function() {
+        mobileCounters.forEach(function(el) {
+            countUp(el, parseInt(el.dataset.target), 1400);
+        });
+    }, 400);
+}
 
 // ── Generate floating particles
 (function() {

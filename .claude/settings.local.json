@@ -19,7 +19,10 @@
       "Bash(php -r ' *)",
       "Bash(php *)",
       "Bash(grep -v \"^[0-9]*:.*--\\\\|//\\\\|\\\\/\\\\*\")",
-      "PowerShell(git clone https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git \"C:\\\\Users\\\\ASUS N 7400 P\\\\.claude\\\\skills\\\\ui-ux-pro-max-skill\" 2>&1)"
+      "PowerShell(git clone https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git \"C:\\\\Users\\\\ASUS N 7400 P\\\\.claude\\\\skills\\\\ui-ux-pro-max-skill\" 2>&1)",
+      "Bash(python skills/ui-ux-pro-max/scripts/search.py \"academic dashboard login mobile glassmorphism dark\" --design-system -p \"Academia SIAKAD\")",
+      "Bash(python \"c:\\\\laragon\\\\www\\\\dashboard\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\search.py\" \"academic dashboard login mobile glassmorphism dark\" --design-system -p \"Academia SIAKAD\")",
+      "Bash(python \"c:\\\\laragon\\\\www\\\\dashboard\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\search.py\" \"mobile login touch animation\" --domain ux -n 5)"
     ]
   }
 }
