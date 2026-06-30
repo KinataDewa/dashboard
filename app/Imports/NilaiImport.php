@@ -46,12 +46,13 @@ class NilaiImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnErr
         };
  
         $this->imported++;
- 
+
         // Upsert: update jika sudah ada, insert jika belum
         return Nilai::updateOrCreate(
             [
                 'mahasiswa_id'   => $mahasiswa->id,
                 'mata_kuliah_id' => $matkul->id,
+                'semester'       => intval($row['semester']),
                 'tahun_akademik' => trim($row['tahun_akademik']),
             ],
             [

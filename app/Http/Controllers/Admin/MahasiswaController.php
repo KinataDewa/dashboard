@@ -15,23 +15,48 @@ class MahasiswaController extends Controller
 {
     public function index(Request $request)
     {
+        $search   = trim($request->input('search', ''));
+        $angkatan = $request->input('angkatan', '');
+        $semester = $request->input('semester', '');
+        $status   = $request->input('status', '');
+
+        $angkatanList = Mahasiswa::distinct()->orderByDesc('angkatan')->pluck('angkatan');
+        $semesterList = Kelas::distinct()->orderBy('semester')->pluck('semester');
+
         $query = Mahasiswa::with(['kelas', 'dosenPa', 'user']);
 
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('nim', 'like', '%' . $request->search . '%')
-                ->orWhere('nama', 'like', '%' . $request->search . '%');
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nim', 'like', "%{$search}%")
+                  ->orWhere('nama', 'like', "%{$search}%");
             });
         }
 
-        if ($request->kelas) {
-            $query->where('kelas_id', $request->kelas);
+        if ($angkatan) {
+            $query->where('angkatan', $angkatan);
         }
 
-        $mahasiswas = $query->orderBy('nama')->paginate(15);
-        $kelasList  = Kelas::orderBy('nama')->get();
+        if ($semester) {
+            $kelasIds = Kelas::where('semester', $semester)
+                ->when($angkatan, fn($q) => $q->where('angkatan', $angkatan))
+                ->pluck('id');
+            $query->whereHas('kelasMahasiswas', fn($q) => $q->whereIn('kelas_id', $kelasIds));
+        }
 
-        return view('admin.mahasiswa.index', compact('mahasiswas', 'kelasList'));
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $mahasiswas = $query->orderBy('nama')->paginate(15)->appends([
+            'search'   => $search,
+            'angkatan' => $angkatan,
+            'semester' => $semester,
+            'status'   => $status,
+        ]);
+
+        return view('admin.mahasiswa.index', compact(
+            'mahasiswas', 'angkatanList', 'semesterList', 'angkatan', 'semester', 'search', 'status'
+        ));
     }
  
     public function create()

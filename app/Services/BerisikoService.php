@@ -84,10 +84,10 @@ class BerisikoService
                     : 0;
                 $alphaEfektif = max(0, $totalAlpha - (int) ($jamKompenSelesai / 2));
 
-                // Resolve kelas dari pivot semester-spesifik jika semesterAktif diberikan
+                // Resolve kelas dari pivot → kelas.semester
                 $kelasNama = $semesterAktif > 0
                     ? (\App\Models\KelasMahasiswa::where('mahasiswa_id', $mhs->id)
-                        ->where('semester', $semesterAktif)
+                        ->whereHas('kelas', fn($q) => $q->where('semester', $semesterAktif))
                         ->with('kelas')
                         ->first()?->kelas?->nama ?? $mhs->kelas?->nama ?? '-')
                     : ($mhs->kelas?->nama ?? '-');

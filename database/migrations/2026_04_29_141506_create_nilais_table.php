@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->decimal('nilai_uas', 5, 2)->default(0);
             $table->decimal('nilai_akhir', 5, 2)->default(0); // dihitung otomatis
             $table->string('grade', 2)->nullable();           // A/B/C/D/E
-            $table->unique(['mahasiswa_id', 'mata_kuliah_id', 'tahun_akademik'], 'unique_nilai');
+            $table->unique(['mahasiswa_id', 'mata_kuliah_id', 'semester', 'tahun_akademik'], 'unique_nilai');
             $table->timestamps();
         });
     }

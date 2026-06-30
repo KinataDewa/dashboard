@@ -12,8 +12,6 @@ use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
  
 class MahasiswaImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnError
 {
@@ -37,13 +35,12 @@ class MahasiswaImport implements ToModel, WithHeadingRow, WithValidation, SkipsO
             ['email' => trim($row['email'])],
             [
                 'name'     => trim($row['nama']),
-                'password' => Hash::make(Str::random(12)),
+                'password' => Hash::make(trim($row['nim'])),
             ]
         );
 
         if ($user->wasRecentlyCreated) {
             $user->assignRole('mahasiswa');
-            Password::sendResetLink(['email' => $user->email]);
         }
  
         $this->imported++;

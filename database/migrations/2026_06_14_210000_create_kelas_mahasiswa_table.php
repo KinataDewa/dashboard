@@ -10,11 +10,9 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('mahasiswa_id')->constrained('mahasiswas')->onDelete('cascade');
             $table->foreignId('kelas_id')->constrained('kelas')->onDelete('cascade');
-            $table->integer('semester');
-            $table->string('tahun_akademik', 10);
             $table->timestamps();
 
-            $table->unique(['mahasiswa_id', 'semester', 'tahun_akademik']);
+            $table->unique(['mahasiswa_id', 'kelas_id']);
         });
     }
 

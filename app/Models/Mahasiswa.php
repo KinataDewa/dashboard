@@ -52,12 +52,10 @@ class Mahasiswa extends Model
 
     public function getKelasAktif(int $semester, string $tahunAkademik): ?Kelas
     {
-        return $this->kelasMahasiswas()
+        return Kelas::whereHas('kelasMahasiswas', fn($q) => $q->where('mahasiswa_id', $this->id))
             ->where('semester', $semester)
             ->where('tahun_akademik', $tahunAkademik)
-            ->with('kelas')
-            ->first()
-            ?->kelas;
+            ->first();
     }
 
     public function getDosenPaAktif(int $semester, string $tahunAkademik): ?Dosen

@@ -17,12 +17,13 @@ class KompensasiController extends Controller
 
         $kelasIds = Kelas::where('dosen_pa_id', $dosen->id)->pluck('id');
 
-        $semesterList  = KelasMahasiswa::whereIn('kelas_id', $kelasIds)
-            ->distinct()->orderBy('semester')->pluck('semester');
+        $semesterList  = Kelas::whereIn('id', $kelasIds)->distinct()->orderBy('semester')->pluck('semester');
         $semesterAktif = (int) $request->get('semester', $semesterList->max() ?? 1);
 
-        $mahasiswas = Mahasiswa::whereHas('kelasMahasiswas', function ($q) use ($kelasIds, $semesterAktif) {
-            $q->whereIn('kelas_id', $kelasIds)->where('semester', $semesterAktif);
+        $kelasAktifIds = Kelas::whereIn('id', $kelasIds)->where('semester', $semesterAktif)->pluck('id');
+
+        $mahasiswas = Mahasiswa::whereHas('kelasMahasiswas', function ($q) use ($kelasAktifIds) {
+            $q->whereIn('kelas_id', $kelasAktifIds);
         })
             ->with(['absensis', 'kompensasis', 'kelas'])
             ->orderBy('nama')

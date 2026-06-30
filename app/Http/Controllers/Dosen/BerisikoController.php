@@ -23,12 +23,12 @@ class BerisikoController extends Controller
         $filterJenis = $request->get('jenis', 'semua');
         $kelasIds    = Kelas::where('dosen_pa_id', $dosen->id)->pluck('id');
 
-        $semesterList  = KelasMahasiswa::whereIn('kelas_id', $kelasIds)
-            ->distinct()->orderBy('semester')->pluck('semester');
+        $semesterList  = Kelas::whereIn('id', $kelasIds)->distinct()->orderBy('semester')->pluck('semester');
         $semesterAktif = (int) $request->get('semester', $semesterList->max() ?? 1);
 
-        $semuaMahasiswa = Mahasiswa::whereHas('kelasMahasiswas', function ($q) use ($kelasIds, $semesterAktif) {
-            $q->whereIn('kelas_id', $kelasIds)->where('semester', $semesterAktif);
+        $kelasAktifIds = Kelas::whereIn('id', $kelasIds)->where('semester', $semesterAktif)->pluck('id');
+        $semuaMahasiswa = Mahasiswa::whereHas('kelasMahasiswas', function ($q) use ($kelasAktifIds) {
+            $q->whereIn('kelas_id', $kelasAktifIds);
         })
             ->with([
                 'user', 'kelas', 'dosenPa', 'nilais.mataKuliah', 'absensis', 'kompensasis',

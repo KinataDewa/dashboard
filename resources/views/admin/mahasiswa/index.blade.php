@@ -215,7 +215,7 @@
     'sub'          => 'Kelola seluruh data mahasiswa aktif Jurusan Teknologi Informasi',
     'chips'        => [
         ['icon' => 'bi-people-fill',       'label' => $mahasiswas->total() . ' Mahasiswa Terdaftar'],
-        ['icon' => 'bi-grid-3x3-gap-fill', 'label' => $kelasList->count() . ' Kelas'],
+        ['icon' => 'bi-mortarboard-fill',   'label' => $angkatanList->count() . ' Angkatan'],
         ['icon' => 'bi-person-check-fill', 'label' => 'Status Aktif'],
     ],
     'badge_num'    => $mahasiswas->total(),
@@ -231,12 +231,12 @@
             <div class="tbl-sub-v2">
                 Menampilkan <strong>{{ $mahasiswas->firstItem() }}–{{ $mahasiswas->lastItem() }}</strong>
                 dari <strong>{{ $mahasiswas->total() }}</strong> mahasiswa
-                @if(request('search') || request('kelas'))
+                @if($search || $angkatan || $semester || $status)
                 · <span style="color:var(--blue);">Filter aktif</span>
                 @endif
             </div>
         </div>
-        @if(request('search') || request('kelas'))
+        @if($search || $angkatan || $semester || $status)
         <a href="{{ route('admin.mahasiswa.index') }}"
            style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#EF4444;text-decoration:none;padding:5px 12px;border:1.5px solid #FECACA;border-radius:20px;background:#FEF2F2;white-space:nowrap;">
             <i class="bi bi-x-circle-fill"></i> Reset Filter
@@ -249,16 +249,27 @@
         <div class="filter-bar">
             <div class="search-wrap">
                 <i class="bi bi-search"></i>
-                <input type="text" name="search" value="{{ request('search') }}"
+                <input type="text" name="search" value="{{ $search }}"
                        placeholder="Cari NIM atau nama...">
             </div>
-            <select name="kelas" class="filter-select">
-                <option value="">Semua Kelas</option>
-                @foreach($kelasList as $kelas)
-                <option value="{{ $kelas->id }}" {{ request('kelas')==$kelas->id ? 'selected':'' }}>
-                    {{ $kelas->nama }}
-                </option>
+            <select name="angkatan" class="filter-select">
+                <option value="">Semua Angkatan</option>
+                @foreach($angkatanList as $a)
+                <option value="{{ $a }}" {{ $angkatan == $a ? 'selected' : '' }}>{{ $a }}</option>
                 @endforeach
+            </select>
+            <select name="semester" class="filter-select">
+                <option value="">Semua Semester</option>
+                @foreach($semesterList as $sem)
+                <option value="{{ $sem }}" {{ $semester == $sem ? 'selected' : '' }}>Semester {{ $sem }}</option>
+                @endforeach
+            </select>
+            <select name="status" class="filter-select">
+                <option value="">Semua Status</option>
+                <option value="aktif"  {{ $status === 'aktif'  ? 'selected' : '' }}>Aktif</option>
+                <option value="cuti"   {{ $status === 'cuti'   ? 'selected' : '' }}>Cuti</option>
+                <option value="lulus"  {{ $status === 'lulus'  ? 'selected' : '' }}>Lulus</option>
+                <option value="keluar" {{ $status === 'keluar' ? 'selected' : '' }}>Keluar</option>
             </select>
             <button type="submit" class="btn-primary" style="padding:8px 16px;white-space:nowrap;">
                 <i class="bi bi-funnel-fill"></i> Filter
@@ -347,8 +358,8 @@
                         <div class="empty-state-v2">
                             <i class="bi bi-people"></i>
                             <p>
-                                @if(request('search'))
-                                    Tidak ada mahasiswa dengan nama/NIM <strong>"{{ request('search') }}"</strong>
+                                @if($search)
+                                    Tidak ada mahasiswa dengan nama/NIM <strong>"{{ $search }}"</strong>
                                 @else
                                     Belum ada data mahasiswa.
                                 @endif
@@ -373,7 +384,7 @@
             @if($mahasiswas->onFirstPage())
                 <span class="pg-btn disabled"><i class="bi bi-chevron-left"></i></span>
             @else
-                <a href="{{ $mahasiswas->withQueryString()->previousPageUrl() }}" class="pg-btn">
+                <a href="{{ $mahasiswas->previousPageUrl() }}" class="pg-btn">
                     <i class="bi bi-chevron-left"></i>
                 </a>
             @endif
@@ -388,7 +399,7 @@
             @endphp
 
             @if($from > 1)
-                <a href="{{ $mahasiswas->withQueryString()->url(1) }}" class="pg-btn">1</a>
+                <a href="{{ $mahasiswas->url(1) }}" class="pg-btn">1</a>
                 @if($from > 2)
                     <span class="pg-btn disabled">…</span>
                 @endif
@@ -398,7 +409,7 @@
                 @if($p == $current)
                     <span class="pg-btn active">{{ $p }}</span>
                 @else
-                    <a href="{{ $mahasiswas->withQueryString()->url($p) }}" class="pg-btn">{{ $p }}</a>
+                    <a href="{{ $mahasiswas->url($p) }}" class="pg-btn">{{ $p }}</a>
                 @endif
             @endfor
 
@@ -406,12 +417,12 @@
                 @if($to < $last - 1)
                     <span class="pg-btn disabled">…</span>
                 @endif
-                <a href="{{ $mahasiswas->withQueryString()->url($last) }}" class="pg-btn">{{ $last }}</a>
+                <a href="{{ $mahasiswas->url($last) }}" class="pg-btn">{{ $last }}</a>
             @endif
 
             {{-- Next --}}
             @if($mahasiswas->hasMorePages())
-                <a href="{{ $mahasiswas->withQueryString()->nextPageUrl() }}" class="pg-btn">
+                <a href="{{ $mahasiswas->nextPageUrl() }}" class="pg-btn">
                     <i class="bi bi-chevron-right"></i>
                 </a>
             @else

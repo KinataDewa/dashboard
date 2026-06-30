@@ -68,7 +68,7 @@ class RaporImport
         $this->importNilai($nilaiRows, $nimCache, $nimTahunAkadMap);
 
         // 6. Import absensi
-        $this->importAbsensi($absensiRows, $nimCache);
+        $this->importAbsensi($absensiRows, $nimCache, $nimTahunAkadMap);
     }
 
     // ── Sheet parser ──────────────────────────────────────────
@@ -122,7 +122,6 @@ class RaporImport
             $nim       = trim((string) ($row['NIM'] ?? ''));
             $nama      = trim((string) ($row['NAMA'] ?? ''));
             $kelasNama = trim((string) ($row['KELAS'] ?? ''));
-            $angkatan  = trim((string) ($row['ANGKATAN'] ?? ''));
             $namaDosen = trim((string) ($row['DPA'] ?? ''));
             $prodi     = trim((string) ($row['PRODI'] ?? ''));
             $tahunAkad = trim((string) ($row['TAHUN_AKADEMIK'] ?? ''));
@@ -133,32 +132,27 @@ class RaporImport
 
             $dosen = $namaDosen ? $this->resolveOrCreateDosen($namaDosen) : null;
             $kelas = $kelasNama
-                ? $this->resolveOrCreateKelas($kelasNama, $semester, $prodi, $tahunAkad, $dosen)
+                ? $this->resolveOrCreateKelas($kelasNama, $this->angkatan, $semester, $prodi, $tahunAkad, $dosen)
                 : null;
 
-            // Gunakan angkatan dari input form jika tersedia, fallback ke kolom Excel
-            $angkatanFinal = $this->angkatan ?: $angkatan;
-            $mhs = $this->resolveOrCreateMahasiswa($nim, $nama, $angkatanFinal, $kelas, $dosen);
+            $mhs = $this->resolveOrCreateMahasiswa($nim, $nama, $this->angkatan, $kelas, $dosen);
             if ($mhs) {
-                // Buat/update pivot kelas_mahasiswa per semester
-                if ($kelas && $tahunAkad && $semester) {
-                    KelasMahasiswa::updateOrCreate(
-                        [
-                            'mahasiswa_id'   => $mhs->id,
-                            'semester'       => $semester,
-                            'tahun_akademik' => $tahunAkad,
-                        ],
-                        ['kelas_id' => $kelas->id]
-                    );
+                if ($kelas) {
+                    KelasMahasiswa::firstOrCreate([
+                        'mahasiswa_id' => $mhs->id,
+                        'kelas_id'     => $kelas->id,
+                    ]);
                 }
 
-                // Update mahasiswas.kelas_id ke kelas semester terbesar
-                $latestPivot = KelasMahasiswa::where('mahasiswa_id', $mhs->id)
-                    ->orderBy('semester', 'desc')
+                // Update kelas_id ke kelas semester terbesar
+                $latestKelas = Kelas::whereHas('kelasMahasiswas', fn($q) => $q->where('mahasiswa_id', $mhs->id))
+                    ->orderByDesc('tahun_akademik')
+                    ->orderByDesc('semester')
                     ->first();
-                if ($latestPivot) {
+
+                if ($latestKelas) {
                     $mhs->update([
-                        'kelas_id'    => $latestPivot->kelas_id,
+                        'kelas_id'    => $latestKelas->id,
                         'dosen_pa_id' => $dosen?->id ?? $mhs->dosen_pa_id,
                     ]);
                 }
@@ -209,7 +203,7 @@ class RaporImport
         }
     }
 
-    private function importAbsensi(array $rows, $nimCache): void
+    private function importAbsensi(array $rows, $nimCache, array $nimTahunAkadMap): void
     {
         foreach ($rows as $row) {
             $nim      = trim((string) ($row['NIM'] ?? ''));
@@ -227,8 +221,10 @@ class RaporImport
                 continue;
             }
 
+            $tahunAkad = $nimTahunAkadMap[$nim] ?? null;
+
             Absensi::updateOrCreate(
-                ['mahasiswa_id' => $mahasiswa->id, 'semester' => $semester],
+                ['mahasiswa_id' => $mahasiswa->id, 'semester' => $semester, 'tahun_akademik' => $tahunAkad],
                 ['jam_hadir' => $hadir, 'jam_izin' => $izin, 'jam_sakit' => $sakit, 'jam_alpha' => $alpha]
             );
             $this->importedAbsensi++;
@@ -265,7 +261,7 @@ class RaporImport
 
             $user = User::firstOrCreate(
                 ['email' => $email],
-                ['name' => $nama, 'password' => Hash::make(Str::random(16))]
+                ['name' => $nama, 'password' => Hash::make('password')]
             );
             if ($user->wasRecentlyCreated) {
                 $user->assignRole('dosen');
@@ -285,13 +281,14 @@ class RaporImport
         });
     }
 
-    private function resolveOrCreateKelas(string $nama, int $semester, string $prodi, string $tahunAkad, ?Dosen $dosen): ?Kelas
+    private function resolveOrCreateKelas(string $nama, string $angkatan, int $semester, string $prodi, string $tahunAkad, ?Dosen $dosen): ?Kelas
     {
-        if (!$nama) return null;
+        if (!$nama || !$angkatan) return null;
 
         return Kelas::firstOrCreate(
             [
                 'nama'           => $nama,
+                'angkatan'       => $angkatan,
                 'semester'       => $semester,
                 'tahun_akademik' => $tahunAkad,
             ],

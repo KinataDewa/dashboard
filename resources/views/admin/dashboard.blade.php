@@ -451,57 +451,36 @@ $stats = [
             <div class="db-card-head">
                 <div>
                     <div class="db-card-title">Distribusi Mahasiswa Berisiko</div>
-                    <div class="db-card-sub">Per kategori risiko · Semester {{ $semesterAktif }}</div>
+                    <div class="db-card-sub" id="risikoChartSub">Per kategori risiko · Semester {{ $semesterAktif }}</div>
                 </div>
-                <a href="{{ route('admin.berisiko.index') }}" class="db-link">
-                    Lihat Detail <i class="bi bi-arrow-right"></i>
-                </a>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <select id="risikoSemesterSel" class="db-select">
+                        @foreach($semesterList as $sem)
+                        <option value="{{ $sem }}" {{ $semesterAktif == $sem ? 'selected' : '' }}>Sem {{ $sem }}</option>
+                        @endforeach
+                    </select>
+                    <select id="risikoAngkatanSel" class="db-select">
+                        <option value="">Semua</option>
+                        @foreach($angkatanList as $a)
+                        <option value="{{ $a }}">{{ $a }}</option>
+                        @endforeach
+                    </select>
+                    <a href="{{ route('admin.berisiko.index') }}" class="db-link">
+                        Detail <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
             </div>
-            @php
-                $riskKeys   = ['sp1','sp2','sp3','ps','nilai_e','nilai_d','ips_rendah'];
-                $riskLabels = ['SP I','SP II','SP III','Putus Studi','Nilai E','D>3 MK','IPS<2.00'];
-                $riskColors = ['#FCD34D','#FB923C','#EF4444','#991B1B','#7F1D1D','#6D28D9','#1D4ED8'];
-                $riskMaxIdx = null; $riskMaxVal = -1;
-                foreach ($riskKeys as $idx => $kat) {
-                    if ($distribusiRisiko[$kat] > $riskMaxVal) { $riskMaxVal = $distribusiRisiko[$kat]; $riskMaxIdx = $idx; }
-                }
-            @endphp
-            @if(array_sum($distribusiRisiko) > 0)
             <div class="db-donut-wrap">
                 <div class="db-donut-box">
                     <canvas id="risikoChart" width="156" height="156"></canvas>
                     <div class="db-donut-center">
-                        <div class="db-donut-num">{{ $mahasiswaBerisiko }}</div>
+                        <div class="db-donut-num" id="risikoDonutNum">{{ $mahasiswaBerisiko }}</div>
                         <div class="db-donut-lbl">Berisiko</div>
                     </div>
                 </div>
-                <div class="db-leg-list">
-                    @foreach($riskKeys as $idx => $kat)
-                    @if($distribusiRisiko[$kat] > 0)
-                    <div class="db-leg-row">
-                        <div class="db-leg-left">
-                            <div class="db-leg-dot" style="background:{{ $riskColors[$idx] }};"></div>
-                            <span class="db-leg-name">{{ $riskLabels[$idx] }}</span>
-                        </div>
-                        <span class="db-leg-val">{{ $distribusiRisiko[$kat] }}</span>
-                    </div>
-                    @endif
-                    @endforeach
-                </div>
+                <div class="db-leg-list" id="risikoLeg"></div>
             </div>
-            @if($riskMaxIdx !== null && $riskMaxVal > 0)
-            <div class="db-insight">
-                <i class="bi bi-info-circle-fill"></i>
-                Kategori terbanyak: <strong>{{ $riskLabels[$riskMaxIdx] }}</strong> ({{ $riskMaxVal }} mahasiswa)
-            </div>
-            @endif
-            @else
-            <div style="text-align:center;padding:40px 16px;color:#94A3B8;">
-                <i class="bi bi-shield-check-fill" style="font-size:40px;color:#22C55E;display:block;margin-bottom:10px;"></i>
-                <div style="font-weight:700;font-size:13.5px;color:#166534;">Tidak ada mahasiswa berisiko</div>
-                <div style="font-size:12px;margin-top:3px;">Semua mahasiswa aman di semester ini</div>
-            </div>
-            @endif
+            <div class="db-insight" id="risikoInsight" style="{{ array_sum($distribusiRisiko) > 0 ? '' : 'display:none;' }}"></div>
         </div>
     </div>
 
@@ -511,14 +490,21 @@ $stats = [
             <div class="db-card-head">
                 <div>
                     <div class="db-card-title">Distribusi Grade Nilai</div>
-                    <div class="db-card-sub">Jumlah nilai per grade · Semester {{ $semesterAktif }}</div>
+                    <div class="db-card-sub" id="gradeChartSub">Jumlah nilai per grade · Semester {{ $semesterAktif }}</div>
                 </div>
-                <select id="gradeAngkatanSel" class="db-select">
-                    <option value="">Semua Angkatan</option>
-                    @foreach($angkatanList as $a)
-                    <option value="{{ $a }}">Angkatan {{ $a }}</option>
-                    @endforeach
-                </select>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <select id="gradeSemesterSel" class="db-select">
+                        @foreach($semesterList as $sem)
+                        <option value="{{ $sem }}" {{ $semesterAktif == $sem ? 'selected' : '' }}>Sem {{ $sem }}</option>
+                        @endforeach
+                    </select>
+                    <select id="gradeAngkatanSel" class="db-select">
+                        <option value="">Semua Angkatan</option>
+                        @foreach($angkatanList as $a)
+                        <option value="{{ $a }}">Angkatan {{ $a }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
             <div style="position:relative;height:228px;margin-top:4px;">
                 <canvas id="gradeChart"></canvas>
@@ -547,97 +533,26 @@ $stats = [
     <div class="db-tbl-head">
         <div>
             <div class="db-tbl-title">Performa per Kelas</div>
-            <div class="db-tbl-sub">Semester {{ $semesterAktif }} · {{ count($ringkasanKelas) }} kelas aktif</div>
+            <div class="db-tbl-sub" id="kelasTblSub">Semester {{ $semesterAktif }} · {{ count($ringkasanKelas) }} kelas</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <select id="kelasSemesterSel" class="db-select">
+                @foreach($semesterList as $sem)
+                <option value="{{ $sem }}" {{ $semesterAktif == $sem ? 'selected' : '' }}>Semester {{ $sem }}</option>
+                @endforeach
+            </select>
+            <select id="kelasAngkatanSel" class="db-select">
+                <option value="">Semua Angkatan</option>
+                @foreach($angkatanList as $a)
+                <option value="{{ $a }}">Angkatan {{ $a }}</option>
+                @endforeach
+            </select>
         </div>
     </div>
 
-    @if(empty($ringkasanKelas))
-    <div style="text-align:center;padding:48px;color:#94A3B8;">
-        <i class="bi bi-grid-3x3-gap" style="font-size:32px;display:block;margin-bottom:10px;opacity:.3;"></i>
-        <div style="font-size:13.5px;font-weight:600;">Belum ada data kelas untuk semester ini.</div>
+    <div id="kelasTblBody">
+        @include('admin.dashboard._kelas_table', ['ringkasanKelas' => $ringkasanKelas])
     </div>
-    @else
-    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-        <table class="db-tbl">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Kelas</th>
-                    <th style="text-align:center;">Total</th>
-                    <th style="text-align:center;">Berisiko</th>
-                    <th style="text-align:center;">% Risiko</th>
-                    <th style="text-align:center;" class="hide-xs">Rata-rata IPK</th>
-                    <th style="text-align:center;">Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($ringkasanKelas as $i => $kls)
-                @php $perlu = $kls['pct_risiko'] > 30; @endphp
-                <tr class="{{ $perlu ? 'risk-row' : '' }}">
-                    <td style="font-size:11.5px;color:#CBD5E1;font-weight:600;">{{ $i + 1 }}</td>
-                    <td style="font-weight:700;color:#0F172A;">{{ $kls['kelas'] }}</td>
-                    <td style="text-align:center;color:#64748B;font-weight:600;">{{ $kls['total'] }}</td>
-                    <td style="text-align:center;">
-                        <span style="font-weight:800;font-size:14px;color:{{ $kls['berisiko'] > 0 ? '#EF4444' : '#22C55E' }};">
-                            {{ $kls['berisiko'] }}
-                        </span>
-                    </td>
-                    <td style="text-align:center;">
-                        <div class="db-pct-wrap">
-                            <span style="font-size:12px;font-weight:700;color:{{ $perlu ? '#EF4444' : '#64748B' }};min-width:32px;text-align:right;">
-                                {{ $kls['pct_risiko'] }}%
-                            </span>
-                            <div class="db-pct-bar">
-                                <div class="db-pct-fill" style="width:{{ min($kls['pct_risiko'],100) }}%;background:{{ $perlu ? '#EF4444' : '#22C55E' }};"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td style="text-align:center;" class="hide-xs">
-                        <div style="display:flex;align-items:center;justify-content:center;gap:5px;">
-                            <span style="font-weight:800;font-size:13px;color:{{ $kls['ipk'] < 2.5 ? '#EF4444' : ($kls['ipk'] >= 3.5 ? '#22C55E' : '#0F172A') }};">
-                                {{ number_format($kls['ipk'], 2) }}
-                            </span>
-                            <div class="db-ipk-bar">
-                                <div class="db-ipk-fill" style="width:{{ min(($kls['ipk']/4)*100,100) }}%;background:{{ $kls['ipk'] < 2.5 ? '#EF4444' : '#2563EB' }};"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td style="text-align:center;">
-                        @if($perlu)
-                        <span class="db-pill db-pill-red">
-                            <i class="bi bi-exclamation-triangle-fill" style="font-size:9px;"></i> Perlu Perhatian
-                        </span>
-                        @else
-                        <span class="db-pill db-pill-grn">
-                            <i class="bi bi-check-circle-fill" style="font-size:9px;"></i> Baik
-                        </span>
-                        @endif
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    @php
-        $kelasMaxRisk = collect($ringkasanKelas)->sortByDesc('pct_risiko')->first();
-        $kelasAman    = collect($ringkasanKelas)->where('pct_risiko', 0)->pluck('kelas');
-    @endphp
-    <div class="db-tbl-foot">
-        @if($kelasMaxRisk && $kelasMaxRisk['pct_risiko'] > 0)
-        <span class="db-chip" style="background:#FEE2E2;color:#991B1B;">
-            <i class="bi bi-exclamation-triangle-fill" style="font-size:10px;"></i>
-            Risiko tertinggi: {{ $kelasMaxRisk['kelas'] }} ({{ $kelasMaxRisk['pct_risiko'] }}%)
-        </span>
-        @endif
-        @if($kelasAman->isNotEmpty())
-        <span class="db-chip" style="background:#DCFCE7;color:#166534;">
-            <i class="bi bi-check-circle-fill" style="font-size:10px;"></i>
-            Paling stabil: {{ $kelasAman->implode(', ') }}
-        </span>
-        @endif
-    </div>
-    @endif
 </div>
 
 @endsection
@@ -784,27 +699,92 @@ if (angkSel) {
 }
 
 // ── Risiko Donut ─────────────────────────────────────────────────
-@if(array_sum($distribusiRisiko) > 0)
-new Chart(document.getElementById('risikoChart').getContext('2d'), {
-    type: 'doughnut',
-    data: {
-        labels: ['SP I','SP II','SP III','Putus Studi','Nilai E','D>3 MK','IPS<2.00'],
-        datasets: [{
-            data: [{{ $distribusiRisiko['sp1'] }},{{ $distribusiRisiko['sp2'] }},{{ $distribusiRisiko['sp3'] }},{{ $distribusiRisiko['ps'] }},{{ $distribusiRisiko['nilai_e'] }},{{ $distribusiRisiko['nilai_d'] }},{{ $distribusiRisiko['ips_rendah'] }}],
-            backgroundColor: ['#FCD34D','#FB923C','#EF4444','#991B1B','#7F1D1D','#6D28D9','#1D4ED8'],
-            borderWidth: 3, borderColor: '#fff', hoverOffset: 5,
-        }]
-    },
-    options: {
-        responsive: false, maintainAspectRatio: false, cutout: '68%',
-        plugins: {
-            legend: { display: false },
-            tooltip: { backgroundColor: '#0F172A', padding: 10, cornerRadius: 8, callbacks: { label: function(c) { return ' ' + c.label + ': ' + c.raw + ' mahasiswa'; } } },
-            datalabels: { display: false },
+var risikoInst = null;
+var risikoColors = ['#FCD34D','#FB923C','#EF4444','#991B1B','#7F1D1D','#6D28D9','#1D4ED8'];
+var risikoLabels = ['SP I','SP II','SP III','Putus Studi','Nilai E','D>3 MK','IPS<2.00'];
+var risikoKeys   = ['sp1','sp2','sp3','ps','nilai_e','nilai_d','ips_rendah'];
+
+function renderRisikoChart(distribusi, totalBerisiko) {
+    var ctx = document.getElementById('risikoChart');
+    if (!ctx) return;
+    if (risikoInst) { risikoInst.destroy(); risikoInst = null; }
+
+    var vals   = risikoKeys.map(function(k) { return distribusi[k] || 0; });
+    var total  = vals.reduce(function(s, v) { return s + v; }, 0);
+
+    // Update legend
+    var legEl = document.getElementById('risikoLeg');
+    if (legEl) {
+        if (total === 0) {
+            legEl.innerHTML = '<div style="text-align:center;padding:20px 0;color:#94A3B8;font-size:13px;">Tidak ada mahasiswa berisiko</div>';
+        } else {
+            var html = '';
+            risikoKeys.forEach(function(k, i) {
+                if (distribusi[k] > 0) {
+                    html += '<div class="db-leg-row">'
+                        + '<div class="db-leg-left"><div class="db-leg-dot" style="background:' + risikoColors[i] + ';"></div>'
+                        + '<span class="db-leg-name">' + risikoLabels[i] + '</span></div>'
+                        + '<span class="db-leg-val">' + distribusi[k] + '</span></div>';
+                }
+            });
+            legEl.innerHTML = html;
         }
     }
-});
-@endif
+
+    // Update donut center
+    var numEl = document.getElementById('risikoDonutNum');
+    if (numEl) numEl.textContent = totalBerisiko;
+
+    // Update insight
+    var insEl = document.getElementById('risikoInsight');
+    if (insEl) {
+        if (total > 0) {
+            var maxIdx = vals.indexOf(Math.max.apply(null, vals));
+            insEl.innerHTML = '<i class="bi bi-info-circle-fill"></i> Kategori terbanyak: <strong>' + risikoLabels[maxIdx] + '</strong> (' + vals[maxIdx] + ' mahasiswa)';
+            insEl.style.display = 'flex';
+        } else {
+            insEl.style.display = 'none';
+        }
+    }
+
+    if (total === 0) return;
+
+    risikoInst = new Chart(ctx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: risikoLabels,
+            datasets: [{ data: vals, backgroundColor: risikoColors, borderWidth: 3, borderColor: '#fff', hoverOffset: 5 }]
+        },
+        options: {
+            responsive: false, maintainAspectRatio: false, cutout: '68%',
+            plugins: {
+                legend: { display: false },
+                tooltip: { backgroundColor: '#0F172A', padding: 10, cornerRadius: 8, callbacks: { label: function(c) { return ' ' + c.label + ': ' + c.raw + ' mahasiswa'; } } },
+                datalabels: { display: false },
+            }
+        }
+    });
+}
+
+function loadRisiko() {
+    var sem = document.getElementById('risikoSemesterSel').value;
+    var ang = document.getElementById('risikoAngkatanSel').value;
+    var sub = document.getElementById('risikoChartSub');
+    if (sub) sub.textContent = 'Per kategori risiko · Semester ' + sem + (ang ? ' · Angkatan ' + ang : '');
+    fetch('{{ route("admin.api.distribusi-risiko") }}?semester=' + encodeURIComponent(sem) + '&angkatan=' + encodeURIComponent(ang))
+        .then(function(r) { return r.json(); })
+        .then(function(d) { renderRisikoChart(d.distribusi, d.total_berisiko); })
+        .catch(function() {});
+}
+
+document.getElementById('risikoSemesterSel').addEventListener('change', loadRisiko);
+document.getElementById('risikoAngkatanSel').addEventListener('change', loadRisiko);
+
+// Initial render from server data
+renderRisikoChart(
+    { sp1: {{ $distribusiRisiko['sp1'] }}, sp2: {{ $distribusiRisiko['sp2'] }}, sp3: {{ $distribusiRisiko['sp3'] }}, ps: {{ $distribusiRisiko['ps'] }}, nilai_e: {{ $distribusiRisiko['nilai_e'] }}, nilai_d: {{ $distribusiRisiko['nilai_d'] }}, ips_rendah: {{ $distribusiRisiko['ips_rendah'] }} },
+    {{ $mahasiswaBerisiko }}
+);
 
 // ── Grade Bar Chart ──────────────────────────────────────────────
 var gradeInst = null;
@@ -852,14 +832,40 @@ function updateGradeInsight(d) {
 }
 
 function loadGrade() {
+    var sem = document.getElementById('gradeSemesterSel').value;
     var ang = document.getElementById('gradeAngkatanSel').value;
-    fetch('{{ route("admin.api.distribusi-grade") }}?semester={{ $semesterAktif }}&angkatan=' + encodeURIComponent(ang))
+    var sub = document.getElementById('gradeChartSub');
+    if (sub) sub.textContent = 'Jumlah nilai per grade · Semester ' + sem + (ang ? ' · Angkatan ' + ang : '');
+    fetch('{{ route("admin.api.distribusi-grade") }}?semester=' + encodeURIComponent(sem) + '&angkatan=' + encodeURIComponent(ang))
         .then(function(r) { return r.json(); })
         .then(function(d) { renderGradeChart(Object.values(d)); updateGradeInsight(d); })
         .catch(function() {});
 }
 
+document.getElementById('gradeSemesterSel').addEventListener('change', loadGrade);
 document.getElementById('gradeAngkatanSel').addEventListener('change', loadGrade);
 renderGradeChart(initGrade);
+
+// ── Ringkasan Kelas Table ────────────────────────────────────────
+function loadKelasTable() {
+    var sem = document.getElementById('kelasSemesterSel').value;
+    var ang = document.getElementById('kelasAngkatanSel').value;
+    var sub = document.getElementById('kelasTblSub');
+    var body = document.getElementById('kelasTblBody');
+    if (sub) sub.textContent = 'Semester ' + sem + (ang ? ' · Angkatan ' + ang : '') + ' · Memuat...';
+    if (body) body.style.opacity = '0.4';
+    fetch('{{ route("admin.api.ringkasan-kelas-html") }}?semester=' + encodeURIComponent(sem) + '&angkatan=' + encodeURIComponent(ang))
+        .then(function(r) { return r.text(); })
+        .then(function(html) {
+            if (body) { body.innerHTML = html; body.style.opacity = '1'; }
+            // Count rows for subtitle
+            var rows = body ? body.querySelectorAll('tbody tr').length : 0;
+            if (sub) sub.textContent = 'Semester ' + sem + (ang ? ' · Angkatan ' + ang : '') + ' · ' + rows + ' kelas';
+        })
+        .catch(function() { if (body) body.style.opacity = '1'; });
+}
+
+document.getElementById('kelasSemesterSel').addEventListener('change', loadKelasTable);
+document.getElementById('kelasAngkatanSel').addEventListener('change', loadKelasTable);
 </script>
 @endpush

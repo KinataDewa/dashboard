@@ -192,6 +192,8 @@
         .btn-edit:hover{background:#2563EB;color:#fff;}
         .btn-del{background:#FEE2E2;color:#991B1B;border:none;border-radius:var(--radius-sm);padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;display:inline-flex;align-items:center;gap:4px;}
         .btn-del:hover{background:#EF4444;color:#fff;}
+        .btn-view{background:#D1FAE5;color:#065F46;border:none;border-radius:var(--radius-sm);padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
+        .btn-view:hover{background:#10B981;color:#fff;}
 
         .select-semester{border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 32px 8px 12px;font-size:13.5px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text-1);background:var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 10px center;-webkit-appearance:none;outline:none;cursor:pointer;box-shadow:var(--shadow-sm);}
         .select-semester:focus{border-color:var(--blue);}

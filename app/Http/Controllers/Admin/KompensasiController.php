@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Kelas;
 use App\Models\Kompensasi;
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
@@ -11,44 +12,53 @@ class KompensasiController extends Controller
     // ── Index: daftar semua kompensasi ───────────────
     public function index(Request $request)
     {
+        $search   = trim($request->input('search', ''));
+        $status   = $request->input('status', '');
+        $semester = $request->input('semester', '');
+        $angkatan = $request->input('angkatan', '');
+
         $query = Kompensasi::with(['mahasiswa.kelas', 'mahasiswa.dosenPa'])
             ->join('mahasiswas', 'kompensasis.mahasiswa_id', '=', 'mahasiswas.id')
             ->orderBy('mahasiswas.nama')
             ->select('kompensasis.*');
- 
-        // Filter status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+
+        if ($status) {
+            $query->where('status', $status);
         }
- 
-        // Filter semester
-        if ($request->filled('semester')) {
-            $query->where('semester', $request->semester);
+
+        if ($semester) {
+            $query->where('kompensasis.semester', $semester);
         }
- 
-        // Filter search nama/NIM
-        if ($request->filled('search')) {
-            $query->whereHas('mahasiswa', function ($q) use ($request) {
-                $q->where('nama', 'like', '%' . $request->search . '%')
-                  ->orWhere('nim', 'like', '%' . $request->search . '%');
+
+        if ($angkatan) {
+            $query->where('mahasiswas.angkatan', $angkatan);
+        }
+
+        if ($search) {
+            $query->whereHas('mahasiswa', function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%");
             });
         }
- 
-        $kompensasis = $query->paginate(15)->withQueryString();
- 
-        $semesterList = Kompensasi::distinct('semester')
-            ->pluck('semester')
-            ->sort()
-            ->values();
- 
-        // Statistik ringkas
+
+        $kompensasis = $query->paginate(15)->appends([
+            'search'   => $search,
+            'status'   => $status,
+            'semester' => $semester,
+            'angkatan' => $angkatan,
+        ]);
+
+        $semesterList = Kompensasi::distinct('semester')->pluck('semester')->sort()->values();
+        $angkatanList = \App\Models\Mahasiswa::distinct()->orderByDesc('angkatan')->pluck('angkatan');
+
         $totalPending = Kompensasi::where('status', 'pending')->count();
         $totalLunas   = Kompensasi::where('status', 'lunas')->count();
         $totalSemua   = Kompensasi::count();
- 
+
         return view('admin.kompensasi.index', compact(
-            'kompensasis', 'semesterList',
-            'totalPending', 'totalLunas', 'totalSemua'
+            'kompensasis', 'semesterList', 'angkatanList',
+            'totalPending', 'totalLunas', 'totalSemua',
+            'search', 'status', 'semester', 'angkatan'
         ));
     }
  
@@ -61,12 +71,8 @@ class KompensasiController extends Controller
             ? Mahasiswa::with(['kelas', 'absensis'])->findOrFail($mahasiswaId)
             : null;
 
-        $latestKm = $mahasiswaId
-            ? \App\Models\KelasMahasiswa::where('mahasiswa_id', $mahasiswaId)->orderBy('semester', 'desc')->first()
-            : null;
-
-        $semesterAktif = $latestKm?->semester ?? ($mahasiswa?->kelas?->semester ?? 1);
-        $tahunAkademik = $latestKm?->tahun_akademik ?? ($mahasiswa?->kelas?->tahun_akademik ?? config('akademik.tahun_akademik'));
+        $semesterAktif = $mahasiswa?->kelas?->semester ?? 1;
+        $tahunAkademik = $mahasiswa?->kelas?->tahun_akademik ?? config('akademik.tahun_akademik');
         $jamAlpha      = $mahasiswa
             ? $mahasiswa->absensis->where('semester', $semesterAktif)->sum('jam_alpha')
             : 0;
@@ -90,16 +96,19 @@ class KompensasiController extends Controller
             ->limit(10)
             ->get()
             ->map(function ($mhs) {
-                $latestKm = \App\Models\KelasMahasiswa::where('mahasiswa_id', $mhs->id)
-                    ->orderBy('semester', 'desc')
+                // join ke kelas karena kelas_mahasiswa tidak punya kolom semester/tahun_akademik
+                $latestKelas = Kelas::join('kelas_mahasiswa', 'kelas.id', '=', 'kelas_mahasiswa.kelas_id')
+                    ->where('kelas_mahasiswa.mahasiswa_id', $mhs->id)
+                    ->orderByDesc('kelas.semester')
+                    ->select('kelas.*')
                     ->first();
                 return [
                     'id'                   => $mhs->id,
                     'nama'                 => $mhs->nama,
                     'nim'                  => $mhs->nim,
                     'kelas_nama'           => $mhs->kelas->nama ?? '-',
-                    'semester_aktif'       => $latestKm?->semester ?? ($mhs->kelas?->semester ?? 1),
-                    'tahun_akademik_aktif' => $latestKm?->tahun_akademik ?? ($mhs->kelas?->tahun_akademik ?? config('akademik.tahun_akademik')),
+                    'semester_aktif'       => $latestKelas?->semester ?? ($mhs->kelas?->semester ?? 1),
+                    'tahun_akademik_aktif' => $latestKelas?->tahun_akademik ?? ($mhs->kelas?->tahun_akademik ?? config('akademik.tahun_akademik')),
                 ];
             });
 
@@ -117,8 +126,10 @@ class KompensasiController extends Controller
             ->orderBy('semester')
             ->get();
 
-        $kmBySemester = \App\Models\KelasMahasiswa::where('mahasiswa_id', $mahasiswaId)
-            ->pluck('tahun_akademik', 'semester');
+        // join ke kelas karena kelas_mahasiswa tidak punya kolom semester/tahun_akademik
+        $kmBySemester = Kelas::join('kelas_mahasiswa', 'kelas.id', '=', 'kelas_mahasiswa.kelas_id')
+            ->where('kelas_mahasiswa.mahasiswa_id', $mahasiswaId)
+            ->pluck('kelas.tahun_akademik', 'kelas.semester');
 
         $riwayat = $absensis->map(fn ($row) => [
             'semester'       => $row->semester,
@@ -129,14 +140,16 @@ class KompensasiController extends Controller
             'jam_hadir'      => (int) $row->jam_hadir,
         ]);
 
-        $latestKm = \App\Models\KelasMahasiswa::where('mahasiswa_id', $mahasiswaId)
-            ->orderBy('semester', 'desc')
+        $latestKelas = Kelas::join('kelas_mahasiswa', 'kelas.id', '=', 'kelas_mahasiswa.kelas_id')
+            ->where('kelas_mahasiswa.mahasiswa_id', $mahasiswaId)
+            ->orderByDesc('kelas.semester')
+            ->select('kelas.*')
             ->first();
 
         return response()->json([
             'riwayat'              => $riwayat,
-            'semester_aktif'       => $latestKm?->semester ?? ($mahasiswa->kelas?->semester ?? 1),
-            'tahun_akademik_aktif' => $latestKm?->tahun_akademik ?? ($mahasiswa->kelas?->tahun_akademik ?? config('akademik.tahun_akademik')),
+            'semester_aktif'       => $latestKelas?->semester ?? ($mahasiswa->kelas?->semester ?? 1),
+            'tahun_akademik_aktif' => $latestKelas?->tahun_akademik ?? ($mahasiswa->kelas?->tahun_akademik ?? config('akademik.tahun_akademik')),
         ]);
     }
  

@@ -15,12 +15,12 @@ class KelasController extends Controller
         $dosen = Dosen::where('user_id', auth()->id())->firstOrFail();
 
         $kelasIds     = Kelas::where('dosen_pa_id', $dosen->id)->pluck('id');
-        $semesterList = KelasMahasiswa::whereIn('kelas_id', $kelasIds)
-            ->distinct()->orderBy('semester')->pluck('semester');
+        $semesterList  = Kelas::whereIn('id', $kelasIds)->distinct()->orderBy('semester')->pluck('semester');
         $semesterAktif = (int) $request->get('semester', $semesterList->max() ?? 1);
 
-        $mahasiswas = Mahasiswa::whereHas('kelasMahasiswas', function ($q) use ($kelasIds, $semesterAktif) {
-            $q->whereIn('kelas_id', $kelasIds)->where('semester', $semesterAktif);
+        $kelasAktifIds = Kelas::whereIn('id', $kelasIds)->where('semester', $semesterAktif)->pluck('id');
+        $mahasiswas = Mahasiswa::whereHas('kelasMahasiswas', function ($q) use ($kelasAktifIds) {
+            $q->whereIn('kelas_id', $kelasAktifIds);
         })
             ->with(['kelas', 'nilais.mataKuliah', 'absensis', 'kompensasis'])
             ->orderBy('nama')
@@ -46,7 +46,7 @@ class KelasController extends Controller
             ->with(['kelas', 'nilais.mataKuliah', 'absensis', 'kompensasis'])
             ->firstOrFail();
 
-        $semesterAktif = KelasMahasiswa::where('mahasiswa_id', $mahasiswa->id)->max('semester') ?? ($mahasiswa->kelas->semester ?? 1);
+        $semesterAktif = $mahasiswa->kelas->semester ?? 1;
         $nilais        = $mahasiswa->nilais->where('semester', $semesterAktif);
         $absensis      = $mahasiswa->absensis->where('semester', $semesterAktif);
         $ip            = $mahasiswa->getIpSemester($semesterAktif);

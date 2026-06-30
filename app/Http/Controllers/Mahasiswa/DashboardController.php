@@ -15,8 +15,8 @@ class DashboardController extends Controller
             ->with(['kelas', 'dosenPa', 'kompensasis', 'nilais.mataKuliah', 'absensis'])
             ->firstOrFail();
 
-        $semesterAktif = $mahasiswa->kelasMahasiswas()->max('semester') ?? ($mahasiswa->kelas->semester ?? 1);
-        $tahunAkademik = $mahasiswa->kelas->tahun_akademik ?? '2024/2025';
+        $semesterAktif = $mahasiswa->kelas->semester ?? $mahasiswa->nilais->max('semester') ?? 1;
+        $tahunAkademik = $mahasiswa->kelas->tahun_akademik ?? config('akademik.tahun_akademik');
 
         // Nilai semester aktif (dari relation yang sudah di-load)
         $nilais = $mahasiswa->nilais->where('semester', $semesterAktif)->values();

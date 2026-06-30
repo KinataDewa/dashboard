@@ -18,23 +18,28 @@ class KirimPeringatanController extends Controller
     {
         $kelasId     = $request->get('kelas_id');
         $filterJenis = $request->get('jenis', 'semua');
-        $kelasList   = Kelas::orderBy('nama')->get();
+        $angkatan    = $request->get('angkatan', '');
 
-        $semesterList  = KelasMahasiswa::distinct()->orderBy('semester')->pluck('semester');
-        $semesterAktif = (int) $request->get('semester', $semesterList->max() ?? 1);
+        $angkatanList  = Kelas::distinct()->orderByDesc('angkatan')->pluck('angkatan');
+        $semesterList  = Kelas::distinct()->orderBy('semester')->pluck('semester');
+        $semInput      = $request->get('semester', '');
+        $semesterAktif = $semInput !== '' ? (int) $semInput : 0; // 0 = semua semester
+
+        $kelasList = Kelas::when($semesterAktif, fn($q) => $q->where('semester', $semesterAktif))
+            ->when($angkatan, fn($q) => $q->where('angkatan', $angkatan))
+            ->orderBy('semester')->orderBy('nama')->get();
+
+        $kelasAktifIds = Kelas::when($semesterAktif, fn($q) => $q->where('semester', $semesterAktif))
+            ->when($angkatan, fn($q) => $q->where('angkatan', $angkatan))
+            ->when($kelasId,  fn($q) => $q->where('id', $kelasId))
+            ->pluck('id');
 
         $query = Mahasiswa::with([
             'user', 'kelas', 'dosenPa', 'nilais.mataKuliah', 'absensis', 'kompensasis',
         ])->where('status', 'aktif');
 
-        if ($kelasId) {
-            $query->whereHas('kelasMahasiswas', fn($q) =>
-                $q->where('kelas_id', $kelasId)->where('semester', $semesterAktif)
-            );
-        } else {
-            $query->whereHas('kelasMahasiswas', fn($q) =>
-                $q->where('semester', $semesterAktif)
-            );
+        if ($semesterAktif || $angkatan || $kelasId) {
+            $query->whereHas('kelasMahasiswas', fn($q) => $q->whereIn('kelas_id', $kelasAktifIds));
         }
 
         $semuaMahasiswa    = $query->orderBy('nama')->get();
@@ -63,7 +68,7 @@ class KirimPeringatanController extends Controller
 
         return view('admin.kirim-peringatan.index', compact(
             'mahasiswaBerisiko', 'summary', 'kelasList', 'kelasId', 'filterJenis',
-            'semesterList', 'semesterAktif'
+            'semesterList', 'semesterAktif', 'angkatanList', 'angkatan'
         ));
     }
 

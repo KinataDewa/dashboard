@@ -6,7 +6,6 @@ use App\Models\Mahasiswa;
 use App\Models\Dosen;
 use App\Models\MataKuliah;
 use App\Models\Kelas;
-use App\Models\KelasMahasiswa;
 use App\Mail\MahasiswaBerisiko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,73 +15,106 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $semesterAktif  = KelasMahasiswa::max('semester') ?? 0;
+        $semesterAktif = Kelas::max('semester') ?? 0;
+        $angkatanList  = Mahasiswa::distinct()->orderBy('angkatan')->pluck('angkatan');
+        $semesterList  = Kelas::distinct()->orderBy('semester')->pluck('semester');
+
         $totalDosen     = Dosen::count();
         $totalMatkul    = MataKuliah::count();
         $totalKelas     = Kelas::count();
-        $angkatanList   = Mahasiswa::distinct()->orderBy('angkatan')->pluck('angkatan');
+        $totalMahasiswa = Mahasiswa::where('status', 'aktif')->count();
 
-        $totalMahasiswa = $semesterAktif > 0
-            ? KelasMahasiswa::where('semester', $semesterAktif)->distinct('mahasiswa_id')->count('mahasiswa_id')
-            : Mahasiswa::where('status', 'aktif')->count();
+        $kelasAktifIds = Kelas::where('semester', $semesterAktif)->pluck('id');
 
-        // Load semua mahasiswa aktif semester ini sekali, reuse untuk semua metrik
-        $mhsAktif = $semesterAktif > 0
-            ? Mahasiswa::whereHas('kelasMahasiswas', fn($q) => $q->where('semester', $semesterAktif))
-                ->with([
-                    'nilais',
-                    'absensis',
-                    'kompensasis',
-                    'kelasMahasiswas' => fn($q) => $q->where('semester', $semesterAktif),
-                ])
-                ->where('status', 'aktif')
-                ->get()
-            : collect();
+        $mhsAktif = Mahasiswa::where('status', 'aktif')
+            ->whereHas('kelasMahasiswas', fn($q) => $q->whereIn('kelas_id', $kelasAktifIds))
+            ->with(['nilais', 'absensis', 'kompensasis'])
+            ->get();
 
         $mahasiswaBerisiko = $mhsAktif->filter(fn($m) => $m->getKategoriRisiko($semesterAktif) !== [])->count();
 
-        // Distribusi risiko per kategori (satu mahasiswa bisa masuk beberapa kategori)
         $distribusiRisiko = ['sp1' => 0, 'sp2' => 0, 'sp3' => 0, 'ps' => 0, 'nilai_e' => 0, 'nilai_d' => 0, 'ips_rendah' => 0];
         foreach ($mhsAktif as $mhs) {
             foreach ($mhs->getKategoriRisiko($semesterAktif) as $kat) {
-                if (isset($distribusiRisiko[$kat])) {
-                    $distribusiRisiko[$kat]++;
-                }
+                if (isset($distribusiRisiko[$kat])) $distribusiRisiko[$kat]++;
             }
         }
 
-        $distribusiGrade  = $this->queryDistribusiGrade($semesterAktif);
-        $ringkasanKelas   = $this->hitungRingkasanKelas($mhsAktif, $semesterAktif);
+        $distribusiGrade = $this->queryDistribusiGrade($semesterAktif);
+        $ringkasanKelas  = $this->hitungRingkasanKelas($mhsAktif, $semesterAktif, $kelasAktifIds);
 
         return view('admin.dashboard', compact(
             'totalMahasiswa', 'totalDosen', 'totalMatkul', 'totalKelas',
             'mahasiswaBerisiko', 'semesterAktif', 'angkatanList',
-            'distribusiRisiko', 'distribusiGrade', 'ringkasanKelas'
+            'distribusiRisiko', 'distribusiGrade', 'ringkasanKelas', 'semesterList'
         ));
     }
 
     // ── API: distribusi grade per semester (+ opsional angkatan) ──
     public function apiDistribusiGrade(Request $request)
     {
-        $semester = $request->integer('semester', KelasMahasiswa::max('semester') ?? 0);
+        $semester = $request->integer('semester', Kelas::max('semester') ?? 0);
         $angkatan = $request->get('angkatan');
         return response()->json($this->queryDistribusiGrade($semester, $angkatan));
+    }
+
+    // ── API: distribusi risiko per semester (+ opsional angkatan) ─
+    public function apiDistribusiRisiko(Request $request)
+    {
+        $semester = $request->integer('semester', Kelas::max('semester') ?? 0);
+        $angkatan = $request->get('angkatan', '');
+
+        $kelasIds = Kelas::where('semester', $semester)
+            ->when($angkatan, fn($q) => $q->where('angkatan', $angkatan))
+            ->pluck('id');
+
+        $mhsAktif = Mahasiswa::where('status', 'aktif')
+            ->whereHas('kelasMahasiswas', fn($q) => $q->whereIn('kelas_id', $kelasIds))
+            ->with(['nilais', 'absensis', 'kompensasis'])
+            ->get();
+
+        $distribusi = ['sp1' => 0, 'sp2' => 0, 'sp3' => 0, 'ps' => 0, 'nilai_e' => 0, 'nilai_d' => 0, 'ips_rendah' => 0];
+        $totalBerisiko = 0;
+        foreach ($mhsAktif as $mhs) {
+            $kat = $mhs->getKategoriRisiko($semester);
+            if (!empty($kat)) $totalBerisiko++;
+            foreach ($kat as $k) {
+                if (isset($distribusi[$k])) $distribusi[$k]++;
+            }
+        }
+
+        return response()->json(['distribusi' => $distribusi, 'total_berisiko' => $totalBerisiko]);
+    }
+
+    // ── API: HTML partial tabel ringkasan kelas ───────────────────
+    public function apiRingkasanKelasHtml(Request $request)
+    {
+        $semester  = $request->integer('semester', Kelas::max('semester') ?? 0);
+        $angkatan  = $request->get('angkatan', '');
+        $kelasIds  = Kelas::where('semester', $semester)
+            ->when($angkatan, fn($q) => $q->where('angkatan', $angkatan))
+            ->pluck('id');
+        $mhsAktif = Mahasiswa::where('status', 'aktif')
+            ->whereHas('kelasMahasiswas', fn($q) => $q->whereIn('kelas_id', $kelasIds))
+            ->with(['nilais', 'absensis', 'kompensasis'])
+            ->get();
+        $ringkasanKelas = $this->hitungRingkasanKelas($mhsAktif, $semester, $kelasIds);
+        return view('admin.dashboard._kelas_table', compact('ringkasanKelas'));
     }
 
     // ── API: ringkasan per kelas per semester ─────────────────────
     public function apiRingkasanKelas(Request $request)
     {
-        $semester = $request->integer('semester', KelasMahasiswa::max('semester') ?? 0);
-        $mhsAktif = $semester > 0
-            ? Mahasiswa::whereHas('kelasMahasiswas', fn($q) => $q->where('semester', $semester))
-                ->with([
-                    'nilais', 'absensis', 'kompensasis',
-                    'kelasMahasiswas' => fn($q) => $q->where('semester', $semester),
-                ])
-                ->where('status', 'aktif')
-                ->get()
-            : collect();
-        return response()->json($this->hitungRingkasanKelas($mhsAktif, $semester));
+        $semester  = $request->integer('semester', Kelas::max('semester') ?? 0);
+        $angkatan  = $request->get('angkatan', '');
+        $kelasIds  = Kelas::where('semester', $semester)
+            ->when($angkatan, fn($q) => $q->where('angkatan', $angkatan))
+            ->pluck('id');
+        $mhsAktif = Mahasiswa::where('status', 'aktif')
+            ->whereHas('kelasMahasiswas', fn($q) => $q->whereIn('kelas_id', $kelasIds))
+            ->with(['nilais', 'absensis', 'kompensasis'])
+            ->get();
+        return response()->json($this->hitungRingkasanKelas($mhsAktif, $semester, $kelasIds));
     }
 
     // ── Helper: query distribusi grade ────────────────────────────
@@ -110,19 +142,32 @@ class DashboardController extends Controller
     }
 
     // ── Helper: ringkasan akademik per kelas ──────────────────────
-    private function hitungRingkasanKelas($mhsAktif, int $semesterAktif): array
+    private function hitungRingkasanKelas($mhsAktif, int $semesterAktif, $kelasAktifIds = null): array
     {
         if ($mhsAktif->isEmpty()) return [];
 
-        $kelasIds = KelasMahasiswa::where('semester', $semesterAktif)->distinct()->pluck('kelas_id');
-        $allKelas = Kelas::whereIn('id', $kelasIds)->get()->keyBy('id');
-        $byKelas  = [];
+        // Tentukan kelas yang relevan dari kelasAktifIds (filter aktif) atau fallback ke kelas_id mahasiswa
+        if ($kelasAktifIds && $kelasAktifIds->isNotEmpty()) {
+            $allKelas = Kelas::whereIn('id', $kelasAktifIds)->get()->keyBy('id');
+        } else {
+            $kelasIds = $mhsAktif->pluck('kelas_id')->filter()->unique();
+            $allKelas = Kelas::whereIn('id', $kelasIds)->get()->keyBy('id');
+        }
 
-        foreach ($mhsAktif as $mhs) {
-            $kelasId = $mhs->kelasMahasiswas->first()?->kelas_id;
-            if (!$kelasId || !isset($allKelas[$kelasId])) continue;
-            if (!isset($byKelas[$kelasId])) $byKelas[$kelasId] = collect();
-            $byKelas[$kelasId]->push($mhs);
+        if ($allKelas->isEmpty()) return [];
+
+        // Grup via pivot kelas_mahasiswa agar akurat (bukan kelas_id shortcut)
+        $mhsById = $mhsAktif->keyBy('id');
+        $pivots  = \App\Models\KelasMahasiswa::whereIn('mahasiswa_id', $mhsAktif->pluck('id'))
+            ->whereIn('kelas_id', $allKelas->keys())
+            ->get();
+
+        $byKelas = [];
+        foreach ($pivots as $pivot) {
+            $kid = $pivot->kelas_id;
+            if (!isset($allKelas[$kid]) || !isset($mhsById[$pivot->mahasiswa_id])) continue;
+            $byKelas[$kid] ??= collect();
+            $byKelas[$kid]->push($mhsById[$pivot->mahasiswa_id]);
         }
 
         $ringkasan = [];
@@ -133,6 +178,7 @@ class DashboardController extends Controller
             $ringkasan[] = [
                 'kelas_id'   => $kelasId,
                 'kelas'      => $allKelas[$kelasId]->nama,
+                'angkatan'   => $allKelas[$kelasId]->angkatan,
                 'total'      => $total,
                 'berisiko'   => $berisiko,
                 'ipk'        => $ipk,

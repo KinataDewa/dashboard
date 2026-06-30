@@ -9,7 +9,7 @@ class Absensi extends Model
     use HasFactory;
 
     protected $fillable = [
-        'mahasiswa_id', 'semester',
+        'mahasiswa_id', 'semester', 'tahun_akademik',
         'jam_hadir', 'jam_izin', 'jam_sakit', 'jam_alpha',
     ];
 

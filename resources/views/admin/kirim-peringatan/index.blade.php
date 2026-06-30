@@ -150,8 +150,17 @@
 <div class="filter-bar">
     <span class="filter-label">Semester:</span>
     <select name="semester" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+        <option value="" {{ $semesterAktif == 0 ? 'selected' : '' }}>Semua Semester</option>
         @foreach($semesterList as $sem)
-        <option value="{{ $sem }}" {{ $sem == $semesterAktif ? 'selected' : '' }}>Semester {{ $sem }}</option>
+        <option value="{{ $sem }}" {{ $sem == $semesterAktif && $semesterAktif != 0 ? 'selected' : '' }}>Semester {{ $sem }}</option>
+        @endforeach
+    </select>
+
+    <span class="filter-label" style="margin-left:4px;">Angkatan:</span>
+    <select name="angkatan" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+        <option value="">Semua Angkatan</option>
+        @foreach($angkatanList as $a)
+        <option value="{{ $a }}" {{ $angkatan == $a ? 'selected' : '' }}>{{ $a }}</option>
         @endforeach
     </select>
 

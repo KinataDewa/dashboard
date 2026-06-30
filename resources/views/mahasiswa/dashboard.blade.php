@@ -584,19 +584,7 @@ body::before {
 </div>
 
 {{-- ══ TABEL ══ --}}
-<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;margin-top:4px;" class="dash-row">
-    <div class="section-label" style="margin:0;flex:1;">Detail Data</div>
-    <div style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:12px;font-weight:600;color:#64748b;">Semester</span>
-        <select id="semFilterTbl" class="sem-select" onchange="onSemNilaiChange(this.value)">
-            @forelse($semesterListNilai as $sem)
-            <option value="{{ $sem }}" {{ (int)$sem===(int)$semesterAktif?'selected':'' }}>Semester {{ $sem }}</option>
-            @empty
-            <option value="{{ $semesterAktif }}">Semester {{ $semesterAktif }}</option>
-            @endforelse
-        </select>
-    </div>
-</div>
+<div class="section-label dash-row">Detail Data</div>
 
 <div class="row g-3 dash-row">
 
@@ -609,6 +597,13 @@ body::before {
                     <div class="tbl-sub-v2" id="nilaiTblSub">Semester {{ $semesterAktif }} • {{ $nilais->count() }} mata kuliah</div>
                 </div>
                 <div class="tbl-actions">
+                    <select id="semFilterNilaiTbl" class="sem-select" onchange="onSemNilaiChange(this.value)">
+                        @forelse($semesterListNilai as $sem)
+                        <option value="{{ $sem }}" {{ (int)$sem===(int)$semesterAktif ? 'selected' : '' }}>Sem {{ $sem }}</option>
+                        @empty
+                        <option value="{{ $semesterAktif }}">Sem {{ $semesterAktif }}</option>
+                        @endforelse
+                    </select>
                     <div class="search-wrap">
                         <i class="bi bi-search"></i>
                         <input type="text" placeholder="Cari..." id="searchNilai">
@@ -699,6 +694,13 @@ body::before {
                     <div class="tbl-sub-v2" id="absensiTblSub">Semester {{ $semesterAktif }} • {{ $allAbsensis->count() }} data</div>
                 </div>
                 <div class="tbl-actions">
+                    <select id="semFilterAbsensiTbl" class="sem-select" onchange="onSemAbsensiChange(this.value)">
+                        @forelse($semesterListAbsensi as $sem)
+                        <option value="{{ $sem }}" {{ (int)$sem===(int)$semesterAktif ? 'selected' : '' }}>Sem {{ $sem }}</option>
+                        @empty
+                        <option value="{{ $semesterAktif }}">Sem {{ $semesterAktif }}</option>
+                        @endforelse
+                    </select>
                     <a href="{{ route('mahasiswa.absensi') }}" class="btn-outline">View All</a>
                 </div>
             </div>
@@ -740,7 +742,7 @@ body::before {
                     </tbody>
                 </table>
             </div>
-            <div class="tbl-footer">
+            <div class="tbl-footer" id="absensiFooter">
                 @php $absenAktif = $absensis->first(); @endphp
                 @if($absenAktif)
                 <div class="info-chip" style="background:#f0fdf4;color:#15803d;"><i class="bi bi-person-check-fill"></i>Hadir: {{ $absenAktif->jam_hadir }}j</div>
@@ -901,13 +903,12 @@ document.getElementById('filterAbsensiDonutBtn').addEventListener('filterChange'
 var NILAI_API_URL='{{ route("mahasiswa.api.nilai") }}';
 function onSemNilaiChange(sem) {
     sem=parseInt(sem);
-    document.getElementById('semFilterNilai').value=sem;
-    document.getElementById('semFilterTbl').value=sem;
+    var s1=document.getElementById('semFilterNilai');
+    var s2=document.getElementById('semFilterNilaiTbl');
+    if(s1) s1.value=sem;
+    if(s2) s2.value=sem;
     document.getElementById('barChartSub').textContent='Nilai akhir per mata kuliah semester '+sem;
     document.getElementById('nilaiTblSub').textContent='Semester '+sem+' • Memuat…';
-    var absensiRowCount=document.querySelectorAll('#absensiTableBody tr[data-semester="'+sem+'"]').length;
-    document.getElementById('absensiTblSub').textContent='Semester '+sem+' • '+absensiRowCount+' data';
-    document.querySelectorAll('#absensiTableBody tr[data-semester]').forEach(function(r){ r.style.display=parseInt(r.dataset.semester)===sem?'':'none'; });
     fetch(NILAI_API_URL+'?semester='+sem,{headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}})
     .then(function(r){return r.json();})
     .then(function(data){
@@ -938,6 +939,30 @@ function onSemNilaiChange(sem) {
         document.getElementById('nilaiTblSub').textContent='Semester '+sem+' • '+data.length+' mata kuliah';
     })
     .catch(function(){ document.getElementById('nilaiTblSub').textContent='Semester '+sem+' • Gagal memuat'; });
+}
+
+// ── Filter Semester Absensi (tabel) ─────────────────
+@php
+$_absensiAllJs = $allAbsensis->keyBy('semester')->map(fn($a) => [
+    'hadir' => $a->jam_hadir, 'alpha' => $a->jam_alpha,
+    'izin'  => $a->jam_izin,  'sakit' => $a->jam_sakit,
+]);
+@endphp
+var ABSENSI_ALL = {!! json_encode($_absensiAllJs) !!};
+function onSemAbsensiChange(sem) {
+    sem=parseInt(sem);
+    document.getElementById('semFilterAbsensiTbl').value=sem;
+    var rows=document.querySelectorAll('#absensiTableBody tr[data-semester]');
+    var count=0;
+    rows.forEach(function(r){ var show=parseInt(r.dataset.semester)===sem; r.style.display=show?'':'none'; if(show)count++; });
+    document.getElementById('absensiTblSub').textContent='Semester '+sem+' • '+count+' data';
+    var d=ABSENSI_ALL[sem];
+    var footer=document.getElementById('absensiFooter');
+    if(footer && d){
+        var sp=d.alpha>=18?'<div class="info-chip" style="background:#fee2e2;color:#991b1b;"><i class="bi bi-exclamation-triangle-fill"></i> SP I</div>':'';
+        footer.innerHTML='<div class="info-chip" style="background:#f0fdf4;color:#15803d;"><i class="bi bi-person-check-fill"></i>Hadir: '+d.hadir+'j</div>'
+            +'<div class="info-chip" style="'+(d.alpha>=18?'background:#fee2e2;color:#991b1b;':'')+'"><i class="bi bi-x-circle-fill"></i>Alpha: '+d.alpha+'j</div>'+sp;
+    }
 }
 
 // ── Filter Tabel Nilai ──────────────────────────────

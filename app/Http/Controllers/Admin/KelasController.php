@@ -8,12 +8,25 @@ use Illuminate\Http\Request;
  
 class KelasController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $kelas = Kelas::with(['dosenPa', 'mahasiswas'])
-            ->orderBy('nama')
-            ->paginate(15);
-        return view('admin.kelas.index', compact('kelas'));
+        $tahunList   = Kelas::distinct()->orderByDesc('tahun_akademik')->pluck('tahun_akademik');
+        $angkatanList = Kelas::distinct()->orderByDesc('angkatan')->pluck('angkatan');
+
+        $tahun    = $request->input('tahun', $tahunList->first());
+        $angkatan = $request->input('angkatan', '');
+
+        $query = Kelas::with(['dosenPa', 'kelasMahasiswas'])
+            ->when($tahun,    fn($q) => $q->where('tahun_akademik', $tahun))
+            ->when($angkatan, fn($q) => $q->where('angkatan', $angkatan))
+            ->orderBy('nama')->orderBy('semester');
+
+        $kelas = $query->paginate(15)->appends([
+            'tahun'    => $tahun,
+            'angkatan' => $angkatan,
+        ]);
+
+        return view('admin.kelas.index', compact('kelas', 'tahunList', 'angkatanList', 'tahun', 'angkatan'));
     }
  
     public function create()
@@ -40,8 +53,25 @@ class KelasController extends Controller
  
     public function show(Kelas $kela)
     {
-        $kela->load(['dosenPa', 'mahasiswas', 'mataKuliahs']);
-        return view('admin.kelas.show', compact('kela'));
+        $kela->load(['dosenPa']);
+
+        $mahasiswas = \App\Models\Mahasiswa::whereHas('kelasMahasiswas', fn($q) => $q->where('kelas_id', $kela->id))
+            ->with(['nilais', 'absensis', 'kompensasis'])
+            ->orderBy('nama')
+            ->get()
+            ->map(function ($m) use ($kela) {
+                $m->ipk_val      = $m->ipk;
+                $m->ips_val      = $m->getIpSemester($kela->semester);
+                $m->alpha_val    = (int) $m->absensis->where('semester', $kela->semester)->sum('jam_alpha');
+                $m->kategori     = $m->getKategoriRisiko($kela->semester);
+                $m->is_berisiko  = !empty($m->kategori);
+                return $m;
+            });
+
+        $totalBerisiko = $mahasiswas->where('is_berisiko', true)->count();
+        $rataIpk       = $mahasiswas->count() > 0 ? round($mahasiswas->avg('ipk_val'), 2) : 0;
+
+        return view('admin.kelas.show', compact('kela', 'mahasiswas', 'totalBerisiko', 'rataIpk'));
     }
  
     public function edit(Kelas $kela)

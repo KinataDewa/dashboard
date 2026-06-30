@@ -10,7 +10,7 @@ class Kelas extends Model
 
     protected $table = 'kelas';
 
-    protected $fillable = ['nama', 'semester', 'prodi', 'dosen_pa_id', 'tahun_akademik'];
+    protected $fillable = ['nama', 'angkatan', 'semester', 'tahun_akademik', 'prodi', 'dosen_pa_id'];
 
     public function dosenPa()
     {

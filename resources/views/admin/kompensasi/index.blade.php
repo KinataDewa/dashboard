@@ -63,7 +63,7 @@
             <div class="tbl-sub-v2">Total <strong>{{ $kompensasis->total() }}</strong> data kompensasi</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            @if(request()->hasAny(['search','status','semester']))
+            @if($search || $status || $semester || $angkatan)
             <a href="{{ route('admin.kompensasi.index') }}"
                style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#EF4444;text-decoration:none;padding:5px 12px;border:1.5px solid #FECACA;border-radius:20px;background:#FEF2F2;">
                 <i class="bi bi-x-circle-fill"></i> Reset Filter
@@ -80,20 +80,26 @@
     {{-- Filter --}}
     <form method="GET" action="{{ route('admin.kompensasi.index') }}">
         <div class="filter-bar">
-            <div class="search-wrap" style="flex:1;min-width:160px;max-width:260px;">
+            <div class="search-wrap" style="flex:1;min-width:160px;max-width:240px;">
                 <i class="bi bi-search"></i>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama / NIM...">
+                <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama / NIM...">
             </div>
-            <select name="status" class="filter-select">
-                <option value="">Semua Status</option>
-                <option value="pending" {{ request('status')=='pending' ? 'selected':'' }}>⏳ Pending</option>
-                <option value="lunas"   {{ request('status')=='lunas'   ? 'selected':'' }}>✅ Lunas</option>
+            <select name="angkatan" class="filter-select">
+                <option value="">Semua Angkatan</option>
+                @foreach($angkatanList as $a)
+                <option value="{{ $a }}" {{ $angkatan == $a ? 'selected' : '' }}>{{ $a }}</option>
+                @endforeach
             </select>
             <select name="semester" class="filter-select">
                 <option value="">Semua Semester</option>
                 @foreach($semesterList as $sem)
-                <option value="{{ $sem }}" {{ request('semester')==$sem ? 'selected':'' }}>Semester {{ $sem }}</option>
+                <option value="{{ $sem }}" {{ $semester == $sem ? 'selected' : '' }}>Semester {{ $sem }}</option>
                 @endforeach
+            </select>
+            <select name="status" class="filter-select">
+                <option value="">Semua Status</option>
+                <option value="pending" {{ $status === 'pending' ? 'selected' : '' }}>⏳ Pending</option>
+                <option value="lunas"   {{ $status === 'lunas'   ? 'selected' : '' }}>✅ Lunas</option>
             </select>
             <button type="submit" class="btn-primary" style="padding:8px 16px;white-space:nowrap;">
                 <i class="bi bi-funnel-fill"></i> Filter
