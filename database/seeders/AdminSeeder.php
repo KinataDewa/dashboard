@@ -20,5 +20,14 @@ class AdminSeeder extends Seeder
             ]
         );
         $user->syncRoles([$role]);
+
+        $user2 = User::updateOrCreate(
+            ['email' => 'hendra.pradibta@polinema.ac.id'],
+            [
+                'name'     => 'Hendra Pradibta',
+                'password' => Hash::make('password'),
+            ]
+        );
+        $user2->syncRoles([$role]);
     }
 }

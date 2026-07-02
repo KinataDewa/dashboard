@@ -609,6 +609,11 @@
                         <div class="demo-card-email">admin@polinema...</div>
                         <span class="demo-card-tag" style="background:rgba(167,139,250,.15);color:#a78bfa;">Admin</span>
                     </div>
+                    <div class="demo-card" onclick="fillDemo('hendra.pradibta@polinema.ac.id', event)">
+                        <div class="demo-card-role" style="color:#a78bfa;">Hendra P.</div>
+                        <div class="demo-card-email">hendra.pradibta...</div>
+                        <span class="demo-card-tag" style="background:rgba(167,139,250,.15);color:#a78bfa;">Civitas</span>
+                    </div>
                     <div class="demo-card" onclick="fillDemo('triana.fatmawati@dosen.polinema.ac.id', event)">
                         <div class="demo-card-role" style="color:#34d399;">Dosen</div>
                         <div class="demo-card-email">triana...</div>
