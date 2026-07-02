@@ -64,13 +64,22 @@ class Mahasiswa extends Model
     }
 
     // ── Helper: IP semester tertentu ─────────────────────────
-    public function getIpSemester(int $semester): float
+    public function getIpSemester(int $semester, ?string $tahunAkad = null): float
     {
         if ($semester === 0) return 0.0;
 
-        $nilais = $this->relationLoaded('nilais')
-            ? $this->nilais->where('semester', $semester)
-            : $this->nilais()->where('semester', $semester)->with('mataKuliah')->get();
+        if ($this->relationLoaded('nilais')) {
+            $nilais = $this->nilais->where('semester', $semester);
+            if ($tahunAkad) {
+                $nilais = $nilais->where('tahun_akademik', $tahunAkad);
+            }
+        } else {
+            $q = $this->nilais()->where('semester', $semester)->with('mataKuliah');
+            if ($tahunAkad) {
+                $q->where('tahun_akademik', $tahunAkad);
+            }
+            $nilais = $q->get();
+        }
 
         return $this->hitungIpDariKoleksi($nilais);
     }

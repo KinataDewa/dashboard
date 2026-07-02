@@ -350,8 +350,8 @@
         </div>
     </div>
     <div class="risk-alert-right">
-        <a href="{{ route('admin.mahasiswa.index') }}" class="risk-alert-btn">
-            <i class="bi bi-arrow-right-circle-fill"></i> Lihat &amp; Tangani Sekarang
+        <a href="{{ route('admin.kirim-peringatan.index') }}" class="risk-alert-btn">
+            <i class="bi bi-send-fill"></i> Kirim Peringatan Sekarang
         </a>
         <button class="risk-alert-close" id="riskCloseAdmin" title="Tutup"><i class="bi bi-x-lg"></i></button>
     </div>

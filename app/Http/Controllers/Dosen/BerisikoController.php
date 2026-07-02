@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
+use App\Models\CatatanDpa;
 use App\Models\Mahasiswa;
 use App\Models\Dosen;
 use App\Models\Kelas;
@@ -50,6 +51,12 @@ class BerisikoController extends Controller
             'ips_rendah'      => $mahasiswaBerisiko->filter(fn($m) => in_array('ips_rendah',$m['kategori']))->count(),
         ];
 
+        $sudahDicatatIds = CatatanDpa::where('dosen_id', $dosen->id)
+            ->where('semester', $semesterAktif)
+            ->distinct()
+            ->pluck('mahasiswa_id')
+            ->toArray();
+
         return view('dosen.berisiko', [
             'dosen'             => $dosen,
             'mahasiswaBerisiko' => $mahasiswaBerisiko,
@@ -57,6 +64,7 @@ class BerisikoController extends Controller
             'filterJenis'       => $filterJenis,
             'semesterList'      => $semesterList,
             'semesterAktif'     => $semesterAktif,
+            'sudahDicatatIds'   => $sudahDicatatIds,
         ]);
     }
 }

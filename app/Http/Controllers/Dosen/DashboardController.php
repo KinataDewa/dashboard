@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
+use App\Models\CatatanDpa;
 use App\Models\Dosen;
 use App\Models\Kelas;
 use App\Models\Mahasiswa;
@@ -41,6 +42,14 @@ class DashboardController extends Controller
 
         $totalMahasiswa = $mahasiswas->count();
         $totalBerisiko  = $mahasiswaBerisiko->count();
+
+        // Berisiko yang sudah diberi catatan semester ini → kurangi dari hitungan banner
+        $sudahDitanganiIds = CatatanDpa::where('dosen_id', $dosen->id)
+            ->where('semester', $semesterAktif)
+            ->whereIn('mahasiswa_id', $mahasiswaBerisiko->pluck('id'))
+            ->distinct()
+            ->pluck('mahasiswa_id');
+        $berisikoTanpaCatatan = $mahasiswaBerisiko->whereNotIn('id', $sudahDitanganiIds)->count();
         $rataRataIpk    = $mahasiswas->count() > 0
             ? round($mahasiswas->avg(fn($m) => $m->ipk), 2)
             : 0;
@@ -76,7 +85,8 @@ class DashboardController extends Controller
             'totalMahasiswa', 'totalBerisiko', 'rataRataIpk', 'totalNilaiDE',
             'totalI', 'totalS', 'totalA',
             'gradeDistribusi', 'kompensasiPending',
-            'semesterList', 'semesterAktif'
+            'semesterList', 'semesterAktif',
+            'berisikoTanpaCatatan'
         ));
     }
 }

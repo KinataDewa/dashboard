@@ -117,7 +117,7 @@
 ])
 
 {{-- ══ ALERT (LAMA) ══ --}}
-@if($totalBerisiko > 0)
+@if($berisikoTanpaCatatan > 0)
 <div class="risk-alert-wrap" id="riskAlertDosen">
     <div class="risk-pulse-ring"></div>
     <div class="risk-alert-left">
@@ -127,7 +127,7 @@
         <div class="risk-alert-content">
             <div class="risk-alert-tag">⚡ Tindakan Diperlukan</div>
             <div class="risk-alert-title">
-                {{ $totalBerisiko }} Mahasiswa Bimbingan Anda Berisiko!
+                {{ $berisikoTanpaCatatan }} Mahasiswa Bimbingan Anda Berisiko!
             </div>
             <div class="risk-alert-desc">
                 Terdapat mahasiswa dengan <strong>nilai D/E</strong> atau <strong>absensi ≥18 jam</strong>.
@@ -136,7 +136,7 @@
         </div>
     </div>
     <div class="risk-alert-right">
-        <a href="{{ route('dosen.kelas') }}" class="risk-alert-btn">
+        <a href="{{ route('dosen.berisiko.index') }}" class="risk-alert-btn">
             <i class="bi bi-arrow-right-circle-fill"></i>
             Lihat & Tangani Sekarang
         </a>
@@ -530,7 +530,7 @@
                         @endif
                     </td>
                     <td style="text-align:center;">
-                        <a href="{{ route('dosen.mahasiswa.detail', $mhs->id) }}"
+                        <a href="{{ route('dosen.mahasiswa.detail', $mhs->id) }}?semester={{ $semesterAktif }}"
                            style="display:inline-flex;align-items:center;gap:3px;padding:5px 10px;border-radius:7px;font-size:12px;font-weight:600;background:var(--blue);color:#fff;text-decoration:none;">
                             <i class="bi bi-eye-fill" style="font-size:11px;"></i> Detail
                         </a>

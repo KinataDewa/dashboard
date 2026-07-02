@@ -8,7 +8,8 @@ use App\Http\Controllers\Mahasiswa\NilaiController;
 use App\Http\Controllers\Mahasiswa\AbsensiController;
 use App\Http\Controllers\Dosen\DashboardController as DosenDashboard;
 use App\Http\Controllers\Dosen\KelasController as DosenKelasController;
-use App\Http\Controllers\Dosen\BerisikoController as DosenBerisikoController; 
+use App\Http\Controllers\Dosen\BerisikoController as DosenBerisikoController;
+use App\Http\Controllers\Dosen\CatatanDpaController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\MahasiswaController as AdminMahasiswaController;
 use App\Http\Controllers\Admin\DosenController as AdminDosenController;
@@ -55,7 +56,9 @@ Route::middleware(['auth', 'role.dosen'])
         Route::get('/api/nilai-kelas',    [DosenDashboard::class,      'apiNilaiKelas'])->name('api.nilai-kelas');
         Route::get('/api/absensi-kelas',  [DosenDashboard::class,      'apiAbsensiKelas'])->name('api.absensi-kelas');
         Route::get('/kelas',              [DosenKelasController::class, 'index'])->name('kelas');
-        Route::get('/mahasiswa/{id}',     [DosenKelasController::class, 'detail'])->name('mahasiswa.detail');
+        Route::get('/mahasiswa/{id}',                        [DosenKelasController::class, 'detail'])->name('mahasiswa.detail');
+        Route::post('/mahasiswa/{id}/catatan',               [CatatanDpaController::class, 'store'])->name('catatan.store');
+        Route::delete('/mahasiswa/{id}/catatan/{catatanId}', [CatatanDpaController::class, 'destroy'])->name('catatan.destroy');
         Route::get('/berisiko',     [DosenBerisikoController::class, 'index'])->name('berisiko.index');
         Route::get('/kompensasi',   [App\Http\Controllers\Dosen\KompensasiController::class, 'index'])->name('kompensasi.index');
     });
@@ -88,6 +91,8 @@ Route::middleware(['auth', 'role.admin'])
             Route::post('/matkul',         [ImportController::class, 'matkul'])->name('matkul');
             Route::post('/kelas',          [ImportController::class, 'kelas'])->name('kelas');
             Route::get('/template/{type}', [ImportController::class, 'downloadTemplate'])->name('template');
+            Route::get('/template-rapor',  [ImportController::class, 'downloadTemplateRapor'])->name('template-rapor');
+            Route::get('/colab-script',    [ImportController::class, 'downloadColabScript'])->name('colab-script');
         });
 
         Route::prefix('kompensasi')->name('kompensasi.')->group(function () {

@@ -587,9 +587,14 @@ $imports = [
             <i class="bi bi-download"></i> Download Template
         </a>
         @elseif(!empty($imp['petunjuk']))
-        <div style="margin-top:8px;background:#F0FDFA;border:1px solid #99F6E4;border-radius:8px;padding:10px 12px;font-size:11.5px;color:#134E4A;line-height:1.6;">
-            <strong style="color:#0F766E;">📋 Format file:</strong> 4 sheet — <code>MAHASISWA</code>, <code>NILAI</code>, <code>ABSENSI</code>, <code>MATA_KULIAH</code><br>
-            Nama file harus diakhiri <code>_CONVERTED.xlsx</code> (hasil konversi script Python Polinema)
+        <div style="display:flex;gap:8px;margin-top:10px;">
+            <a href="{{ route('admin.import.template-rapor') }}" class="tpl-btn" style="flex:1;margin-top:0;">
+                <i class="bi bi-file-earmark-arrow-down-fill"></i> Template
+            </a>
+            <a href="{{ route('admin.import.colab-script') }}" class="tpl-btn"
+               style="flex:1;margin-top:0;background:#FFF7ED;border-color:#FED7AA;color:#C2410C;">
+                <i class="bi bi-google"></i> Tutorial Colab
+            </a>
         </div>
         @endif
     </div>
@@ -601,48 +606,70 @@ $imports = [
 {{-- ══ FORMAT GUIDE ══ --}}
 <div class="format-guide">
     <div class="format-title">
-        <div style="width:32px;height:32px;border-radius:8px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="bi bi-info-circle-fill" style="color:#2563EB;font-size:15px;"></i>
+        <div style="width:32px;height:32px;border-radius:8px;background:#F0FDFA;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="bi bi-journal-text" style="color:#0F766E;font-size:15px;"></i>
         </div>
-        Panduan Format Kolom Excel
+        Cara Konversi &amp; Import Rapor
     </div>
 
-    {{-- <div class="format-grid">
+    {{-- 3 langkah horizontal --}}
+    <div style="display:flex;align-items:flex-start;gap:0;margin-bottom:20px;flex-wrap:wrap;">
         @php
-        $formats = [
-            ['icon'=>'bi-bar-chart-line-fill','color'=>'#16A34A','title'=>'Nilai','cols'=>['nim','kode_matkul','semester','tahun_akademik','nilai_tugas','nilai_uts','nilai_uas']],
-            ['icon'=>'bi-calendar2-check-fill','color'=>'#D97706','title'=>'Absensi','cols'=>['nim','semester','jam_hadir','jam_izin','jam_sakit','jam_alpha']],
-            ['icon'=>'bi-people-fill','color'=>'#1D4ED8','title'=>'Mahasiswa','cols'=>['nim','nama','email','kelas','angkatan','nip_dosen_pa']],
-            ['icon'=>'bi-person-badge-fill','color'=>'#6D28D9','title'=>'Dosen','cols'=>['nip','nama','email','no_hp']],
-            ['icon'=>'bi-book-fill','color'=>'#0E7490','title'=>'Mata Kuliah','cols'=>['kode','nama','sks','semester','kelas','nip_dosen']],
-            ['icon'=>'bi-clock-fill','color'=>'#BE185D','title'=>'Jadwal','cols'=>['kode_matkul','kelas','hari','jam_mulai','jam_selesai','ruangan']],
+        $steps = [
+            ['num'=>'1','bg'=>'#F0FDFA','border'=>'#0D9488','nc'=>'#0F766E','label'=>'Unduh rapor dari SIPA','sub'=>'File .xlsx asli Polinema'],
+            ['num'=>'2','bg'=>'#FFF7ED','border'=>'#EA580C','nc'=>'#C2410C','label'=>'Konversi via Google Colab','sub'=>'Klik "Tutorial Colab" → upload → run'],
+            ['num'=>'3','bg'=>'#EFF6FF','border'=>'#2563EB','nc'=>'#1D4ED8','label'=>'Upload _CONVERTED.xlsx','sub'=>'Pilih angkatan → Upload & Import'],
         ];
         @endphp
-        @foreach($formats as $fmt)
-        <div class="format-item">
-            <div class="format-item-title">
-                <i class="bi {{ $fmt['icon'] }}" style="color:{{ $fmt['color'] }};"></i>
-                {{ $fmt['title'] }}
-            </div>
-            <div class="format-cols">
-                @foreach($fmt['cols'] as $col)
-                <span class="format-col">{{ $col }}</span>
-                @endforeach
-            </div>
+        @foreach($steps as $i => $step)
+        <div style="flex:1;min-width:160px;text-align:center;padding:12px 8px;">
+            <div style="width:38px;height:38px;border-radius:50%;background:{{ $step['bg'] }};border:2px solid {{ $step['border'] }};
+                        display:flex;align-items:center;justify-content:center;margin:0 auto 8px;
+                        font-size:15px;font-weight:800;color:{{ $step['nc'] }};">{{ $step['num'] }}</div>
+            <div style="font-size:12.5px;font-weight:700;color:{{ $step['nc'] }};margin-bottom:3px;">{{ $step['label'] }}</div>
+            <div style="font-size:11px;color:#6B7280;">{{ $step['sub'] }}</div>
         </div>
+        @if($i < count($steps)-1)
+        <div style="align-self:center;color:#CBD5E1;font-size:18px;padding-bottom:28px;">›</div>
+        @endif
         @endforeach
-    </div> --}}
+    </div>
 
-    <div class="warning-box">
-        <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#92400E;margin-bottom:4px;">
+    {{-- Struktur 4 sheet — ringkas --}}
+    <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;">
+        <div style="background:#F8FAFC;padding:10px 14px;font-size:12px;font-weight:700;color:var(--text-1);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;">
+            <i class="bi bi-table" style="color:#0F766E;"></i> Struktur <code>_CONVERTED.xlsx</code>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);background:#fff;">
+            @php
+            $sheets = [
+                ['name'=>'MAHASISWA','color'=>'#1E3A8A','cols'=>['NIM','NAMA','KELAS','ANGKATAN','DPA','PRODI','TAHUN_AKADEMIK']],
+                ['name'=>'NILAI','color'=>'#166534','cols'=>['NIM','KODE_MK','NAMA_MK','SKS','SEMESTER','NILAI_AKHIR','GRADE']],
+                ['name'=>'ABSENSI','color'=>'#7C3AED','cols'=>['NIM','SEMESTER','JAM_HADIR','JAM_IZIN','JAM_SAKIT','JAM_ALPHA']],
+                ['name'=>'MATA_KULIAH','color'=>'#B45309','cols'=>['KODE','NAMA','SKS']],
+            ];
+            @endphp
+            @foreach($sheets as $sh)
+            <div style="padding:12px;border-right:1px solid var(--border);">
+                <div style="font-size:11px;font-weight:700;color:{{ $sh['color'] }};margin-bottom:8px;letter-spacing:.3px;">{{ $sh['name'] }}</div>
+                <div style="display:flex;flex-direction:column;gap:3px;">
+                    @foreach($sh['cols'] as $col)
+                    <span style="font-size:10px;font-weight:600;color:#475569;font-family:monospace;">{{ $col }}</span>
+                    @endforeach
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+    <div class="warning-box" style="margin-top:0;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#92400E;margin-bottom:4px;">
             <i class="bi bi-exclamation-triangle-fill"></i> Perhatian
         </div>
         <ul>
-            <li>Header baris pertama harus <strong>persis sama</strong> dengan nama kolom di atas (huruf kecil, underscore)</li>
-            <li>Absensi disimpan <strong>per semester</strong> (total jam), bukan per mata kuliah</li>
-            <li>NIM, NIP, dan kode matkul harus sudah terdaftar di database sebelum import nilai/absensi</li>
-            <li>Import menggunakan <strong>updateOrCreate</strong> — data lama akan diperbarui jika sudah ada</li>
-            <li>Untuk <strong>Import Rapor Polinema</strong>: upload file <code>_CONVERTED.xlsx</code> hasil konversi script Python — file memiliki 4 sheet: MAHASISWA, NILAI, ABSENSI, MATA_KULIAH</li>
+            <li>Upload file <code>_CONVERTED.xlsx</code> hasil konversi — <strong>bukan</strong> file rapor asli dari SIPA</li>
+            <li>Bisa upload <strong>banyak file sekaligus</strong> (multi-kelas). Data lama diperbarui otomatis (<em>updateOrCreate</em>)</li>
+            <li>Belum punya file converted? Klik <strong>Tutorial Colab</strong> di card upload untuk konversi otomatis</li>
         </ul>
     </div>
 </div>

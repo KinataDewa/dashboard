@@ -190,7 +190,7 @@
                         @endif
                     </td>
                     <td>
-                        <a href="{{ route('dosen.mahasiswa.detail', $mhs->id) }}" class="btn-outline" style="font-size:12px;padding:5px 12px;">
+                        <a href="{{ route('dosen.mahasiswa.detail', $mhs->id) }}?semester={{ $semesterAktif }}" class="btn-outline" style="font-size:12px;padding:5px 12px;">
                             Detail
                         </a>
                     </td>

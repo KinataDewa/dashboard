@@ -57,7 +57,22 @@
 <div class="row g-4">
     {{-- KIRI: Nilai & Absensi --}}
     <div class="col-lg-8">
- 
+
+        {{-- Semester Switcher --}}
+        @if($semesterList->count() > 1)
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+            @foreach($semesterList as $sem)
+            <a href="{{ route('dosen.mahasiswa.detail', $mahasiswa->id) }}?semester={{ $sem }}"
+               style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none;transition:all .15s;
+                      {{ $sem == $semesterAktif
+                          ? 'background:var(--blue);color:#fff;'
+                          : 'background:#F1F5F9;color:var(--text-2);' }}">
+                <i class="bi bi-calendar2-week" style="font-size:11px;"></i> Semester {{ $sem }}
+            </a>
+            @endforeach
+        </div>
+        @endif
+
         {{-- Tabel Nilai --}}
         <div class="section-label">Nilai Akademik</div>
         <div class="card-white tbl-card-v2 mb-4">
@@ -256,7 +271,67 @@
                 </div>
             </div>
         </div>
+
+        {{-- Catatan Penanganan --}}
+        <div class="section-label" style="margin-top:24px;">Catatan Penanganan</div>
+        <div class="card-white tbl-card-v2">
+
+            {{-- Flash success --}}
+            @if(session('success'))
+            <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#166534;display:flex;align-items:center;gap:8px;">
+                <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
+            </div>
+            @endif
+
+            {{-- Form tambah catatan --}}
+            <form action="{{ route('dosen.catatan.store', $mahasiswa->id) }}?semester={{ $semesterAktif }}" method="POST">
+                @csrf
+                <input type="hidden" name="semester" value="{{ $semesterAktif }}">
+                <textarea name="catatan" rows="3" placeholder="Tulis catatan penanganan..."
+                    style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text-1);resize:vertical;outline:none;font-family:inherit;background:#FAFAFA;"
+                    required>{{ old('catatan') }}</textarea>
+                @error('catatan')
+                <div style="font-size:12px;color:#EF4444;margin-top:4px;">{{ $message }}</div>
+                @enderror
+                <button type="submit"
+                    style="margin-top:8px;display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">
+                    <i class="bi bi-plus-circle-fill"></i> Simpan Catatan
+                </button>
+            </form>
+
+            {{-- Riwayat catatan --}}
+            @if($catatanList->isNotEmpty())
+            <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px;display:flex;flex-direction:column;gap:10px;">
+                @foreach($catatanList as $cat)
+                <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:12px 14px;position:relative;">
+                    <div style="font-size:11px;color:var(--text-3);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                        <i class="bi bi-calendar2-check" style="font-size:10px;"></i>
+                        {{ $cat->created_at->format('d M Y, H:i') }}
+                        <span style="background:#EFF6FF;color:#1D4ED8;border-radius:20px;padding:1px 8px;font-weight:700;">
+                            Sem {{ $cat->semester }}
+                        </span>
+                    </div>
+                    <div style="font-size:13.5px;color:var(--text-1);white-space:pre-wrap;line-height:1.6;">{{ $cat->catatan }}</div>
+                    <form action="{{ route('dosen.catatan.destroy', [$mahasiswa->id, $cat->id]) }}?semester={{ $semesterAktif }}" method="POST"
+                          style="position:absolute;top:10px;right:12px;"
+                          onsubmit="return confirm('Hapus catatan ini?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" style="background:none;border:none;cursor:pointer;color:#CBD5E1;padding:2px 4px;" title="Hapus">
+                            <i class="bi bi-trash3" style="font-size:13px;"></i>
+                        </button>
+                    </form>
+                </div>
+                @endforeach
+            </div>
+            @else
+            <div style="text-align:center;padding:20px 0 6px;color:var(--text-3);font-size:13px;">
+                <i class="bi bi-journal-text" style="font-size:22px;display:block;margin-bottom:6px;"></i>
+                Belum ada catatan penanganan.
+            </div>
+            @endif
+        </div>
     </div>
 </div>
- 
+
 @endsection

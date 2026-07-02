@@ -312,8 +312,14 @@
                                     {{ strtoupper(substr($mhs['nama'], 0, 1)) }}
                                 </div>
                                 <div>
-                                    <div style="font-weight:700;font-size:13.5px;color:var(--text-1);">
+                                    <div style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:13.5px;color:var(--text-1);">
                                         {{ $mhs['nama'] }}
+                                        @if(in_array($mhs['id'], $sudahDicatatIds))
+                                        <span title="Sudah diberi catatan penanganan"
+                                              style="display:inline-flex;align-items:center;gap:3px;background:#DCFCE7;color:#15803D;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;">
+                                            <i class="bi bi-journal-check" style="font-size:9px;"></i> Dicatat
+                                        </span>
+                                        @endif
                                     </div>
                                     <div style="font-size:11px;color:var(--text-3);font-family:monospace;">
                                         {{ $mhs['nim'] }}
@@ -375,7 +381,7 @@
                         </td>
 
                         <td class="no-print">
-                            <a href="{{ route('dosen.mahasiswa.detail', $mhs['id']) }}"
+                            <a href="{{ route('dosen.mahasiswa.detail', $mhs['id']) }}?semester={{ $semesterAktif }}"
                                style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;font-size:12px;font-weight:600;background:var(--blue);color:#fff;text-decoration:none;">
                                 <i class="bi bi-eye-fill" style="font-size:11px;"></i> Detail
                             </a>
